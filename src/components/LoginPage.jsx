@@ -15,7 +15,7 @@ import adminImage from "../assets/admin.png";
 
 const LoginPage = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-blue-gray-50">
       <Card className="w-full max-w-4xl overflow-hidden rounded-xl shadow-xl">
         <div className="flex flex-col md:flex-row">
           {/* Left side - Login Form */}

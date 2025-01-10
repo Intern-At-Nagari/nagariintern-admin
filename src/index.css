@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    @apply bg-blue-gray-50; /* Replace with your desired Tailwind color class */
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
