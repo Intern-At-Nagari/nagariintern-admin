@@ -8,10 +8,12 @@ const routeMap = {
   '/diproses': ['Home', 'Permintaan', 'Diproses'],
   '/diverifikasi': ['Home', 'Permintaan', 'Diverifikasi'],
   '/diterima': ['Home', 'Permintaan', 'Diterima'],
-  '/monitoring/active': ['Home', 'Monitoring Peserta', 'Sedang Berlangsung'],
+  '/sedang-berlangsung': ['Home', 'Monitoring Peserta', 'Sedang Berlangsung'],
   '/monitoring/completed': ['Home', 'Monitoring Peserta', 'Selesai'],
   '/mapping': ['Home', 'Pemetaan'],
-  '/detail': ['Home', 'Permintaan','Detail']
+  '/detail': ['Home', 'Permintaan','Detail'],
+  '/selesai': ['Home','Monitoring', 'Selesai'],
+  '/cetak-sertif': ['Home', 'Cetak Sertifikat']
 };
 
 const BreadcrumbsComponent = () => {

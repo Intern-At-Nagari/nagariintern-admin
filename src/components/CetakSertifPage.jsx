@@ -17,7 +17,7 @@ import Sidebar from "./Sidebar";
 import ApprovalModal from "./ApprovalModal";
 import BreadcrumbsComponent from "./BreadcrumbsComponent";
 
-const DetailPage = () => {
+const CetakSertifPage = () => {
   const [modalState, setModalState] = useState({
     isOpen: false,
     type: null,
@@ -56,18 +56,6 @@ const DetailPage = () => {
     });
   };
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "diterima":
-        return "text-green-500 bg-green-50";
-      case "ditolak":
-        return "text-red-500 bg-red-50";
-      case "menunggu":
-        return "text-yellow-500 bg-yellow-50";
-      default:
-        return "text-gray-500 bg-gray-50";
-    }
-  };
   const handleModalOpen = (type = null) => {
     setModalState({
       isOpen: !modalState.isOpen,
@@ -100,45 +88,7 @@ const DetailPage = () => {
           {/* Breadcrumbs */}
           <BreadcrumbsComponent/>
 
-          {/* Status Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <Card>
-              <CardBody className="p-4 md:p-6">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="mb-2 font-medium"
-                >
-                  Status Permohonan
-                </Typography>
-                <StatusBadge status={data.statusPermohonan} />
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody className="p-4 md:p-6">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="mb-2 font-medium"
-                >
-                  Status PSDM
-                </Typography>
-                <StatusBadge status={data.statusPersetujuanPSDM} />
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody className="p-4 md:p-6">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="mb-2 font-medium"
-                >
-                  Status Pimpinan
-                </Typography>
-                <StatusBadge status={data.statusPersetujuanPimpinan} />
-              </CardBody>
-            </Card>
-          </div>
+          
 
           {/* Combined Information Card */}
           <Card>
@@ -269,48 +219,18 @@ const DetailPage = () => {
                 </div>
               </div>
 
-              {/* Documents Section */}
-              <Typography variant="h6" color="blue-gray" className="mb-4">
-                Dokumen Pendukung
-              </Typography>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                {[
-                  { name: "CV", file: data.fileCv },
-                  { name: "KTP", file: data.fileKtp },
-                  { name: "Surat Pengantar", file: data.fileSuratPengantar },
-                  { name: "Transkrip", file: data.fileTranskrip },
-                ].map((doc) => (
-                  <Button
-                    key={doc.name}
-                    variant="outlined"
-                    className="flex items-center gap-3 normal-case"
-                    onClick={() =>
-                      window.open(`/api/download/${doc.file}`, "_blank")
-                    }
-                  >
-                    <DocumentArrowDownIcon className="h-5 w-5" />
-                    Download {doc.name}
-                  </Button>
-                ))}
-              </div>
+           
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6 pt-6 border-t">
-                <Button
-                  variant="outlined"
-                  color="red"
-                  className="flex items-center gap-2"
-                  onClick={() => handleModalOpen("reject")}
-                >
-                  Tolak
-                </Button>
+                
                 <Button
                   variant="filled"
                   color="green"
                   className="flex items-center gap-2"
-                  onClick={() => handleModalOpen("accept")}
+                  onClick={() => handleModalOpen("print")}
                 >
-                  Terima
+                  Cetak
                 </Button>
               </div>
             </CardBody>
@@ -327,4 +247,4 @@ const DetailPage = () => {
   );
 };
 
-export default DetailPage;
+export default CetakSertifPage;

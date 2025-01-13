@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   UserCircleIcon,
   DocumentTextIcon,
@@ -10,20 +11,38 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Typography } from "@material-tailwind/react";
+import { Typography, } from "@material-tailwind/react";
 
 const Sidebar = () => {
+  const location = useLocation();
   const [openPermintaan, setOpenPermintaan] = useState(false);
   const [openMonitoring, setOpenMonitoring] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [activeItem, setActiveItem] = useState("Diproses");
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [activeItem, setActiveItem] = useState(null);
+
+  useEffect(() => {
+    const path = location.pathname.slice(1);
+    if (["diproses", "diverifikasi", "diterima"].includes(path)) {
+      setActiveItem(path.charAt(0).toUpperCase() + path.slice(1));
+      setActiveDropdown("Permintaan");
+      setOpenPermintaan(true);
+    } else if (["sedang-berlangsung", "selesai"].includes(path)) {
+      setActiveItem(
+        path === "sedang-berlangsung" ? "Sedang Berlangsung" : "Selesai"
+      );
+      setActiveDropdown("Monitoring");
+      setOpenMonitoring(true);
+    } else if (path === "mapping") {
+      setActiveItem("Pemetaan");
+    }
+  }, [location]);
 
   const toggleMobileMenu = () => {
     setIsMobileOpen(!isMobileOpen);
   };
 
-  // Close mobile menu when clicking outside
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       setIsMobileOpen(false);
@@ -39,10 +58,32 @@ const Sidebar = () => {
       setOpenMonitoring(true);
     }
   };
+  const getPemetaanClassName = () => {
+    const isActive = activeItem === "Pemetaan";
+    const isHovered = hoveredItem === "Pemetaan";
+
+    return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 
+      ${
+        isActive || isHovered
+          ? "bg-white/20 text-white translate-x-1"
+          : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+      }`;
+  };
+
+  const getItemClassName = (item, dropdown) => {
+    const isActive = activeItem === item && activeDropdown === dropdown;
+    const isHovered = hoveredItem === item;
+
+    return `block p-3 rounded-xl transition-all duration-300 text-blue-100 
+      ${
+        isActive || isHovered
+          ? "bg-white/20 text-white translate-x-1"
+          : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+      }`;
+  };
 
   return (
     <>
-      {/* Mobile Menu Button */}
       <button
         onClick={toggleMobileMenu}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-colors"
@@ -62,15 +103,11 @@ const Sidebar = () => {
       )}
 
       <div
-        className={`
-        fixed top-0 left-0 z-40 h-full
-        transform transition-transform duration-300 ease-in-out
-        lg:translate-x-0 
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-      `}
+        className={`fixed top-0 left-0 z-40 h-full transform transition-transform duration-300 ease-in-out lg:translate-x-0 
+        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <div className="min-h-screen bg-slate-100 p-4 ">
-          <div className="w-72 min-h-[calc(100vh-2rem)]  bg-gradient-to-b from-blue-600 to-blue-800 p-6  text-white shadow-xl rounded-3xl relative">
+        <div className="min-h-screen bg-slate-100 p-4">
+          <div className="w-72 min-h-[calc(100vh-2rem)] bg-gradient-to-b from-blue-600 to-blue-800 p-6 text-white shadow-xl rounded-3xl relative">
             {/* Logo and Title */}
             <div className="mb-8 flex items-center gap-3">
               <Squares2X2Icon className="h-8 w-8" color="white" />
@@ -95,6 +132,7 @@ const Sidebar = () => {
             </div>
 
             <div className="space-y-2">
+              {/* Permintaan Dropdown */}
               <button
                 onClick={() => setOpenPermintaan(!openPermintaan)}
                 className="flex items-center justify-between w-full p-3 hover:bg-white/20 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
@@ -118,14 +156,11 @@ const Sidebar = () => {
                   {["Diproses", "Diverifikasi", "Diterima"].map((item) => (
                     <a
                       key={item}
-                      href="/diproses"
+                      href={`/${item.toLowerCase()}`}
                       onClick={() => handleItemClick(item, "Permintaan")}
-                      className={`block p-3 rounded-xl transition-all duration-300 text-blue-100 hover:text-white hover:translate-x-1
-                        ${
-                          activeItem === item && activeDropdown === "Permintaan"
-                            ? "bg-white/20 text-white translate-x-1"
-                            : "hover:bg-white/20"
-                        }`}
+                      onMouseEnter={() => setHoveredItem(item)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                      className={getItemClassName(item, "Permintaan")}
                     >
                       {item}
                     </a>
@@ -156,19 +191,22 @@ const Sidebar = () => {
                 }`}
               >
                 <div className="ml-7 space-y-1 pt-1">
-                  {["Sedang Berlangsung", "Selesai"].map((item) => (
+                  {[
+                    {
+                      label: "Sedang Berlangsung",
+                      path: "/sedang-berlangsung",
+                    },
+                    { label: "Selesai", path: "/selesai" },
+                  ].map(({ label, path }) => (
                     <a
-                      key={item}
-                      href="#"
-                      onClick={() => handleItemClick(item, "Monitoring")}
-                      className={`block p-3 rounded-xl transition-all duration-300 text-blue-100 hover:text-white hover:translate-x-1
-                        ${
-                          activeItem === item && activeDropdown === "Monitoring"
-                            ? "bg-white/20 text-white translate-x-1"
-                            : "hover:bg-white/20"
-                        }`}
+                      key={label}
+                      href={path}
+                      onClick={() => handleItemClick(label, "Monitoring")}
+                      onMouseEnter={() => setHoveredItem(label)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                      className={getItemClassName(label, "Monitoring")}
                     >
-                      {item}
+                      {label}
                     </a>
                   ))}
                 </div>
@@ -177,7 +215,10 @@ const Sidebar = () => {
               {/* Pemetaan Link */}
               <a
                 href="/mapping"
-                className="flex items-center gap-3 p-3 hover:bg-white/20 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                onClick={() => setActiveItem("Pemetaan")}
+                onMouseEnter={() => setHoveredItem("Pemetaan")}
+                onMouseLeave={() => setHoveredItem(null)}
+                className={getPemetaanClassName()}
               >
                 <UserGroupIcon className="h-5 w-5" />
                 <span className="font-medium text-white">Pemetaan</span>

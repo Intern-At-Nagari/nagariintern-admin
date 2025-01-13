@@ -9,14 +9,14 @@ import {
   Typography
 } from "@material-tailwind/react";
 
-export const ApprovalModal = ({ 
-  open, 
-  handleOpen, 
-  onSubmit, 
-  type = 'accept' // 'accept', 'reject', or 'delete'
+export const ApprovalModal = ({
+  open,
+  handleOpen,
+  onSubmit,
+  type = 'accept' // 'accept', 'reject', 'delete', or 'print'
 }) => {
   const [notes, setNotes] = React.useState("");
-
+  
   const handleSubmit = () => {
     onSubmit(notes);
     setNotes("");
@@ -25,15 +25,22 @@ export const ApprovalModal = ({
 
   const isReject = type === 'reject';
   const isDelete = type === 'delete';
+  const isPrint = type === 'print';
 
   return (
     <Dialog open={open} handler={handleOpen}>
       <DialogHeader>
-        {isDelete ? 'Konfirmasi Hapus' : 
-         isReject ? 'Tolak Permohonan' : 
+        {isPrint ? 'Konfirmasi Cetak Surat' :
+         isDelete ? 'Konfirmasi Hapus' :
+         isReject ? 'Tolak Permohonan' :
          'Terima Permohonan'}
       </DialogHeader>
       <DialogBody>
+        {isPrint && (
+          <Typography variant="body1" color="red" className="mb-4">
+            Pastikan semua data sudah benar sebelum mencetak surat
+          </Typography>
+        )}
         {isReject ? (
           <div className="mb-4">
             <label className="block text-sm font-medium text-blue-gray-900 mb-2">
@@ -48,26 +55,29 @@ export const ApprovalModal = ({
           </div>
         ) : (
           <Typography variant="body1" className="text-blue-gray-900">
-            {isDelete ? 
-              'Apakah Anda yakin ingin menghapus item ini?' : 
-              'Apakah Anda yakin ingin menerima permohonan ini?'}
+            {isPrint ? 'Apakah Anda yakin ingin mencetak surat ini?' :
+             isDelete ? 'Apakah Anda yakin ingin menghapus item ini?' :
+             'Apakah Anda yakin ingin menerima permohonan ini?'}
           </Typography>
         )}
       </DialogBody>
       <DialogFooter className="space-x-2">
-        <Button 
-          variant="outlined" 
-          color="gray" 
+        <Button
+          variant="outlined"
+          color="gray"
           onClick={handleOpen}
         >
           Batal
         </Button>
-        <Button 
-          variant="filled" 
-          color={isDelete ? "red" : isReject ? "red" : "green"} 
+        <Button
+          variant="filled"
+          color={isDelete || isReject ? "red" : isPrint ? "blue" : "green"}
           onClick={handleSubmit}
         >
-          {isDelete ? 'Hapus' : isReject ? 'Tolak' : 'Terima'}
+          {isPrint ? 'Cetak' :
+           isDelete ? 'Hapus' :
+           isReject ? 'Tolak' :
+           'Terima'}
         </Button>
       </DialogFooter>
     </Dialog>
