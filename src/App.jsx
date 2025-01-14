@@ -20,9 +20,9 @@ function App() {
       <Routes>
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="/" element={<LoginPage />} />
-        <Route path="*" element={<NotFound/>} />
+        {/* <Route path="*" element={<NotFound/>} /> */}
         <Route path="/diproses" element={<DiprosesPage />} />
-        <Route path="/detail" element={<DetailPage />} />
+        <Route path="/detail/:id" element={<DetailPage />} />
         <Route path="/mapping" element={<MappingPage />} />
         <Route path="/diverifikasi" element={<Diverifikasi />} />
         <Route path="/diterima" element={<Diterima />} />

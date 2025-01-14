@@ -1,9 +1,11 @@
-import React, { useState} from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
   CardBody,
   Typography,
   Button,
+  Alert,
 } from "@material-tailwind/react";
 import {
   DocumentArrowDownIcon,
@@ -13,40 +15,43 @@ import {
   PhoneIcon,
   CalendarIcon,
 } from "@heroicons/react/24/outline";
+import axios from "axios";
 import Sidebar from "./Sidebar";
 import ApprovalModal from "./ApprovalModal";
 import BreadcrumbsComponent from "./BreadcrumbsComponent";
 
 const DetailPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [modalState, setModalState] = useState({
     isOpen: false,
     type: null,
   });
 
-  const data = {
-    alamat: "Limau Manis, Kec. Pauh, Kota Padang, Sumatera Barat",
-    createdAt: "2025-01-09T06:26:21.000Z",
-    departemen: "it",
-    fileCv: "fileCv-1736403981081-458202965.pdf",
-    fileKtp: "fileKtp-1736403981091-308009098.pdf",
-    fileSuratPengantar: "fileSuratPengantar-1736403981103-410762374.pdf",
-    fileTranskrip: "fileTranskrip-1736403981084-684445750.pdf",
-    id: 5,
-    institusi: "Universitas Andalas",
-    jurusan: "Sistem Informasi",
-    noHp: "087780687924",
-    statusPermohonan: "menunggu",
-    statusPersetujuanPSDM: "menunggu",
-    statusPersetujuanPimpinan: "menunggu",
-    tanggalMulai: "2025-01-09",
-    tanggalPengajuan: "2025-01-09",
-    tanggalSelesai: "2025-01-23",
-    tipePemohon: "mahasiswa",
-    updatedAt: "2025-01-09T06:26:21.000Z",
-    userId: 6,
-    waktuPersetujuanPSDM: null,
-    waktuPersetujuanPimpinan: null,
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`http://localhost:3000/intern/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setData(response.data);
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to fetch intern details");
+        console.error("Error fetching data:", err);
+        console.log("err.response");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("id-ID", {
@@ -57,7 +62,7 @@ const DetailPage = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case "diterima":
         return "text-green-500 bg-green-50";
       case "ditolak":
@@ -68,6 +73,7 @@ const DetailPage = () => {
         return "text-gray-500 bg-gray-50";
     }
   };
+
   const handleModalOpen = (type = null) => {
     setModalState({
       isOpen: !modalState.isOpen,
@@ -75,11 +81,52 @@ const DetailPage = () => {
     });
   };
 
-  const handleSubmit = (notes) => {
-    // Handle the submission logic here
-    console.log('Submitted with notes:', notes);
-    console.log('Submission type:', modalState.type);
-    // Add your API call or state update logic here
+  const handleSubmit = async (notes) => {
+    try {
+      const action = modalState.type === 'accept' ? 'approve' : 'reject';
+      await axios.put(`http://localhost:3000/intern/${id}/${action}`, 
+        { notes },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      
+      // Refresh data after update
+      const response = await axios.get(`http://localhost:3000/intern/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setData(response.data);
+      handleModalOpen();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update status");
+      console.error("Error updating status:", err);
+    }
+  };
+
+  const handleDownload = async (fileName) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/download/${fileName}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        responseType: 'blob',
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      setError("Failed to download file");
+      console.error("Error downloading file:", err);
+    }
   };
 
   const StatusBadge = ({ status }) => (
@@ -88,17 +135,40 @@ const DetailPage = () => {
         status
       )}`}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status?.charAt(0).toUpperCase() + status?.slice(1) || 'N/A'}
     </span>
   );
+
+  if (loading) {
+    return (
+      <div className="lg:ml-80 min-h-screen bg-blue-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="lg:ml-80 min-h-screen bg-blue-gray-50 p-4">
+        <Alert color="red">{error}</Alert>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="lg:ml-80 min-h-screen bg-blue-gray-50 p-4">
+        <Alert color="blue">No data found</Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
       <div className="px-4 md:px-8 pb-8">
         <div className="max-w-7xl mx-auto">
-          {/* Breadcrumbs */}
-          <BreadcrumbsComponent/>
+          <BreadcrumbsComponent />
 
           {/* Status Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -140,10 +210,10 @@ const DetailPage = () => {
             </Card>
           </div>
 
-          {/* Combined Information Card */}
+          {/* Main Information Card */}
           <Card>
             <CardBody className="p-4 md:p-6">
-              {/* Personal Information Section */}
+              {/* Personal Information */}
               <Typography variant="h6" color="blue-gray" className="mb-4">
                 Informasi Pendaftar
               </Typography>
@@ -152,19 +222,11 @@ const DetailPage = () => {
                   <div className="flex items-start gap-3">
                     <UserIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
+                      <Typography variant="small" color="blue-gray" className="font-medium">
                         Tipe Pemohon
                       </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {data.tipePemohon.charAt(0).toUpperCase() +
-                          data.tipePemohon.slice(1)}
+                      <Typography variant="small" className="text-blue-gray-500">
+                        {data.tipePemohon?.charAt(0).toUpperCase() + data.tipePemohon?.slice(1)}
                       </Typography>
                     </div>
                   </div>
@@ -172,17 +234,10 @@ const DetailPage = () => {
                   <div className="flex items-start gap-3">
                     <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
+                      <Typography variant="small" color="blue-gray" className="font-medium">
                         Institusi & Jurusan
                       </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
+                      <Typography variant="small" className="text-blue-gray-500">
                         {data.institusi} - {data.jurusan}
                       </Typography>
                     </div>
@@ -191,17 +246,10 @@ const DetailPage = () => {
                   <div className="flex items-start gap-3">
                     <PhoneIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
+                      <Typography variant="small" color="blue-gray" className="font-medium">
                         Nomor HP
                       </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
+                      <Typography variant="small" className="text-blue-gray-500">
                         {data.noHp}
                       </Typography>
                     </div>
@@ -212,19 +260,11 @@ const DetailPage = () => {
                   <div className="flex items-start gap-3">
                     <CalendarIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
+                      <Typography variant="small" color="blue-gray" className="font-medium">
                         Periode Magang
                       </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {formatDate(data.tanggalMulai)} -{" "}
-                        {formatDate(data.tanggalSelesai)}
+                      <Typography variant="small" className="text-blue-gray-500">
+                        {formatDate(data.tanggalMulai)} - {formatDate(data.tanggalSelesai)}
                       </Typography>
                     </div>
                   </div>
@@ -232,17 +272,10 @@ const DetailPage = () => {
                   <div className="flex items-start gap-3">
                     <ClockIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
+                      <Typography variant="small" color="blue-gray" className="font-medium">
                         Tanggal Pengajuan
                       </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
+                      <Typography variant="small" className="text-blue-gray-500">
                         {formatDate(data.tanggalPengajuan)}
                       </Typography>
                     </div>
@@ -251,18 +284,11 @@ const DetailPage = () => {
                   <div className="flex items-start gap-3">
                     <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
+                      <Typography variant="small" color="blue-gray" className="font-medium">
                         Departemen
                       </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {data.departemen.toUpperCase()}
+                      <Typography variant="small" className="text-blue-gray-500">
+                        {data.departemen?.toUpperCase()}
                       </Typography>
                     </div>
                   </div>
@@ -284,9 +310,7 @@ const DetailPage = () => {
                     key={doc.name}
                     variant="outlined"
                     className="flex items-center gap-3 normal-case"
-                    onClick={() =>
-                      window.open(`/api/download/${doc.file}`, "_blank")
-                    }
+                    onClick={() => handleDownload(doc.file)}
                   >
                     <DocumentArrowDownIcon className="h-5 w-5" />
                     Download {doc.name}
@@ -295,34 +319,37 @@ const DetailPage = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6 pt-6 border-t">
-                <Button
-                  variant="outlined"
-                  color="red"
-                  className="flex items-center gap-2"
-                  onClick={() => handleModalOpen("reject")}
-                >
-                  Tolak
-                </Button>
-                <Button
-                  variant="filled"
-                  color="green"
-                  className="flex items-center gap-2"
-                  onClick={() => handleModalOpen("accept")}
-                >
-                  Terima
-                </Button>
-              </div>
+              {data.statusPermohonan === "menunggu" && (
+                <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6 pt-6 border-t">
+                  <Button
+                    variant="outlined"
+                    color="red"
+                    className="flex items-center gap-2"
+                    onClick={() => handleModalOpen("reject")}
+                  >
+                    Tolak
+                  </Button>
+                  <Button
+                    variant="filled"
+                    color="green"
+                    className="flex items-center gap-2"
+                    onClick={() => handleModalOpen("accept")}
+                  >
+                    Terima
+                  </Button>
+                </div>
+              )}
             </CardBody>
           </Card>
         </div>
       </div>
+      
       <ApprovalModal
-          open={modalState.isOpen}
-          handleOpen={() => handleModalOpen()}
-          onSubmit={handleSubmit}
-          type={modalState.type}
-        />
+        open={modalState.isOpen}
+        handleOpen={() => handleModalOpen()}
+        onSubmit={handleSubmit}
+        type={modalState.type}
+      />
     </div>
   );
 };

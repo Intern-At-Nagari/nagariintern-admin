@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ArrowRightIcon,
   EnvelopeIcon,
-  LockClosedIcon, 
+  LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import {
   Card,
@@ -12,8 +12,59 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import adminImage from "../assets/admin.png";
+import { useNavigate } from 'react-router-dom';
+import axios from "axios";
 
-const LoginPage = () => {
+const AdminLoginPage = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post("http://localhost:3000/auth/login", formData);
+      const { data } = response;
+      console.log(data);
+
+      // Check if the user is an admin
+      if (data.user.role !== 'admin') {
+        setError("Access denied. This login page is for administrators only.");
+        return;
+      }
+
+      // Save tokens to localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));      
+      localStorage.setItem("userRole", data.user.role); 
+      // Redirect to admin dashboard
+      navigate('/dashboard');
+
+    } catch (err) {
+      let errorMessage;
+      if (err.response?.status === 403) {
+        errorMessage = "Access denied. This login page is for administrators only.";
+      } else {
+        errorMessage = err.response?.data?.error || "Login gagal. Silakan coba lagi.";
+      }
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-blue-gray-50">
       <Card className="w-full max-w-4xl overflow-hidden rounded-xl shadow-xl">
@@ -24,35 +75,46 @@ const LoginPage = () => {
               <h2 className="text-3xl font-bold text-gray-800">
                 Nagari Intern
               </h2>
-              <p className="text-gray-600 mt-2">Silahkan Log In Untuk Melanjutkan</p>
+              <p className="text-gray-600 mt-2">Admin Login Panel</p>
+              <p className="text-sm text-gray-500 mt-1">
+                For administrator access only. Users please login through the user portal.
+              </p>
             </div>
 
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleLogin}>
               <div className="relative">
-                <div>
-                  <Input
-                    type="email"
-                    name="email"
-                    label="Email"
-                    icon={<EnvelopeIcon className="h-5 w-5" />}
-                    required
-                  />
-                  {/*handle error*/}
-                </div>
+                <Input
+                  type="email"
+                  name="email"
+                  label="Admin Email"
+                  icon={<EnvelopeIcon className="h-5 w-5" />}
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="relative">
-              <div>
-                  <Input
-                    type="password"
-                    name="password"
-                    label="Password"
-                    icon={<LockClosedIcon className="h-5 w-5" />}
-                    required
-                  />
-                  {/*handle error*/}
-                </div>
+                <Input
+                  type="password"
+                  name="password"
+                  label="Password"
+                  icon={<LockClosedIcon className="h-5 w-5" />}
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                />
               </div>
+
+              {error && (
+                <Typography
+                  variant="small"
+                  color="red"
+                  className="text-sm mt-2"
+                >
+                  {error}
+                </Typography>
+              )}
 
               <div className="flex items-center justify-between mb-4">
                 <label className="flex items-center">
@@ -75,10 +137,22 @@ const LoginPage = () => {
               <Button
                 type="submit"
                 className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all flex items-center justify-center space-x-2 group"
+                disabled={isLoading}
               >
-                <span>Log In</span>
-                <ArrowRightIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <span>{isLoading ? "Loading..." : "Admin Log In"}</span>
+                {!isLoading && (
+                  <ArrowRightIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                )}
               </Button>
+
+              <div className="text-center mt-4">
+                <a
+                  href="/user-login"
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Are you a user? Login here
+                </a>
+              </div>
             </form>
           </div>
 
@@ -88,8 +162,8 @@ const LoginPage = () => {
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-400 rounded-full -ml-16 -mb-16" />
 
             <div className="relative z-10 text-center">
-              <h2 className="text-3xl font-bold mb-4">Selamat Datang</h2>
-              <p className="text-blue-100 mb-4 text-2xl font-bold">Admin</p>
+              <h2 className="text-3xl font-bold mb-4">Administrator Portal</h2>
+              <p className="text-blue-100 mb-4 text-2xl font-bold">Restricted Access</p>
               <div className="w-64 h-64 mx-auto">
                 <img
                   src={adminImage}
@@ -105,4 +179,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default AdminLoginPage;

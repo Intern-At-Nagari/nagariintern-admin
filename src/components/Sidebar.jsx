@@ -21,8 +21,13 @@ const Sidebar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [hoveredItem, setHoveredItem] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
+  const [userData, setUserData] = useState(null);
+
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    setUserData(user);
+
     const path = location.pathname.slice(1);
     if (["diproses", "diverifikasi", "diterima"].includes(path)) {
       setActiveItem(path.charAt(0).toUpperCase() + path.slice(1));
@@ -125,7 +130,7 @@ const Sidebar = () => {
                     Admin Dashboard
                   </Typography>
                   <Typography variant="small" className="text-blue-100">
-                    admin@nagari.com
+                    {userData?.email}
                   </Typography>
                 </div>
               </div>
