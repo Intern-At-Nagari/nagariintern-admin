@@ -214,7 +214,7 @@ const DiprosesPage = () => {
                                 </td>
                                 <td className="p-4">
                                   <Typography variant="small" color="blue-gray">
-                                    {item.institusi}
+                                    {item.Institusi.name}
                                   </Typography>
                                 </td>
                                 <td className="p-4">
