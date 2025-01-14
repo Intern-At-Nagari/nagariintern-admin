@@ -67,7 +67,7 @@ const DetailPage = () => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case "diterima":
+      case "disetujui":
         return "text-green-500 bg-green-50";
       case "ditolak":
         return "text-red-500 bg-red-50";
@@ -88,7 +88,8 @@ const DetailPage = () => {
   const handleSubmit = async (notes) => {
     try {
       const action = modalState.type === 'accept' ? 'approve' : 'reject';
-      await axios.put(`http://localhost:3000/intern/${id}/${action}`, 
+      console.log(action);
+      await axios.patch(`http://localhost:3000/intern/${id}/${action}`, 
         { notes },
         {
           headers: {
@@ -97,7 +98,6 @@ const DetailPage = () => {
         }
       );
       
-      // Refresh data after update
       const response = await axios.get(`http://localhost:3000/intern/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
