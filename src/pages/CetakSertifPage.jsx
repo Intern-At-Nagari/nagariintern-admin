@@ -13,9 +13,9 @@ import {
   PhoneIcon,
   CalendarIcon,
 } from "@heroicons/react/24/outline";
-import Sidebar from "./Sidebar";
-import ApprovalModal from "./ApprovalModal";
-import BreadcrumbsComponent from "./BreadcrumbsComponent";
+import Sidebar from "../components/Sidebar";
+import ApprovalModal from "../components/ApprovalModal";
+import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 
 const CetakSertifPage = () => {
   const [modalState, setModalState] = useState({

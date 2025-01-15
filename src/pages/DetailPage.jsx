@@ -14,11 +14,12 @@ import {
   UserIcon,
   PhoneIcon,
   CalendarIcon,
+  ArrowDownTrayIcon
 } from "@heroicons/react/24/outline";
 import axios from "axios";
-import Sidebar from "./Sidebar";
-import ApprovalModal from "./ApprovalModal";
-import BreadcrumbsComponent from "./BreadcrumbsComponent";
+import Sidebar from "../components/Sidebar";
+import ApprovalModal from "../components/ApprovalModal";
+import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 
 const DetailPage = () => {
   const { id } = useParams();
@@ -41,10 +42,13 @@ const DetailPage = () => {
           },
         });
         setData(response.data);
+        console.log(response.data);
+
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch intern details");
         console.error("Error fetching data:", err);
         console.log("err.response");
+        console.log(response.data);
       } finally {
         setLoading(false);
       }
@@ -285,38 +289,66 @@ const DetailPage = () => {
                     <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
                       <Typography variant="small" color="blue-gray" className="font-medium">
-                        Departemen
+                        Divisi
                       </Typography>
                       <Typography variant="small" className="text-blue-gray-500">
-                        {data.Divisi.name}
+                        {data.Divisi.name?.toUpperCase()}
                       </Typography>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Documents Section */}
+              
               <Typography variant="h6" color="blue-gray" className="mb-4">
                 Dokumen Pendukung
               </Typography>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                {[
-                  { name: "CV", file: data.fileCv },
-                  { name: "KTP", file: data.fileKtp },
-                  { name: "Surat Pengantar", file: data.fileSuratPengantar },
-                  { name: "Transkrip", file: data.fileTranskrip },
-                ].map((doc) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {data.Dokumens && (
                   <Button
-                    key={doc.name}
                     variant="outlined"
-                    className="flex items-center gap-3 normal-case"
-                    onClick={() => handleDownload(doc.file)}
+                    className="flex items-center gap-2 normal-case"
+                    onClick={() => window.open(`http://localhost:3000/uploads/${data.Dokumens[0].url}`, "_blank")}
                   >
-                    <DocumentArrowDownIcon className="h-5 w-5" />
-                    Download {doc.name}
+                    <ArrowDownTrayIcon className="w-4 h-4" />
+                    Curriculum Vitae
                   </Button>
-                ))}
+                )}
+                {data.Dokumens && (
+                  <Button
+                    variant="outlined"
+                    className="flex items-center gap-2 normal-case"
+                    onClick={() => window.open(`http://localhost:3000/uploads/${data.Dokumens[2].url}`, "_blank")}
+
+                  >
+                    <ArrowDownTrayIcon className="w-4 h-4" />
+                    Kartu Tanda Penduduk
+                  </Button>
+                )}
+                {data.Dokumens && (
+                  <Button
+                    variant="outlined"
+                    className="flex items-center gap-2 normal-case"
+                    onClick={() => window.open(`http://localhost:3000/uploads/${data.Dokumens[3].url}`, "_blank")}
+
+                  >
+                    <ArrowDownTrayIcon className="w-4 h-4" />
+                    Surat Pengantar
+                  </Button>
+                )}
+                {data.Dokumens && (
+                  <Button
+                    variant="outlined"
+                    className="flex items-center gap-2 normal-case"
+                    onClick={() => window.open(`http://localhost:3000/uploads/${data.Dokumens[1].url}`, "_blank")}
+
+                  >
+                    <ArrowDownTrayIcon className="w-4 h-4" />
+                    Transkrip Nilai
+                  </Button>
+                )}
               </div>
+            
 
               {/* Action Buttons */}
               {data.statusPermohonan === "menunggu" && (
