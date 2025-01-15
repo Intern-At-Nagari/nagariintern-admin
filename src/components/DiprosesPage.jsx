@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { Card, CardBody, Typography, IconButton, Input, Tooltip } from "@material-tailwind/react";
 import {
   EyeIcon,
-  PencilIcon,
   TrashIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
@@ -42,7 +41,7 @@ const DiprosesPage = () => {
         });
 
         if (response.data) {
-          setData(response.data);
+          setData(response.data.reverse());
           console.log("Data received:", response.data);
         } else {
           throw new Error("No data received from server");
