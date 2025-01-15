@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   UserCircleIcon,
   DocumentTextIcon,
   ClipboardDocumentCheckIcon,
   UserGroupIcon,
   ArrowRightOnRectangleIcon,
+  ArrowRightEndOnRectangleIcon ,
   ChevronDownIcon,
   Squares2X2Icon,
   Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Typography, } from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const [openPermintaan, setOpenPermintaan] = useState(false);
   const [openMonitoring, setOpenMonitoring] = useState(false);
@@ -22,7 +25,6 @@ const Sidebar = () => {
   const [hoveredItem, setHoveredItem] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
   const [userData, setUserData] = useState(null);
-
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -85,6 +87,15 @@ const Sidebar = () => {
           ? "bg-white/20 text-white translate-x-1"
           : "hover:bg-white/20 hover:text-white hover:translate-x-1"
       }`;
+  };
+
+  const handleLogout = () => {
+    // Hapus data yang terkait dengan sesi pengguna
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Arahkan pengguna ke halaman login
+    navigate("/");
   };
 
   return (
@@ -231,13 +242,13 @@ const Sidebar = () => {
 
               {/* Logout Section */}
               <div className="pt-6 mt-6 border-t border-white/30">
-                <a
-                  href="#"
+                <button
+                  onClick={handleLogout}
                   className="flex items-center gap-3 p-3 font-bold hover:bg-white rounded-xl transition-all duration-300 text-red-white hover:text-red-600 hover:shadow-lg hover:scale-[1.02]"
                 >
-                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                  <ArrowRightEndOnRectangleIcon className="h-5 w-5" />
                   <span className="font-medium">Log Out</span>
-                </a>
+                </button>
               </div>
             </div>
           </div>

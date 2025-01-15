@@ -15,10 +15,9 @@ import CetakSertifPage from './pages/CetakSertifPage';
 
 function App() {
   return (
-    
     <Router>
       <Routes>
-        <Route path="/dashboard/*" element={<Dashboard />} />
+        {/* Halaman login */}
         <Route path="/" element={<LoginPage />} />
         <Route path="*" element={<NotFound/>} />
         <Route path="/diproses" element={<DiprosesPage />} />
@@ -31,7 +30,7 @@ function App() {
         <Route path="/cetak-sertif" element={<CetakSertifPage />} />
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;
