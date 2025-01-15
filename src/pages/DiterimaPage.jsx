@@ -5,7 +5,7 @@ import {
   Typography,
   IconButton,
   Input,
-  Tooltip,
+  Tooltip
 } from "@material-tailwind/react";
 import {
   EyeIcon,
@@ -13,12 +13,12 @@ import {
   TrashIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import Sidebar from "./Sidebar";
-import Pagination from "./Pagination";
-import BreadcrumbsComponent from "./BreadcrumbsComponent";
-import ApprovalModal from "./ApprovalModal";
+import Sidebar from "../components/Sidebar";
+import Pagination from "../components/Pagination";
+import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
+import ApprovalModal from "../components/ApprovalModal";
 
-const Diverifikasi = () => {
+const Diterima = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -382,4 +382,4 @@ const Diverifikasi = () => {
   );
 };
 
-export default Diverifikasi;
+export default Diterima;

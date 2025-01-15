@@ -5,14 +5,14 @@ import {
   Typography,
   IconButton,
   Input,
-  Tooltip
+  Tooltip,
 } from "@material-tailwind/react";
-import { EyeIcon, MagnifyingGlassIcon , PrinterIcon} from "@heroicons/react/24/outline";
-import Sidebar from "./Sidebar";
-import Pagination from "./Pagination";
-import BreadcrumbsComponent from "./BreadcrumbsComponent";
+import { EyeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import Sidebar from "../components/Sidebar";
+import Pagination from "../components/Pagination";
+import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 
-const SelesaiPage = () => {
+const SedangBerlangsungPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -25,6 +25,7 @@ const SelesaiPage = () => {
       nama: "John Doe",
       no_hp: "081234567890",
       tempat_magang: "Cabang Bukittinggi",
+      tanggal_mulai: "2024-01-01",
       tanggal_selesai: "2024-03-01",
     },
     {
@@ -32,6 +33,7 @@ const SelesaiPage = () => {
       nama: "Jane Smith",
       no_hp: "081234567891",
       tempat_magang: "Cabang Bandung",
+      tanggal_mulai: "2024-01-02",
       tanggal_selesai: "2024-03-02",
     },
     {
@@ -39,6 +41,7 @@ const SelesaiPage = () => {
       nama: "Alice Johnson",
       no_hp: "081234567892",
       tempat_magang: "Cabang Padang Panjang",
+      tanggal_mulai: "2024-01-03",
       tanggal_selesai: "2024-03-03",
     },
     {
@@ -46,6 +49,7 @@ const SelesaiPage = () => {
       nama: "Bob Wilson",
       no_hp: "081234567893",
       tempat_magang: "Cabang Jakarta",
+      tanggal_mulai: "2024-01-04",
       tanggal_selesai: "2024-03-04",
     },
     {
@@ -53,6 +57,7 @@ const SelesaiPage = () => {
       nama: "Carol Brown",
       no_hp: "081234567894",
       tempat_magang: "Cabang Pariaman",
+      tanggal_mulai: "2024-01-05",
       tanggal_selesai: "2024-03-05",
     },
     {
@@ -60,6 +65,7 @@ const SelesaiPage = () => {
       nama: "David Lee",
       no_hp: "081234567895",
       tempat_magang: "Cabang Pekanbaru",
+      tanggal_mulai: "2024-01-06",
       tanggal_selesai: "2024-03-06",
     },
     {
@@ -67,6 +73,7 @@ const SelesaiPage = () => {
       nama: "Eva Garcia",
       no_hp: "081234567896",
       tempat_magang: "Cabang Solok",
+      tanggal_mulai: "2024-01-07",
       tanggal_selesai: "2024-03-07",
     },
     {
@@ -74,6 +81,7 @@ const SelesaiPage = () => {
       nama: "Frank Miller",
       no_hp: "081234567897",
       tempat_magang: "Cabang Utama Padang",
+      tanggal_mulai: "2024-01-08",
       tanggal_selesai: "2024-03-08",
     },
     {
@@ -81,6 +89,7 @@ const SelesaiPage = () => {
       nama: "Grace Taylor",
       no_hp: "081234567898",
       tempat_magang: "Cabang Payakumbuh",
+      tanggal_mulai: "2024-01-09",
       tanggal_selesai: "2024-03-09",
     },
     {
@@ -88,6 +97,7 @@ const SelesaiPage = () => {
       nama: "Henry Davis",
       no_hp: "081234567899",
       tempat_magang: "Cabang Lubuk Alung",
+      tanggal_mulai: "2024-01-10",
       tanggal_selesai: "2024-03-10",
     },
     {
@@ -95,6 +105,7 @@ const SelesaiPage = () => {
       nama: "Ivy Chen",
       no_hp: "081234567800",
       tempat_magang: "Cabang Alahan Panjang",
+      tanggal_mulai: "2024-01-11",
       tanggal_selesai: "2024-03-11",
     },
     {
@@ -102,6 +113,7 @@ const SelesaiPage = () => {
       nama: "Jack Martin",
       no_hp: "081234567801",
       tempat_magang: "Cabang Alahan Panjang",
+      tanggal_mulai: "2024-01-12",
       tanggal_selesai: "2024-03-12",
     },
   ];
@@ -127,9 +139,6 @@ const SelesaiPage = () => {
 
   const handleViewClick = () => {
     window.location.href = `/detail`;
-  };
-  const handlePrintCertificate = () => {
-    window.location.href = `/cetak-sertif`
   };
 
   return (
@@ -200,7 +209,15 @@ const SelesaiPage = () => {
                           Tempat Magang
                         </Typography>
                       </th>
-
+                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-semibold leading-none"
+                        >
+                          Tanggal Mulai
+                        </Typography>
+                      </th>
                       <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
                         <Typography
                           variant="small"
@@ -211,7 +228,7 @@ const SelesaiPage = () => {
                         </Typography>
                       </th>
 
-                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4  text-start">
+                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
@@ -245,7 +262,11 @@ const SelesaiPage = () => {
                             {item.tempat_magang}
                           </Typography>
                         </td>
-
+                        <td className="p-4">
+                          <Typography variant="small" color="blue-gray">
+                            {item.tanggal_mulai}
+                          </Typography>
+                        </td>
                         <td className="p-4">
                           <Typography variant="small" color="blue-gray">
                             {item.tanggal_selesai}
@@ -254,25 +275,17 @@ const SelesaiPage = () => {
 
                         <td className="p-4">
                           <div className="flex gap-2">
-                            <Tooltip content="Lihat Detail" className="bg-blue-500">   
-                            <IconButton
-                              variant="text"
-                              color="blue"
-                              className="rounded-full"
-                              onClick={() => handleViewClick()}
+                            <Tooltip
+                              content="Lihat Detail"
+                              className="bg-blue-500"
                             >
-                              <EyeIcon className="h-4 w-4" />
-                            </IconButton>
-                            </Tooltip>
-
-                            <Tooltip content="Cetak Sertifikat" className="bg-green-500">
                               <IconButton
                                 variant="text"
-                                color="green"
+                                color="blue"
                                 className="rounded-full"
-                                onClick={() => handlePrintCertificate()}
+                                onClick={() => handleViewClick()}
                               >
-                                <PrinterIcon className="h-4 w-4" />
+                                <EyeIcon className="h-4 w-4" />
                               </IconButton>
                             </Tooltip>
                           </div>
@@ -296,4 +309,4 @@ const SelesaiPage = () => {
   );
 };
 
-export default SelesaiPage;
+export default SedangBerlangsungPage;

@@ -12,8 +12,8 @@ import {
   ChartBarIcon,
   ArrowTrendingUpIcon
 } from "@heroicons/react/24/outline";
-import Sidebar from './Sidebar';
-import BreadcrumbsComponent from './BreadcrumbsComponent';
+import Sidebar from '../components/Sidebar';
+import BreadcrumbsComponent from '../components/BreadcrumbsComponent';
 
 const MappingPage = () => {
   const branchData = [

@@ -7,114 +7,134 @@ import {
   Input,
   Tooltip,
 } from "@material-tailwind/react";
-import { EyeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import Sidebar from "./Sidebar";
-import Pagination from "./Pagination";
-import BreadcrumbsComponent from "./BreadcrumbsComponent";
+import {
+  EyeIcon,
+  PencilIcon,
+  TrashIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+import Sidebar from "../components/Sidebar";
+import Pagination from "../components/Pagination";
+import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
+import ApprovalModal from "../components/ApprovalModal";
 
-const SedangBerlangsungPage = () => {
+const Diverifikasi = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const itemsPerPage = 10;
 
   // Sample data array
   const data = [
     {
-      no: 1,
+      id: 1,
       nama: "John Doe",
-      no_hp: "081234567890",
-      tempat_magang: "Cabang Bukittinggi",
-      tanggal_mulai: "2024-01-01",
-      tanggal_selesai: "2024-03-01",
+      email: "johndoe@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Indonesia",
+      periode: "2 bulan",
+      tanggal: "2024-01-01",
     },
     {
-      no: 2,
+      id: 2,
       nama: "Jane Smith",
-      no_hp: "081234567891",
-      tempat_magang: "Cabang Bandung",
-      tanggal_mulai: "2024-01-02",
-      tanggal_selesai: "2024-03-02",
+      email: "janesmith@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Institut Teknologi Bandung",
+      periode: "2 bulan",
+      tanggal: "2024-01-02",
     },
     {
-      no: 3,
+      id: 3,
       nama: "Alice Johnson",
-      no_hp: "081234567892",
-      tempat_magang: "Cabang Padang Panjang",
-      tanggal_mulai: "2024-01-03",
-      tanggal_selesai: "2024-03-03",
+      email: "alicejohnson@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Gadjah Mada",
+      periode: "2 bulan",
+      tanggal: "2024-01-03",
     },
     {
-      no: 4,
+      id: 4,
       nama: "Bob Wilson",
-      no_hp: "081234567893",
-      tempat_magang: "Cabang Jakarta",
-      tanggal_mulai: "2024-01-04",
-      tanggal_selesai: "2024-03-04",
+      email: "bobwilson@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Brawijaya",
+      periode: "2 bulan",
+      tanggal: "2024-01-04",
     },
     {
-      no: 5,
+      id: 5,
       nama: "Carol Brown",
-      no_hp: "081234567894",
-      tempat_magang: "Cabang Pariaman",
-      tanggal_mulai: "2024-01-05",
-      tanggal_selesai: "2024-03-05",
+      email: "carolbrown@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Padjadjaran",
+      periode: "2 bulan",
+      tanggal: "2024-01-05",
     },
     {
-      no: 6,
+      id: 6,
       nama: "David Lee",
-      no_hp: "081234567895",
-      tempat_magang: "Cabang Pekanbaru",
-      tanggal_mulai: "2024-01-06",
-      tanggal_selesai: "2024-03-06",
+      email: "davidlee@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Institut Teknologi Sepuluh November",
+      periode: "2 bulan",
+      tanggal: "2024-01-06",
     },
     {
-      no: 7,
+      id: 7,
       nama: "Eva Garcia",
-      no_hp: "081234567896",
-      tempat_magang: "Cabang Solok",
-      tanggal_mulai: "2024-01-07",
-      tanggal_selesai: "2024-03-07",
+      email: "evagarcia@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Diponegoro",
+      periode: "2 bulan",
+      tanggal: "2024-01-07",
     },
     {
-      no: 8,
+      id: 8,
       nama: "Frank Miller",
-      no_hp: "081234567897",
-      tempat_magang: "Cabang Utama Padang",
-      tanggal_mulai: "2024-01-08",
-      tanggal_selesai: "2024-03-08",
+      email: "frankmiller@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Airlangga",
+      periode: "2 bulan",
+      tanggal: "2024-01-08",
     },
     {
-      no: 9,
+      id: 9,
       nama: "Grace Taylor",
-      no_hp: "081234567898",
-      tempat_magang: "Cabang Payakumbuh",
-      tanggal_mulai: "2024-01-09",
-      tanggal_selesai: "2024-03-09",
+      email: "gracetaylor@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Hasanuddin",
+      periode: "2 bulan",
+      tanggal: "2024-01-09",
     },
     {
-      no: 10,
+      id: 10,
       nama: "Henry Davis",
-      no_hp: "081234567899",
-      tempat_magang: "Cabang Lubuk Alung",
-      tanggal_mulai: "2024-01-10",
-      tanggal_selesai: "2024-03-10",
+      email: "henrydavis@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Negeri Yogyakarta",
+      periode: "2 bulan",
+      tanggal: "2024-01-10",
     },
     {
-      no: 11,
+      id: 11,
       nama: "Ivy Chen",
-      no_hp: "081234567800",
-      tempat_magang: "Cabang Alahan Panjang",
-      tanggal_mulai: "2024-01-11",
-      tanggal_selesai: "2024-03-11",
+      email: "ivychen@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Sebelas Maret",
+      periode: "2 bulan",
+      tanggal: "2024-01-11",
     },
     {
-      no: 12,
+      id: 12,
       nama: "Jack Martin",
-      no_hp: "081234567801",
-      tempat_magang: "Cabang Alahan Panjang",
-      tanggal_mulai: "2024-01-12",
-      tanggal_selesai: "2024-03-12",
+      email: "jackmartin@gmail.com",
+      alamat: "jalan 1",
+      institusi: "Universitas Pendidikan Indonesia",
+      periode: "2 bulan",
+      tanggal: "2024-01-12",
     },
   ];
 
@@ -140,6 +160,19 @@ const SedangBerlangsungPage = () => {
   const handleViewClick = () => {
     window.location.href = `/detail`;
   };
+
+  const handleDeleteClick = (item) => {
+    setSelectedItem(item);
+    setDeleteOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    // Handle delete logic here
+    setDeleteOpen(false);
+    setSelectedItem(null);
+  };
+
+  const handleDeleteOpen = () => setDeleteOpen(!deleteOpen);
 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
@@ -197,7 +230,7 @@ const SedangBerlangsungPage = () => {
                           color="blue-gray"
                           className="font-semibold leading-none"
                         >
-                          Nomor HP
+                          Email
                         </Typography>
                       </th>
                       <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
@@ -206,7 +239,7 @@ const SedangBerlangsungPage = () => {
                           color="blue-gray"
                           className="font-semibold leading-none"
                         >
-                          Tempat Magang
+                          Alamat
                         </Typography>
                       </th>
                       <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
@@ -215,7 +248,7 @@ const SedangBerlangsungPage = () => {
                           color="blue-gray"
                           className="font-semibold leading-none"
                         >
-                          Tanggal Mulai
+                          Institusi
                         </Typography>
                       </th>
                       <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
@@ -224,11 +257,19 @@ const SedangBerlangsungPage = () => {
                           color="blue-gray"
                           className="font-semibold leading-none"
                         >
-                          Tanggal Selesai
+                          Tanggal
                         </Typography>
                       </th>
-
-                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4 text-start">
+                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-semibold leading-none"
+                        >
+                          Periode
+                        </Typography>
+                      </th>
+                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4 text-center">
                         <Typography
                           variant="small"
                           color="blue-gray"
@@ -254,29 +295,40 @@ const SedangBerlangsungPage = () => {
                         </td>
                         <td className="p-4">
                           <Typography variant="small" color="blue-gray">
-                            {item.no_hp}
+                            {item.email}
                           </Typography>
                         </td>
                         <td className="p-4">
                           <Typography variant="small" color="blue-gray">
-                            {item.tempat_magang}
+                            {item.alamat}
                           </Typography>
                         </td>
                         <td className="p-4">
                           <Typography variant="small" color="blue-gray">
-                            {item.tanggal_mulai}
+                            {item.institusi}
                           </Typography>
                         </td>
                         <td className="p-4">
                           <Typography variant="small" color="blue-gray">
-                            {item.tanggal_selesai}
+                            {new Date(item.tanggal).toLocaleDateString(
+                              "id-ID",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
+                            )}
                           </Typography>
                         </td>
-
+                        <td className="p-4">
+                          <Typography variant="small" color="blue-gray">
+                            {item.periode}
+                          </Typography>
+                        </td>
                         <td className="p-4">
                           <div className="flex gap-2">
                             <Tooltip
-                              content="Lihat Detail"
+                              content="Lihat detail"
                               className="bg-blue-500"
                             >
                               <IconButton
@@ -286,6 +338,20 @@ const SedangBerlangsungPage = () => {
                                 onClick={() => handleViewClick()}
                               >
                                 <EyeIcon className="h-4 w-4" />
+                              </IconButton>
+                            </Tooltip>
+                            
+                            <Tooltip
+                              content="Hapus data"
+                              className="bg-red-500"
+                            >
+                              <IconButton
+                                variant="text"
+                                color="red"
+                                className="rounded-full"
+                                onClick={() => handleDeleteClick(item)}
+                              >
+                                <TrashIcon className="h-4 w-4" />
                               </IconButton>
                             </Tooltip>
                           </div>
@@ -305,8 +371,15 @@ const SedangBerlangsungPage = () => {
           />
         </div>
       </div>
+
+      <ApprovalModal
+        open={deleteOpen}
+        handleOpen={handleDeleteOpen}
+        onSubmit={handleDeleteConfirm}
+        type="delete"
+      />
     </div>
   );
 };
 
-export default SedangBerlangsungPage;
+export default Diverifikasi;

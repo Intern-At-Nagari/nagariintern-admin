@@ -17,9 +17,9 @@ import {
   ArrowDownTrayIcon
 } from "@heroicons/react/24/outline";
 import axios from "axios";
-import Sidebar from "./Sidebar";
-import ApprovalModal from "./ApprovalModal";
-import BreadcrumbsComponent from "./BreadcrumbsComponent";
+import Sidebar from "../components/Sidebar";
+import ApprovalModal from "../components/ApprovalModal";
+import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 
 const DetailPage = () => {
   const { id } = useParams();

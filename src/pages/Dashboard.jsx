@@ -26,8 +26,8 @@ import {
   Cell,
   ResponsiveContainer,
 } from "recharts";
-import Sidebar from "./Sidebar";
-import BreadcrumbsComponent from "./BreadcrumbsComponent";
+import Sidebar from "../components/Sidebar";
+import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 
 const Dashboard = () => {
   const monthlyData = [
