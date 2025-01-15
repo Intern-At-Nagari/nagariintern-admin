@@ -238,7 +238,7 @@ const DetailPage = () => {
                         Institusi & Jurusan
                       </Typography>
                       <Typography variant="small" className="text-blue-gray-500">
-                        {data.institusi} - {data.jurusan}
+                        {data.Institusi.name} - {data.Jurusan.name}
                       </Typography>
                     </div>
                   </div>
@@ -288,7 +288,7 @@ const DetailPage = () => {
                         Departemen
                       </Typography>
                       <Typography variant="small" className="text-blue-gray-500">
-                        {data.departemen?.toUpperCase()}
+                        {data.Divisi.name}
                       </Typography>
                     </div>
                   </div>

@@ -14,12 +14,21 @@ import {
 import adminImage from "../assets/admin.png";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { useEffect } from "react";
+
 
 const AdminLoginPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard"); 
+    }
+  }, []);
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
