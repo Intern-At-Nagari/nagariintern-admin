@@ -140,32 +140,32 @@ const MappingPage = () => {
   );
 
   const renderListView = () => (
-    <Card className="w-full">
+    <Card className="w-full overflow-x-auto border border-blue-gray-100">
       <table className="w-full min-w-max table-auto text-left">
         <thead>
-          <tr>
-            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+          <tr className="bg-white">
+            <th className="border-b border-blue-gray-100 p-4">
+              <Typography variant="small" color="blue-gray" className="font-semibold leading-none">
                 Nama Unit
               </Typography>
             </th>
-            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+            <th className="border-b border-blue-gray-100 p-4">
+              <Typography variant="small" color="blue-gray" className="font-semibold leading-none">
                 Kuota Mahasiswa
               </Typography>
             </th>
-            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+            <th className="border-b border-blue-gray-100 p-4">
+              <Typography variant="small" color="blue-gray" className="font-semibold leading-none">
                 Kuota Siswa
               </Typography>
             </th>
-            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+            <th className="border-b border-blue-gray-100 p-4">
+              <Typography variant="small" color="blue-gray" className="font-semibold leading-none">
                 Total Kuota
               </Typography>
             </th>
-            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+            <th className="border-b border-blue-gray-100 p-4">
+              <Typography variant="small" color="blue-gray" className="font-semibold leading-none">
                 Aksi
               </Typography>
             </th>
@@ -173,28 +173,28 @@ const MappingPage = () => {
         </thead>
         <tbody>
           {filteredBranchData.map((branch) => (
-            <tr key={branch.id} className="hover:bg-blue-gray-50">
-              <td className="p-4">
+            <tr key={branch.id} className="hover:bg-blue-gray-50 bg-white">
+              <td className="p-4 border-b border-blue-gray-100">
                 <Typography variant="small" color="blue-gray" className="font-normal">
                   {branch.name}
                 </Typography>
               </td>
-              <td className="p-4">
+              <td className="p-4 border-b border-blue-gray-100">
                 <Typography variant="small" color="blue-gray" className="font-normal">
                   {branch.kuotaMhs}
                 </Typography>
               </td>
-              <td className="p-4">
+              <td className="p-4 border-b border-blue-gray-100">
                 <Typography variant="small" color="blue-gray" className="font-normal">
                   {branch.kuotaSiswa}
                 </Typography>
               </td>
-              <td className="p-4">
+              <td className="p-4 border-b border-blue-gray-100">
                 <Typography variant="small" color="blue-gray" className="font-normal">
                   {branch.kuotaMhs + branch.kuotaSiswa}
                 </Typography>
               </td>
-              <td className="p-4">
+              <td className="p-4 border-b border-blue-gray-100">
                 <Button size="sm" color="blue" onClick={() => handleOpen(branch)}>
                   <PencilIcon className="h-4 w-4" />
                 </Button>

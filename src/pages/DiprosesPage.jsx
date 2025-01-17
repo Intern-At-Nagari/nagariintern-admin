@@ -51,7 +51,7 @@ const DiprosesPage = () => {
         const responseData = response.data.data || response.data;
         const dataArray = Array.isArray(responseData) ? responseData : [];
         setData(dataArray);
-        console.log(dataArray);
+        
 
         // Extract unique institutions and types from the data
         const uniqueInstitutions = [
@@ -202,15 +202,15 @@ const DiprosesPage = () => {
                 </Select>
 
                 <Select
-                  label="Filter Institusi"
-                  value={selectedInstitution}
-                  onChange={handleInstitutionChange}
+                  label="Filter Tipe"
+                  value={selectedType}
+                  onChange={handleTypeChange}
                   searchable
                 >
-                  <Option value="">Semua Institusi</Option>
-                  {institutions.map((institution) => (
-                    <Option key={institution} value={institution}>
-                      {institution}
+                  <Option value="">Semua Tipe</Option>
+                  {types.map((type) => (
+                    <Option key={type} value={type}>
+                      {type}
                     </Option>
                   ))}
                 </Select>
