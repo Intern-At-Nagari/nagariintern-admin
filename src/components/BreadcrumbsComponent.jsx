@@ -11,14 +11,25 @@ const routeMap = {
   '/sedang-berlangsung': ['Home', 'Monitoring Peserta', 'Sedang Berlangsung'],
   '/monitoring/completed': ['Home', 'Monitoring Peserta', 'Selesai'],
   '/mapping': ['Home', 'Pemetaan'],
-  '/detail': ['Home', 'Permintaan','Detail'],
   '/selesai': ['Home','Monitoring', 'Selesai'],
-  '/cetak-sertif': ['Home', 'Cetak Sertifikat']
+  '/cetak-sertif': ['Home', 'Cetak Sertifikat'],
+  '/anggaran': ['Home', 'Anggaran'],
 };
 
 const BreadcrumbsComponent = () => {
   const pathname = window.location.pathname;
-  const paths = routeMap[pathname] || ['Home'];
+  
+  const getPathsForRoute = (path) => {
+    // Handle detail/:id route
+    if (path.match(/^\/detail\/\d+$/)) {
+      return ['Home', 'Permintaan', 'Detail'];
+    }
+    
+    // Handle other static routes
+    return routeMap[path] || ['Home'];
+  };
+
+  const paths = getPathsForRoute(pathname);
 
   return (
     <div className="sticky top-4 z-40 bg-blue-gray-50/95 backdrop-blur-sm border border-blue-gray-100 mb-8 rounded-xl mx-4">

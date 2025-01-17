@@ -16,7 +16,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import Pagination from "../components/Pagination";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
-import ApprovalModal from "../components/ApprovalModal";
+import Modal from "../components/Modal";
 
 const Diverifikasi = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -372,7 +372,7 @@ const Diverifikasi = () => {
         </div>
       </div>
 
-      <ApprovalModal
+      <Modal
         open={deleteOpen}
         handleOpen={handleDeleteOpen}
         onSubmit={handleDeleteConfirm}

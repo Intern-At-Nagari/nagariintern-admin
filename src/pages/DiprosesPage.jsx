@@ -1,6 +1,14 @@
-// src/pages/DiprosesPage.jsx
 import React, { useState, useEffect } from "react";
-import { Card, CardBody, Typography, IconButton, Input, Tooltip } from "@material-tailwind/react";
+import {
+  Card,
+  CardBody,
+  Typography,
+  IconButton,
+  Input,
+  Tooltip,
+  Select,
+  Option,
+} from "@material-tailwind/react";
 import {
   EyeIcon,
   TrashIcon,
@@ -10,7 +18,7 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Pagination from "../components/Pagination";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
-import ApprovalModal from "../components/ApprovalModal";
+import Modal from "../components/Modal";
 
 const DiprosesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +28,10 @@ const DiprosesPage = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedInstitution, setSelectedInstitution] = useState("");
+  const [institutions, setInstitutions] = useState([]);
+  const [types, setTypes] = useState([]);
 
   const itemsPerPage = 10;
 
@@ -30,25 +42,31 @@ const DiprosesPage = () => {
 
       try {
         const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
+        if (!token) throw new Error("No authentication token found");
 
         const response = await axios.get("http://localhost:3000/intern", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (response.data) {
-          setData(response.data.reverse());
-          console.log("Data received:", response.data);
-        } else {
-          throw new Error("No data received from server");
-        }
+        const responseData = response.data.data || response.data;
+        const dataArray = Array.isArray(responseData) ? responseData : [];
+        setData(dataArray);
+        console.log(dataArray);
+
+        // Extract unique institutions and types from the data
+        const uniqueInstitutions = [
+          ...new Set(dataArray.map((item) => item.institusi).filter(Boolean)),
+        ];
+        const uniqueTypes = [
+          ...new Set(dataArray.map((item) => item.type).filter(Boolean)),
+        ];
+
+        setInstitutions(uniqueInstitutions);
+        setTypes(uniqueTypes);
       } catch (err) {
-        const errorMessage = err.response?.data?.message || err.message || "Failed to fetch data";
-        setError(errorMessage);
+        setError(
+          err.response?.data?.message || err.message || "Failed to fetch data"
+        );
         console.error("Error details:", err);
       } finally {
         setLoading(false);
@@ -63,18 +81,43 @@ const DiprosesPage = () => {
     setCurrentPage(1);
   };
 
-  const filteredData = data.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  const handleTypeChange = (value) => {
+    setSelectedType(value);
+    setCurrentPage(1);
+  };
+
+  const handleInstitutionChange = (value) => {
+    setSelectedInstitution(value);
+    setCurrentPage(1);
+  };
+
+  const filteredData = data.filter((item) => {
+    if (!item) return false;
+
+    const matchesSearch = [
+      item.biodata?.nama || "",
+      item.institusi || "",
+      item.type || "",
+      item.status || "",
+      item.jurusan || "",
+      item.unitKerja || "",
+
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    const matchesType = !selectedType || item.type === selectedType;
+    const matchesInstitution =
+      !selectedInstitution || item.institusi === selectedInstitution;
+
+    return matchesSearch && matchesType && matchesInstitution;
+  });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
   const getCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredData.slice(startIndex, endIndex);
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
   };
 
   const handleViewClick = (id) => {
@@ -87,13 +130,13 @@ const DiprosesPage = () => {
   };
 
   const handleDeleteConfirm = async () => {
+    if (!selectedItem?.id) return;
+
     try {
       await axios.delete(`http://localhost:3000/intern/${selectedItem.id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      setData(data.filter(item => item.id !== selectedItem.id));
+      setData(data.filter((item) => item.id !== selectedItem.id));
       setDeleteOpen(false);
       setSelectedItem(null);
     } catch (err) {
@@ -120,15 +163,15 @@ const DiprosesPage = () => {
       <div className="px-4 md:px-8 pb-8">
         <div className="max-w-7xl mx-auto">
           <BreadcrumbsComponent />
-          
+
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
             </div>
           ) : (
             <>
-              <div className="mb-4">
-                <div className="relative flex w-full max-w-[24rem]">
+              <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="relative flex w-full">
                   <Input
                     type="search"
                     label="Cari data..."
@@ -138,16 +181,42 @@ const DiprosesPage = () => {
                     containerProps={{
                       className: "min-w-0",
                     }}
+                    icon={
+                      <MagnifyingGlassIcon className="h-5 w-5 text-blue-gray-500" />
+                    }
                   />
-                  <div className="!absolute right-1 top-1 rounded-full">
-                    <IconButton variant="text" className="rounded-full">
-                      <MagnifyingGlassIcon className="h-5 w-5" />
-                    </IconButton>
-                  </div>
                 </div>
+
+                <Select
+                  label="Filter Institusi"
+                  value={selectedInstitution}
+                  onChange={handleInstitutionChange}
+                  searchable
+                >
+                  <Option value="">Semua Institusi</Option>
+                  {institutions.map((institution) => (
+                    <Option key={institution} value={institution}>
+                      {institution}
+                    </Option>
+                  ))}
+                </Select>
+
+                <Select
+                  label="Filter Institusi"
+                  value={selectedInstitution}
+                  onChange={handleInstitutionChange}
+                  searchable
+                >
+                  <Option value="">Semua Institusi</Option>
+                  {institutions.map((institution) => (
+                    <Option key={institution} value={institution}>
+                      {institution}
+                    </Option>
+                  ))}
+                </Select>
               </div>
 
-              {data.length === 0 ? (
+              {getCurrentPageData().length === 0 ? (
                 <div className="text-center py-8">
                   <Typography variant="h6" color="blue-gray">
                     No data available
@@ -162,95 +231,196 @@ const DiprosesPage = () => {
                           <thead>
                             <tr>
                               <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                                <Typography variant="small" color="blue-gray" className="font-semibold">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-semibold"
+                                >
                                   No
                                 </Typography>
                               </th>
                               <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                                <Typography variant="small" color="blue-gray" className="font-semibold">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-semibold"
+                                >
                                   Nama
                                 </Typography>
                               </th>
+
                               <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                                <Typography variant="small" color="blue-gray" className="font-semibold">
-                                  Alamat
-                                </Typography>
-                              </th>
-                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                                <Typography variant="small" color="blue-gray" className="font-semibold">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-semibold"
+                                >
                                   Institusi
                                 </Typography>
                               </th>
                               <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                                <Typography variant="small" color="blue-gray" className="font-semibold">
-                                  Tanggal
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-semibold"
+                                >
+                                  Prodi/Jurusan
+                                </Typography>
+                              </th>
+                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-semibold"
+                                >
+                                  Unit Kerja
+                                </Typography>
+                              </th>
+                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-semibold"
+                                >
+                                  Status
+                                </Typography>
+                              </th>
+                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-semibold"
+                                >
+                                  Periode
                                 </Typography>
                               </th>
                               <th className="border-b border-blue-gray-100 bg-gray-100 p-4 text-center">
-                                <Typography variant="small" color="blue-gray" className="font-semibold">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-semibold"
+                                >
                                   Aksi
                                 </Typography>
                               </th>
                             </tr>
                           </thead>
                           <tbody>
-                            {getCurrentPageData().map((item, index) => (
-                              <tr key={item.id} className="even:bg-gray-100/50">
-                                <td className="p-4">
-                                  <Typography variant="small" color="blue-gray">
-                                    {(currentPage - 1) * itemsPerPage + index + 1}
-                                  </Typography>
-                                </td>
-                                <td className="p-4">
-                                  <Typography variant="small" color="blue-gray">
-                                    {item.user.nama}
-                                  </Typography>
-                                </td>
-                                <td className="p-4">
-                                  <Typography variant="small" color="blue-gray">
-                                    {item.alamat}
-                                  </Typography>
-                                </td>
-                                <td className="p-4">
-                                  <Typography variant="small" color="blue-gray">
-                                    {item.Institusi.name}
-                                  </Typography>
-                                </td>
-                                <td className="p-4">
-                                  <Typography variant="small" color="blue-gray">
-                                    {new Date(item.createdAt).toLocaleDateString("id-ID", {
-                                      year: "numeric",
-                                      month: "long",
-                                      day: "numeric",
-                                    })}
-                                  </Typography>
-                                </td>
-                                <td className="p-4">
-                                  <div className="flex gap-2 justify-center">
-                                    <Tooltip content="Lihat detail" className="bg-blue-500">
-                                      <IconButton
-                                        variant="text"
-                                        color="blue"
-                                        className="rounded-full"
-                                        onClick={() => handleViewClick(item.id)}
+                            {getCurrentPageData().map((item, index) => {
+                              if (!item) return null;
+
+                              const startDate = item.tanggalMulai
+                                ? new Date(
+                                    item.tanggalMulai
+                                  ).toLocaleDateString("id-ID")
+                                : "-";
+                              const endDate = item.tanggalSelesai
+                                ? new Date(
+                                    item.tanggalSelesai
+                                  ).toLocaleDateString("id-ID")
+                                : "-";
+
+                              return (
+                                <tr
+                                  key={item.id}
+                                  className="even:bg-gray-100/50"
+                                >
+                                  <td className="p-4">
+                                    <Typography
+                                      variant="small"
+                                      color="blue-gray"
+                                    >
+                                      {(currentPage - 1) * itemsPerPage +
+                                        index +
+                                        1}
+                                    </Typography>
+                                  </td>
+                                  <td className="p-4">
+                                    <Typography
+                                      variant="small"
+                                      color="blue-gray"
+                                    >
+                                      {item.biodata?.nama || "-"}
+                                    </Typography>
+                                  </td>
+
+                                  <td className="p-4">
+                                    <Typography
+                                      variant="small"
+                                      color="blue-gray"
+                                    >
+                                      {item.institusi || "-"}
+                                    </Typography>
+                                  </td>
+                                  <td className="p-4">
+                                    <Typography
+                                      variant="small"
+                                      color="blue-gray"
+                                    >
+                                      {item.jurusan || "-"}
+                                    </Typography>
+                                  </td>
+                                  <td className="p-4">
+                                    <Typography
+                                      variant="small"
+                                      color="blue-gray"
+                                    >
+                                      {item.unitKerja.name || "-"}
+                                    </Typography>
+                                  </td>
+                                  <td className="p-4">
+                                    <Typography
+                                      variant="small"
+                                      color="blue-gray"
+                                    >
+                                      {item.status || "-"}
+                                    </Typography>
+                                  </td>
+                                  <td className="p-4">
+                                    <Typography
+                                      variant="small"
+                                      color="blue-gray"
+                                    >
+                                      {startDate} - {endDate}
+                                    </Typography>
+                                  </td>
+                                  <td className="p-4">
+                                    <div className="flex gap-2 justify-center">
+                                      <Tooltip
+                                        content="Lihat detail"
+                                        className="bg-blue-500"
                                       >
-                                        <EyeIcon className="h-4 w-4" />
-                                      </IconButton>
-                                    </Tooltip>
-                                    <Tooltip content="Hapus data" className="bg-red-500">
-                                      <IconButton
-                                        variant="text"
-                                        color="red"
-                                        className="rounded-full"
-                                        onClick={() => handleDeleteClick(item)}
+                                        <IconButton
+                                          variant="text"
+                                          color="blue"
+                                          className="rounded-full"
+                                          onClick={() =>
+                                            handleViewClick(item.id)
+                                          }
+                                        >
+                                          <EyeIcon className="h-4 w-4" />
+                                        </IconButton>
+                                      </Tooltip>
+                                      <Tooltip
+                                        content="Hapus data"
+                                        className="bg-red-500"
                                       >
-                                        <TrashIcon className="h-4 w-4" />
-                                      </IconButton>
-                                    </Tooltip>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
+                                        <IconButton
+                                          variant="text"
+                                          color="red"
+                                          className="rounded-full"
+                                          onClick={() =>
+                                            handleDeleteClick(item)
+                                          }
+                                        >
+                                          <TrashIcon className="h-4 w-4" />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -269,7 +439,7 @@ const DiprosesPage = () => {
         </div>
       </div>
 
-      <ApprovalModal
+      <Modal
         open={deleteOpen}
         handleOpen={handleDeleteOpen}
         onSubmit={handleDeleteConfirm}

@@ -9,7 +9,7 @@ import {
   Typography
 } from "@material-tailwind/react";
 
-export const ApprovalModal = ({
+export const Modal = ({
   open,
   handleOpen,
   onSubmit,
@@ -84,4 +84,4 @@ export const ApprovalModal = ({
   );
 };
 
-export default ApprovalModal;
+export default Modal;

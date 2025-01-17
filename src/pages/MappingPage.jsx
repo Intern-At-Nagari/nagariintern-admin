@@ -1,79 +1,260 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import {  toast } from 'react-toastify';
 import {
-  Card,
-  CardBody,
-  Typography,
+  Card, CardBody, Typography, Button, Dialog,
+  DialogHeader, DialogBody, DialogFooter, Input, Alert, Tooltip
 } from "@material-tailwind/react";
 import {
-  HomeIcon,
-  ChevronRightIcon,
-  MapPinIcon,
-  UsersIcon,
-  ChartBarIcon,
-  ArrowTrendingUpIcon
+  MapPinIcon, UsersIcon, ArrowTrendingUpIcon,
+  PencilIcon, XMarkIcon, ListBulletIcon, TableCellsIcon,
+  MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
 import Sidebar from '../components/Sidebar';
 import BreadcrumbsComponent from '../components/BreadcrumbsComponent';
+import axios from 'axios';
 
 const MappingPage = () => {
-  const branchData = [
-    { branch: 'Alahan Panjang', interns: 3 },
-    { branch: 'Bandung', interns: 5 },
-    { branch: 'Batusangkar', interns: 4 },
-    { branch: 'Bukittinggi', interns: 6 },
-    { branch: 'Jakarta', interns: 8 },
-    { branch: 'Koto Baru', interns: 2 },
-    { branch: 'Padang Panjang', interns: 4 },
-    { branch: 'Pariaman', interns: 3 },
-    { branch: 'Payakumbuh', interns: 5 },
-    { branch: 'Solok', interns: 4 }
-  ];
+  const [branchData, setBranchData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [selectedBranch, setSelectedBranch] = useState(null);
+  const [isGridView, setIsGridView] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [formData, setFormData] = useState({
+    kuotaMhs: '',
+    kuotaSiswa: ''
+  });
 
-  const totalInterns = branchData.reduce((sum, branch) => sum + branch.interns, 0);
-  const maxInterns = Math.max(...branchData.map(branch => branch.interns));
+  const fetchBranchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/admin/unit-kerja', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      setBranchData(response.data);
+    } catch (err) {
+      setError('Failed to fetch branch data');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBranchData();
+  }, []);
+
+  const handleOpen = (branch = null) => {
+    setSelectedBranch(branch);
+    setFormData({
+      kuotaMhs: branch ? branch.kuotaMhs.toString() : '',
+      kuotaSiswa: branch ? branch.kuotaSiswa.toString() : ''
+    });
+    setOpen(!open);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+  
+      const payload = {
+        kuotaMhs: parseInt(formData.kuotaMhs) || 0,
+        kuotaSiswa: parseInt(formData.kuotaSiswa) || 0
+      };
+  
+      await axios.put(
+        `http://localhost:3000/admin/unit-kerja/${selectedBranch.id}`,
+        payload,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      await fetchBranchData();
+      setOpen(false);
+      setFormData({ kuotaMhs: '', kuotaSiswa: '' });
+      toast.success('Kuota magang berhasil diperbarui!');
+  
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Failed to update quota';
+      setError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredBranchData = branchData.filter(branch => 
+    branch.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+
+  const totalInterns = branchData.reduce((sum, branch) => sum + branch.kuotaMhs + branch.kuotaSiswa, 0);
+  const totalMhs = branchData.reduce((sum, branch) => sum + branch.kuotaMhs, 0);
+  const totalSiswa = branchData.reduce((sum, branch) => sum + branch.kuotaSiswa, 0);
+
+  const renderGridView = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      {filteredBranchData.map((branch) => (
+        <Card key={branch.id} className="transform transition-all duration-300 hover:shadow-xl">
+          <CardBody className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="rounded-xl p-3 bg-blue-500 shadow-blue-500/20 shadow-md">
+                  <MapPinIcon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <Typography variant="h6" color="blue-gray" className="font-medium">
+                    {branch.name}
+                  </Typography>
+                  <div className="space-y-1">
+                    <Typography className="text-sm text-gray-600">
+                      Kuota Mahasiswa: {branch.kuotaMhs}
+                    </Typography>
+                    <Typography className="text-sm text-gray-600">
+                      Kuota Siswa: {branch.kuotaSiswa}
+                    </Typography>
+                    <Typography className="text-gray-700 text-lg font-bold">
+                      Total Kuota: {branch.kuotaMhs + branch.kuotaSiswa}
+                    </Typography>
+                  </div>
+                </div>
+              </div>
+              <Tooltip className="bg-blue-500" content="Edit Kuota" placement="top"  interactive={false} > 
+                <Button size="sm" className="p-2" color="blue" onClick={() => handleOpen(branch)}>
+                  <PencilIcon className="h-4 w-4" />
+                </Button>
+              </Tooltip>
+            </div>
+          </CardBody>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderListView = () => (
+    <Card className="w-full">
+      <table className="w-full min-w-max table-auto text-left">
+        <thead>
+          <tr>
+            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+                Nama Unit
+              </Typography>
+            </th>
+            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+                Kuota Mahasiswa
+              </Typography>
+            </th>
+            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+                Kuota Siswa
+              </Typography>
+            </th>
+            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+                Total Kuota
+              </Typography>
+            </th>
+            <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+              <Typography variant="small" color="blue-gray" className="font-normal leading-none">
+                Aksi
+              </Typography>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredBranchData.map((branch) => (
+            <tr key={branch.id} className="hover:bg-blue-gray-50">
+              <td className="p-4">
+                <Typography variant="small" color="blue-gray" className="font-normal">
+                  {branch.name}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography variant="small" color="blue-gray" className="font-normal">
+                  {branch.kuotaMhs}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography variant="small" color="blue-gray" className="font-normal">
+                  {branch.kuotaSiswa}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography variant="small" color="blue-gray" className="font-normal">
+                  {branch.kuotaMhs + branch.kuotaSiswa}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Button size="sm" color="blue" onClick={() => handleOpen(branch)}>
+                  <PencilIcon className="h-4 w-4" />
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Card>
+  );
 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
-      
-      {/* Main Content */}
       <div className="px-4 md:px-8 pb-8">
         <div className="max-w-7xl mx-auto">
           <BreadcrumbsComponent />
-          <Typography variant="h3" className="mb-8 font-bold text-gray-800 text-2xl md:text-3xl">
-            Pemetaan Peserta Magang
-          </Typography>
+        
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+            <Typography variant="h3" className="font-bold text-gray-800 text-2xl md:text-3xl">
+              Pemetaan Peserta Magang
+            </Typography>
+            <div className="flex gap-4 items-center">
+              <div className="relative flex-grow md:w-64">
+                <Input
+                  type="text"
+                  label="Cari Unit Kerja"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pr-10"
+                  icon={<MagnifyingGlassIcon className="h-5 w-5 text-blue-gray-500" />}
+                />
+              </div>
+              <Button
+                color="blue"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={() => setIsGridView(!isGridView)}
+              >
+                {isGridView ? (
+                  <><ListBulletIcon className="h-4 w-4" /> List View</>
+                ) : (
+                  <><TableCellsIcon className="h-4 w-4" /> Grid View</>
+                )}
+              </Button>
+            </div>
+          </div>
           
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <Card className="shadow-lg">
               <CardBody className="flex items-center gap-4 p-4 md:p-6">
                 <div className="rounded-xl p-3 bg-blue-500 shadow-blue-500/20 shadow-lg">
                   <UsersIcon className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-1">
-                    Total Peserta
-                  </Typography>
-                  <Typography variant="h4" className="font-bold">
-                    {totalInterns} Peserta
-                  </Typography>
-                </div>
-              </CardBody>
-            </Card>
+                  <Typography variant="h6" color="blue-gray" className="mb-1">Total Kuota</Typography>
+                  <Typography variant="h4" className="font-bold">{totalInterns} Peserta</Typography>
+                  <Typography variant="h6" className="font-normal">{totalMhs} Mahasiswa</Typography>
+                  <Typography variant="h6" className="font-normal">{totalSiswa} Siswa</Typography>
 
-            <Card className="shadow-lg">
-              <CardBody className="flex items-center gap-4 p-4 md:p-6">
-                <div className="rounded-xl p-3 bg-green-500 shadow-green-500/20 shadow-lg">
-                  <ChartBarIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-1">
-                    Cabang Terbanyak
-                  </Typography>
-                  <Typography variant="h4" className="font-bold">
-                    {maxInterns} Peserta
-                  </Typography>
                 </div>
               </CardBody>
             </Card>
@@ -84,55 +265,50 @@ const MappingPage = () => {
                   <ArrowTrendingUpIcon className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-1">
-                    Total Cabang
-                  </Typography>
-                  <Typography variant="h4" className="font-bold">
-                    {branchData.length} Cabang
-                  </Typography>
+                  <Typography variant="h6" color="blue-gray" className="mb-1">Total Cabang</Typography>
+                  <Typography variant="h4" className="font-bold">{branchData.length} Cabang</Typography>
                 </div>
               </CardBody>
             </Card>
           </div>
 
-          {/* Branch Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {branchData.map((branch, index) => (
-              <Card
-                key={index}
-                className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
-              >
-                <CardBody className="p-4 md:p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="rounded-xl p-3 bg-blue-500 shadow-blue-500/20 shadow-md">
-                      <MapPinIcon className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <Typography variant="h6" color="blue-gray" className="font-medium">
-                        {branch.branch}
-                      </Typography>
-                      <Typography className="text-gray-700 text-lg font-bold">
-                        {branch.interns} Peserta
-                      </Typography>
-                    </div>
-                  </div>
+          {isGridView ? renderGridView() : renderListView()}
 
-                  {/* Progress bar */}
-                  <div className="w-full bg-blue-gray-50 rounded-full h-2.5 mb-2">
-                    <div
-                      className="bg-blue-500 h-2.5 rounded-full transition-all duration-500"
-                      style={{ width: `${(branch.interns / maxInterns) * 100}%` }}
-                    />
-                  </div>
-                  
-                  {/* Percentage of total */}
-                  <Typography className="text-sm text-gray-600 text-right">
-                    {((branch.interns / totalInterns) * 100).toFixed(1)}% dari total
-                  </Typography>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
+          <Dialog open={open} handler={handleOpen}>
+            <DialogHeader>
+              Edit Kuota - {selectedBranch?.name}
+            </DialogHeader>
+            <DialogBody>
+              <div className="space-y-4">
+                <div>
+                  <Typography variant="small" className="mb-2">Kuota Mahasiswa</Typography>
+                  <Input
+                    type="number"
+                    value={formData.kuotaMhs}
+                    onChange={(e) => setFormData({...formData, kuotaMhs: e.target.value})}
+                    label="Jumlah Kuota Mahasiswa"
+                  />
+                </div>
+                <div>
+                  <Typography variant="small" className="mb-2">Kuota Siswa</Typography>
+                  <Input
+                    type="number"
+                    value={formData.kuotaSiswa}
+                    onChange={(e) => setFormData({...formData, kuotaSiswa: e.target.value})}
+                    label="Jumlah Kuota Siswa"
+                  />
+                </div>
+              </div>
+            </DialogBody>
+            <DialogFooter>
+              <Button variant="text" color="red" onClick={() => handleOpen(null)} className="mr-1">
+                Batal
+              </Button>
+              <Button variant="gradient" color="green" onClick={handleSubmit}>
+                Simpan
+              </Button>
+            </DialogFooter>
+          </Dialog>
         </div>
       </div>
     </div>

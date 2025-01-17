@@ -14,11 +14,11 @@ import {
   UserIcon,
   PhoneIcon,
   CalendarIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
-import ApprovalModal from "../components/ApprovalModal";
+import Modal from "../components/Modal";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 
 const DetailPage = () => {
@@ -43,9 +43,10 @@ const DetailPage = () => {
         });
         setData(response.data);
         console.log(response.data);
-
       } catch (err) {
-        setError(err.response?.data?.message || "Failed to fetch intern details");
+        setError(
+          err.response?.data?.message || "Failed to fetch intern details"
+        );
         console.error("Error fetching data:", err);
         console.log("err.response");
         console.log(response.data);
@@ -87,9 +88,10 @@ const DetailPage = () => {
 
   const handleSubmit = async (notes) => {
     try {
-      const action = modalState.type === 'accept' ? 'approve' : 'reject';
+      const action = modalState.type === "accept" ? "approve" : "reject";
       console.log(action);
-      await axios.patch(`http://localhost:3000/intern/${id}/${action}`, 
+      await axios.patch(
+        `http://localhost:3000/intern/${id}/${action}`,
         { notes },
         {
           headers: {
@@ -97,7 +99,7 @@ const DetailPage = () => {
           },
         }
       );
-      
+
       const response = await axios.get(`http://localhost:3000/intern/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -113,17 +115,20 @@ const DetailPage = () => {
 
   const handleDownload = async (fileName) => {
     try {
-      const response = await axios.get(`http://localhost:3000/download/${fileName}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        responseType: 'blob',
-      });
-      
+      const response = await axios.get(
+        `http://localhost:3000/download/${fileName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          responseType: "blob",
+        }
+      );
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', fileName);
+      link.setAttribute("download", fileName);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -139,7 +144,7 @@ const DetailPage = () => {
         status
       )}`}
     >
-      {status?.charAt(0).toUpperCase() + status?.slice(1) || 'N/A'}
+      {status?.charAt(0).toUpperCase() + status?.slice(1) || "N/A"}
     </span>
   );
 
@@ -174,184 +179,206 @@ const DetailPage = () => {
         <div className="max-w-7xl mx-auto">
           <BreadcrumbsComponent />
 
-          {/* Status Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <Card>
-              <CardBody className="p-4 md:p-6">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="mb-2 font-medium"
-                >
-                  Status Permohonan
-                </Typography>
-                <StatusBadge status={data.statusPermohonan} />
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody className="p-4 md:p-6">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="mb-2 font-medium"
-                >
-                  Status PSDM
-                </Typography>
-                <StatusBadge status={data.statusPersetujuanPSDM} />
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody className="p-4 md:p-6">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="mb-2 font-medium"
-                >
-                  Status Pimpinan
-                </Typography>
-                <StatusBadge status={data.statusPersetujuanPimpinan} />
-              </CardBody>
-            </Card>
-          </div>
+         
 
           {/* Main Information Card */}
-          <Card>
-            <CardBody className="p-4 md:p-6">
-              {/* Personal Information */}
-              <Typography variant="h6" color="blue-gray" className="mb-4">
-                Informasi Pendaftar
-              </Typography>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
+                <Card>
+                <CardBody className="p-4 md:p-6">
+                  <Typography variant="h6" color="blue-gray" className="mb-4">
+                  Informasi Pendaftar
+                  </Typography>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
                     <UserIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography variant="small" color="blue-gray" className="font-medium">
-                        Tipe Pemohon
+                      <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                      >
+                      Tipe Pemohon
                       </Typography>
-                      <Typography variant="small" className="text-blue-gray-500">
-                        {data.tipePemohon?.charAt(0).toUpperCase() + data.tipePemohon?.slice(1)}
+                      <Typography
+                      variant="small"
+                      className="text-blue-gray-500"
+                      >
+                      {data.type?.charAt(0).toUpperCase() +
+                        data.type?.slice(1)}
                       </Typography>
                     </div>
-                  </div>
+                    </div>
 
-                  <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3">
                     <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography variant="small" color="blue-gray" className="font-medium">
-                        Institusi & Jurusan
+                      <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                      >
+                      {data.type === "siswa" ? "SMK & Jurusan" : "Institusi & Program Studi"}
                       </Typography>
-                      <Typography variant="small" className="text-blue-gray-500">
-                        {data.Institusi.name} - {data.Jurusan.name}
+                      <Typography
+                      variant="small"
+                      className="text-blue-gray-500"
+                      >
+                      {data.type === "siswa"
+                        ? `${data.Smk?.name} - ${data.Jurusan?.name}`
+                        : `${data.PerguruanTinggi?.name} - ${data.Prodi?.name}`}
                       </Typography>
                     </div>
-                  </div>
+                    </div>
 
-                  <div className="flex items-start gap-3">
-                    <PhoneIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                    <div className="flex items-start gap-3">
+                    <UserIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography variant="small" color="blue-gray" className="font-medium">
-                        Nomor HP
+                      <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                      >
+                      Email
                       </Typography>
-                      <Typography variant="small" className="text-blue-gray-500">
-                        {data.noHp}
+                      <Typography
+                      variant="small"
+                      className="text-blue-gray-500"
+                      >
+                      {data.User?.email}
                       </Typography>
                     </div>
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
                     <CalendarIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography variant="small" color="blue-gray" className="font-medium">
-                        Periode Magang
+                      <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                      >
+                      Periode Magang
                       </Typography>
-                      <Typography variant="small" className="text-blue-gray-500">
-                        {formatDate(data.tanggalMulai)} - {formatDate(data.tanggalSelesai)}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <ClockIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
-                    <div>
-                      <Typography variant="small" color="blue-gray" className="font-medium">
-                        Tanggal Pengajuan
-                      </Typography>
-                      <Typography variant="small" className="text-blue-gray-500">
-                        {formatDate(data.tanggalPengajuan)}
+                      <Typography
+                      variant="small"
+                      className="text-blue-gray-500"
+                      >
+                      {formatDate(data.tanggalMulai)} -{" "}
+                      {formatDate(data.tanggalSelesai)}
                       </Typography>
                     </div>
-                  </div>
+                    </div>
 
-                  <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3">
                     <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                     <div>
-                      <Typography variant="small" color="blue-gray" className="font-medium">
-                        Divisi
+                      <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                      >
+                      Unit Kerja
                       </Typography>
-                      <Typography variant="small" className="text-blue-gray-500">
-                        {data.Divisi.name?.toUpperCase()}
+                      <Typography
+                      variant="small"
+                      className="text-blue-gray-500"
+                      >
+                      {data.UnitKerja?.name}
                       </Typography>
                     </div>
-                  </div>
-                </div>
-              </div>
+                    </div>
 
-              
-              <Typography variant="h6" color="blue-gray" className="mb-4">
-                Dokumen Pendukung
-              </Typography>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {data.Dokumens && (
-                  <Button
+                    <div className="flex items-start gap-3">
+                    <ClockIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                    <div>
+                      <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                      >
+                      Status
+                      </Typography>
+                      <Typography
+                      variant="small"
+                      className="text-blue-gray-500"
+                      >
+                      {data.Status?.name}
+                      </Typography>
+                    </div>
+                    </div>
+                  </div>
+                  </div>
+
+                  <Typography variant="h6" color="blue-gray" className="mb-4">
+                  Dokumen Pendukung
+                  </Typography>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {data.Dokumens && (
+                    <Button
                     variant="outlined"
                     className="flex items-center gap-2 normal-case"
-                    onClick={() => window.open(`http://localhost:3000/uploads/${data.Dokumens[0].url}`, "_blank")}
-                  >
+                    onClick={() =>
+                      window.open(
+                      `http://localhost:3000/uploads/${data.Dokumens[0].url}`,
+                      "_blank"
+                      )
+                    }
+                    >
                     <ArrowDownTrayIcon className="w-4 h-4" />
                     Curriculum Vitae
-                  </Button>
-                )}
-                {data.Dokumens && (
-                  <Button
+                    </Button>
+                  )}
+                  {data.Dokumens && (
+                    <Button
                     variant="outlined"
                     className="flex items-center gap-2 normal-case"
-                    onClick={() => window.open(`http://localhost:3000/uploads/${data.Dokumens[2].url}`, "_blank")}
-
-                  >
+                    onClick={() =>
+                      window.open(
+                      `http://localhost:3000/uploads/${data.Dokumens[2].url}`,
+                      "_blank"
+                      )
+                    }
+                    >
                     <ArrowDownTrayIcon className="w-4 h-4" />
                     Kartu Tanda Penduduk
-                  </Button>
-                )}
-                {data.Dokumens && (
-                  <Button
+                    </Button>
+                  )}
+                  {data.Dokumens && (
+                    <Button
                     variant="outlined"
                     className="flex items-center gap-2 normal-case"
-                    onClick={() => window.open(`http://localhost:3000/uploads/${data.Dokumens[3].url}`, "_blank")}
-
-                  >
+                    onClick={() =>
+                      window.open(
+                      `http://localhost:3000/uploads/${data.Dokumens[3].url}`,
+                      "_blank"
+                      )
+                    }
+                    >
                     <ArrowDownTrayIcon className="w-4 h-4" />
                     Surat Pengantar
-                  </Button>
-                )}
-                {data.Dokumens && (
-                  <Button
+                    </Button>
+                  )}
+                  {data.Dokumens && (
+                    <Button
                     variant="outlined"
                     className="flex items-center gap-2 normal-case"
-                    onClick={() => window.open(`http://localhost:3000/uploads/${data.Dokumens[1].url}`, "_blank")}
-
-                  >
+                    onClick={() =>
+                      window.open(
+                      `http://localhost:3000/uploads/${data.Dokumens[1].url}`,
+                      "_blank"
+                      )
+                    }
+                    >
                     <ArrowDownTrayIcon className="w-4 h-4" />
                     Transkrip Nilai
-                  </Button>
-                )}
-              </div>
-            
+                    </Button>
+                  )}
+                  </div>
 
-              {/* Action Buttons */}
-              {data.statusPermohonan === "menunggu" && (
+                  {/* Action Buttons */}
+              {data.statusId === 1 && (
                 <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6 pt-6 border-t">
                   <Button
                     variant="outlined"
@@ -375,8 +402,8 @@ const DetailPage = () => {
           </Card>
         </div>
       </div>
-      
-      <ApprovalModal
+
+      <Modal
         open={modalState.isOpen}
         handleOpen={() => handleModalOpen()}
         onSubmit={handleSubmit}

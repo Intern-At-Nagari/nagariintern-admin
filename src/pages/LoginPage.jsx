@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowRightIcon,
   EnvelopeIcon,
@@ -6,7 +6,6 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   Card,
-  CardContent,
   Input,
   Button,
   Typography,
@@ -14,8 +13,7 @@ import {
 import adminImage from "../assets/admin.png";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
-import { useEffect } from "react";
-
+import { toast } from 'react-toastify';
 
 const AdminLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -48,9 +46,10 @@ const AdminLoginPage = () => {
       const { data } = response;
       console.log(data);
 
-      // Check if the user is an admin
-      if (data.user.role !== 'admin') {
+      // Check if the user is an admin or superadmin
+      if (data.user.role !== 'admin' && data.user.role !== 'SuperAdmin') {
         setError("Access denied. This login page is for administrators only.");
+        toast.error("Access denied. This login page is for administrators only.");
         return;
       }
 
@@ -60,6 +59,7 @@ const AdminLoginPage = () => {
       localStorage.setItem("userRole", data.user.role); 
       // Redirect to admin dashboard
       navigate('/dashboard');
+      toast.success("Login successful!");
 
     } catch (err) {
       let errorMessage;
@@ -69,6 +69,7 @@ const AdminLoginPage = () => {
         errorMessage = err.response?.data?.error || "Login gagal. Silakan coba lagi.";
       }
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -154,14 +155,7 @@ const AdminLoginPage = () => {
                 )}
               </Button>
 
-              <div className="text-center mt-4">
-                <a
-                  href="/user-login"
-                  className="text-sm text-blue-600 hover:text-blue-800"
-                >
-                  Are you a user? Login here
-                </a>
-              </div>
+            
             </form>
           </div>
 

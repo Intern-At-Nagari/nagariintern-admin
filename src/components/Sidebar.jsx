@@ -6,12 +6,12 @@ import {
   DocumentTextIcon,
   ClipboardDocumentCheckIcon,
   UserGroupIcon,
-  ArrowRightOnRectangleIcon,
   ArrowRightEndOnRectangleIcon ,
   ChevronDownIcon,
   Squares2X2Icon,
   Bars3Icon,
   XMarkIcon,
+  BanknotesIcon
 } from "@heroicons/react/24/outline";
 import { Typography } from "@material-tailwind/react";
 
@@ -43,6 +43,8 @@ const Sidebar = () => {
       setOpenMonitoring(true);
     } else if (path === "mapping") {
       setActiveItem("Pemetaan");
+    } else if (path === "anggaran") {
+      setActiveItem("Anggaran");
     }
   }, [location]);
 
@@ -68,6 +70,17 @@ const Sidebar = () => {
   const getPemetaanClassName = () => {
     const isActive = activeItem === "Pemetaan";
     const isHovered = hoveredItem === "Pemetaan";
+
+    return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 
+      ${
+        isActive || isHovered
+          ? "bg-white/20 text-white translate-x-1"
+          : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+      }`;
+  };
+  const getAnggaranClassName = () => {
+    const isActive = activeItem === "Anggaran";
+    const isHovered = hoveredItem === "Anggaran";
 
     return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 
       ${
@@ -239,12 +252,23 @@ const Sidebar = () => {
                 <UserGroupIcon className="h-5 w-5" />
                 <span className="font-medium text-white">Pemetaan</span>
               </a>
+              {/* Anggaran Link */}
+              <a
+                href="/anggaran"
+                onClick={() => setActiveItem("Anggaran")}
+                onMouseEnter={() => setHoveredItem("Anggaran")}
+                onMouseLeave={() => setHoveredItem(null)}
+                className={getAnggaranClassName()}
+              >
+                <BanknotesIcon className="h-5 w-5" />
+                <span className="font-medium text-white">Anggaran</span>
+              </a>
 
               {/* Logout Section */}
               <div className="pt-6 mt-6 border-t border-white/30">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 p-3 font-bold hover:bg-white rounded-xl transition-all duration-300 text-red-white hover:text-red-600 hover:shadow-lg hover:scale-[1.02]"
+                  className="flex items-center w-full gap-3 p-3 font-bold hover:bg-white rounded-xl transition-all duration-300 text-red-white hover:text-red-600 hover:shadow-lg hover:scale-[1.02]"
                 >
                   <ArrowRightEndOnRectangleIcon className="h-5 w-5" />
                   <span className="font-medium">Log Out</span>

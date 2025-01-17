@@ -14,7 +14,7 @@ import {
   CalendarIcon,
 } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar";
-import ApprovalModal from "../components/ApprovalModal";
+import ApprovalModal from "../components/Modal";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 
 const CetakSertifPage = () => {
