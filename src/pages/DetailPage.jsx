@@ -284,7 +284,7 @@ const DetailPage = () => {
                       variant="small"
                       className="text-blue-gray-500"
                       >
-                      {data.UnitKerja?.name}
+                      {/* {data.UnitKerja?.name} */}
                       </Typography>
                     </div>
                     </div>

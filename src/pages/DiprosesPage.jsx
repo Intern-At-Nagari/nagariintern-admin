@@ -365,7 +365,7 @@ const DiprosesPage = () => {
                                       variant="small"
                                       color="blue-gray"
                                     >
-                                      {item.unitKerja.name || "-"}
+                                      {/* {item.unitKerja.name || "-"} */}
                                     </Typography>
                                   </td>
                                   <td className="p-4">
