@@ -12,7 +12,6 @@ import {
 import {
   MagnifyingGlassIcon,
   EyeIcon,
-  TrashIcon,
 } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
@@ -31,24 +30,18 @@ const Diverifikasi = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-
-      // Get token from localStorage
       const token = localStorage.getItem("token");
-
-      const response = await axios.get("http://localhost:3000/diterima", {
+      const response = await axios.get("http://localhost:3000/intern/diverifikasi", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-
       setData(response.data);
       setError(null);
     } catch (err) {
       if (err.response?.status === 403) {
         setError("Access denied. Please login again.");
-        // Optionally redirect to login
-        // window.location.href = '/login';
       } else {
         setError("Failed to fetch data. Please try again later.");
       }
@@ -57,11 +50,13 @@ const Diverifikasi = () => {
       setLoading(false);
     }
   };
+
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
 
   const navigate = useNavigate();
+
   const filteredData = [
     ...data.universities.flatMap((uni) =>
       uni.prodi.map((prodi) => ({
@@ -69,6 +64,8 @@ const Diverifikasi = () => {
         name: uni.nama_institusi,
         prodi: prodi.nama_prodi,
         total: prodi.total_diterima,
+        idInstitusi: uni.id_univ,
+        idProdi: prodi.id_prodi
       }))
     ),
     ...data.schools.map((school) => ({
@@ -76,6 +73,8 @@ const Diverifikasi = () => {
       name: school.nama_institusi,
       prodi: "-",
       total: school.total_diterima,
+      idInstitusi: school.id_smk,
+      idProdi: null
     })),
   ].filter(
     (item) =>
@@ -108,8 +107,6 @@ const Diverifikasi = () => {
       </div>
     );
   }
-
-  // ...existing imports and state...
 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
@@ -242,6 +239,8 @@ const Diverifikasi = () => {
                                       type: item.type,
                                       name: item.name,
                                       prodi: item.prodi,
+                                      idInstitusi: item.idInstitusi,
+                                      idProdi: item.idProdi
                                     },
                                   })
                                 }
@@ -255,7 +254,7 @@ const Diverifikasi = () => {
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan="5" className="p-4 text-center">
+                        <td colSpan="6" className="p-4 text-center">
                           <Typography variant="small" color="blue-gray">
                             No data found
                           </Typography>

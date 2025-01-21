@@ -14,32 +14,44 @@ import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import Modal from "../components/Modal";
 
 const DiterimaDetailPage = () => {
-  const [data, setData] = useState({ mahasiswa: [], siswa: [] });
+  const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [printOpen, setPrintOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { type, name, prodi } = location.state || {};
-  const [printOpen, setPrintOpen] = useState(false);
+  const { type, name, prodi, idInstitusi, idProdi } = location.state || {};
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [idInstitusi, idProdi]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        "http://localhost:3000/intern/diterima/detail",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      setData(response.data);
+      let url;
+
+      // Determine the correct API endpoint based on institution type
+      if (type === "Perguruan Tinggi") {
+        url = `http://localhost:3000/intern/diverifikasi/univ/${idInstitusi}/${idProdi}`;
+      } else {
+        url = `http://localhost:3000/intern/diverifikasi/smk/${idInstitusi}`;
+      }
+
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+
+      // Set participants based on the new API response structure
+      setParticipants(response.data || []);
+      console.log(response.data);
+
       setError(null);
     } catch (err) {
       setError("Failed to fetch data. Please try again later.");
@@ -49,12 +61,15 @@ const DiterimaDetailPage = () => {
     }
   };
 
-  
   const handlePrintSubmit = async (formData) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post("http://localhost:3000/intern/diterima/print", 
-        formData,
+      const response = await axios.post(
+        "http://localhost:3000/intern/diterima/print",
+        {
+          ...formData,
+          type: type === "Perguruan Tinggi" ? "mahasiswa" : "siswa"
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -67,7 +82,7 @@ const DiterimaDetailPage = () => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'surat_balasan.pdf');
+      link.setAttribute('download', 'surat_balasan.docx');
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -76,6 +91,7 @@ const DiterimaDetailPage = () => {
       console.error("Error printing response letter:", err);
     }
   };
+
   const handlePrintOpen = () => setPrintOpen(!printOpen);
 
   const formatDate = (dateString) => {
@@ -108,15 +124,6 @@ const DiterimaDetailPage = () => {
       </div>
     );
   }
-
-  const participants =
-    type === "Perguruan Tinggi"
-      ? data.mahasiswa.filter(
-          (m) => m.institusi === name && m.program_studi === prodi
-        )
-      : data.siswa.filter(
-          (s) => s.institusi === name && (prodi === "-" || s.jurusan === prodi)
-        );
 
   if (!participants || participants.length === 0) {
     return (
