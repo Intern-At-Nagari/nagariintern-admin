@@ -43,10 +43,9 @@ export const Modal = ({
       });
     } else {
       const submitData = type === 'accept' 
-        ? { notes, unit: selectedUnit }
-        : { notes };
+        ? { penempatan: selectedUnit }  // Just send the ID directly, not as an object
+        : { notes: '' };
       onSubmit(submitData);
-      setNotes("");
       setSelectedUnit("");
     }
     handleOpen();
@@ -123,16 +122,16 @@ export const Modal = ({
               <div className="space-y-4">
                 {type === 'accept' && (
                   <Select
-                    label="Pilih Unit Kerja"
-                    value={selectedUnit}
-                    onChange={(value) => setSelectedUnit(value)}
-                  >
-                    {branches.map((branch) => (
-                      <Option key={branch} value={branch}>
-                        {branch}
-                      </Option>
-                    ))}
-                  </Select>
+                  label="Pilih Unit Kerja"
+                  value={selectedUnit}
+                  onChange={(value) => setSelectedUnit(value)}
+                >
+                  {branches.map((branch) => (
+                    <Option key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </Option>
+                  ))}
+                </Select>
                 )}
                 <Textarea
                   value={notes}

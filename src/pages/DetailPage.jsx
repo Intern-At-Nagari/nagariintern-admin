@@ -85,20 +85,28 @@ const DetailPage = () => {
     });
   };
 
-  const handleSubmit = async (notes) => {
+  
+  const handleSubmit = async (formData) => {
     try {
       const action = modalState.type === "accept" ? "approve" : "reject";
-      console.log(action);
+      const payload = modalState.type === "accept" 
+        ? { 
+            penempatan: formData.penempatan  // Now directly using the ID
+          }
+        : {};
+
       await axios.patch(
         `http://localhost:3000/intern/${id}/${action}`,
-        { notes },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            'Content-Type': 'application/json'
           },
         }
       );
 
+      // Refresh data after successful update
       const response = await axios.get(`http://localhost:3000/intern/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -111,6 +119,7 @@ const DetailPage = () => {
       console.error("Error updating status:", err);
     }
   };
+
 
   const handleDownload = async (fileName) => {
     try {
@@ -377,26 +386,27 @@ const DetailPage = () => {
                   </div>
 
                   {/* Action Buttons */}
-              {data.statusId === 1 && (
-                <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6 pt-6 border-t">
-                  <Button
-                    variant="outlined"
-                    color="red"
-                    className="flex items-center gap-2"
-                    onClick={() => handleModalOpen("reject")}
-                  >
-                    Tolak
-                  </Button>
-                  <Button
-                    variant="filled"
-                    color="green"
-                    className="flex items-center gap-2"
-                    onClick={() => handleModalOpen("accept")}
-                  >
-                    Terima
-                  </Button>
-                </div>
-              )}
+               {/* Action Buttons */}
+            {data?.statusId === 1 && (
+              <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6 pt-6 border-t">
+                <Button
+                  variant="outlined"
+                  color="red"
+                  className="flex items-center gap-2"
+                  onClick={() => handleModalOpen("reject")}
+                >
+                  Tolak
+                </Button>
+                <Button
+                  variant="filled"
+                  color="green"
+                  className="flex items-center gap-2"
+                  onClick={() => handleModalOpen("accept")}
+                >
+                  Terima
+                </Button>
+              </div>
+            )}
             </CardBody>
           </Card>
         </div>
