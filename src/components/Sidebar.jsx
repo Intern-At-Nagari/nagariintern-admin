@@ -31,7 +31,7 @@ const Sidebar = () => {
     setUserData(user);
 
     const path = location.pathname.slice(1);
-    if (["diproses", "diverifikasi", "diterima"].includes(path)) {
+    if (["diproses",  "diterima", "diverifikasi"].includes(path)) {
       setActiveItem(path.charAt(0).toUpperCase() + path.slice(1));
       setActiveDropdown("Permintaan");
       setOpenPermintaan(true);
@@ -182,7 +182,7 @@ const Sidebar = () => {
                 }`}
               >
                 <div className="ml-7 space-y-1 pt-1">
-                  {["Diproses", "Diverifikasi", "Diterima"].map((item) => (
+                  {["Diproses",  "Diterima", "Diverifikasi"].map((item) => (
                     <a
                       key={item}
                       href={`/${item.toLowerCase()}`}

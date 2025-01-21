@@ -14,6 +14,7 @@ const routeMap = {
   '/selesai': ['Home','Monitoring', 'Selesai'],
   '/cetak-sertif': ['Home', 'Cetak Sertifikat'],
   '/anggaran': ['Home', 'Anggaran'],
+  '/intern/diterima/detail': ['Home', 'Permintaan', 'Diterima', 'Detail'],
 };
 
 const BreadcrumbsComponent = () => {

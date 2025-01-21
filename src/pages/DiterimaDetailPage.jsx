@@ -7,7 +7,21 @@ import {
   Spinner,
   Button,
 } from "@material-tailwind/react";
-import { ArrowLeftIcon, PrinterIcon } from "@heroicons/react/24/outline";
+import { 
+  ArrowLeftIcon, 
+  PrinterIcon,
+  UserIcon,
+  IdentificationIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  MapPinIcon,
+  BuildingOfficeIcon,
+  AcademicCapIcon,
+  BuildingOffice2Icon,
+  CalendarIcon,
+  ClockIcon,
+  CalendarDaysIcon
+} from "@heroicons/react/24/outline";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
@@ -34,11 +48,10 @@ const DiterimaDetailPage = () => {
 
       // Determine the correct API endpoint based on institution type
       if (type === "Perguruan Tinggi") {
-        url = `http://localhost:3000/intern/diverifikasi/univ/${idInstitusi}/${idProdi}`;
+        url = `http://localhost:3000/intern/diterima/univ/${idInstitusi}/${idProdi}`;
       } else {
-        url = `http://localhost:3000/intern/diverifikasi/smk/${idInstitusi}`;
+        url = `http://localhost:3000/intern/diterima/smk/${idInstitusi}`;
       }
-
 
       const response = await axios.get(url, {
         headers: {
@@ -46,7 +59,6 @@ const DiterimaDetailPage = () => {
           "Content-Type": "application/json",
         },
       });
-
 
       // Set participants based on the new API response structure
       setParticipants(response.data || []);
@@ -101,6 +113,16 @@ const DiterimaDetailPage = () => {
       year: "numeric",
     });
   };
+
+  const InfoItem = ({ icon: Icon, label, value }) => (
+    <div className="flex items-start gap-3">
+      <Icon className="h-5 w-5 text-blue-gray-500 mt-1 flex-shrink-0" />
+      <div>
+        <dt className="font-medium text-blue-gray-700">{label}:</dt>
+        <dd className="text-blue-gray-600">{value}</dd>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -164,80 +186,79 @@ const DiterimaDetailPage = () => {
           </Typography>
 
           {participants.map((participant, index) => (
-            <Card key={index} className="mb-4">
-              <CardBody>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Typography variant="h6" color="blue-gray" className="mb-2">
+            <Card key={index} className="mb-4 shadow-lg">
+              <CardBody className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <Typography variant="h6" color="blue-gray" className="mb-4 flex items-center gap-2">
+                      <UserIcon className="h-5 w-5" />
                       Informasi Pribadi
                     </Typography>
-                    <dl className="space-y-2">
-                      <div>
-                        <dt className="font-medium">Nama</dt>
-                        <dd>{participant.nama_peserta}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium">
-                          {type === "Perguruan Tinggi" ? "NIM" : "NISN"}
-                        </dt>
-                        <dd>
-                          {type === "Perguruan Tinggi"
-                            ? participant.nim
-                            : participant.nisn}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium">Email</dt>
-                        <dd>{participant.email}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium">No. HP</dt>
-                        <dd>{participant.no_hp}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium">Alamat</dt>
-                        <dd>{participant.alamat}</dd>
-                      </div>
+                    <dl className="space-y-4">
+                      <InfoItem
+                        icon={UserIcon}
+                        label="Nama"
+                        value={participant.nama_peserta}
+                      />
+                      <InfoItem
+                        icon={IdentificationIcon}
+                        label={type === "Perguruan Tinggi" ? "NIM" : "NISN"}
+                        value={type === "Perguruan Tinggi" ? participant.nim : participant.nisn}
+                      />
+                      <InfoItem
+                        icon={EnvelopeIcon}
+                        label="Email"
+                        value={participant.email}
+                      />
+                      <InfoItem
+                        icon={PhoneIcon}
+                        label="No. HP"
+                        value={participant.no_hp}
+                      />
+                      <InfoItem
+                        icon={MapPinIcon}
+                        label="Alamat"
+                        value={participant.alamat}
+                      />
                     </dl>
                   </div>
 
-                  <div>
-                    <Typography variant="h6" color="blue-gray" className="mb-2">
+                  <div className="space-y-6">
+                    <Typography variant="h6" color="blue-gray" className="mb-4 flex items-center gap-2">
+                      <AcademicCapIcon className="h-5 w-5" />
                       Informasi Akademik
                     </Typography>
-                    <dl className="space-y-2">
-                      <div>
-                        <dt className="font-medium">Institusi</dt>
-                        <dd>{participant.institusi}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium">
-                          {type === "Perguruan Tinggi"
-                            ? "Program Studi"
-                            : "Jurusan"}
-                        </dt>
-                        <dd>
-                          {type === "Perguruan Tinggi"
-                            ? participant.program_studi
-                            : participant.jurusan}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium">Unit Kerja</dt>
-                        <dd>{participant.unit_kerja}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium">Tanggal Mulai</dt>
-                        <dd>{formatDate(participant.tanggal_mulai)}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium">Tanggal Selesai</dt>
-                        <dd>{formatDate(participant.tanggal_selesai)}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium">Tanggal Daftar</dt>
-                        <dd>{formatDate(participant.tanggal_daftar)}</dd>
-                      </div>
+                    <dl className="space-y-4">
+                      <InfoItem
+                        icon={BuildingOfficeIcon}
+                        label="Institusi"
+                        value={participant.institusi}
+                      />
+                      <InfoItem
+                        icon={AcademicCapIcon}
+                        label={type === "Perguruan Tinggi" ? "Program Studi" : "Jurusan"}
+                        value={type === "Perguruan Tinggi" ? participant.program_studi : participant.jurusan}
+                      />
+                      <InfoItem
+                        icon={BuildingOffice2Icon}
+                        label="Unit Kerja"
+                        value={participant.unit_kerja}
+                      />
+                      <InfoItem
+                        icon={CalendarIcon}
+                        label="Tanggal Mulai"
+                        value={formatDate(participant.tanggal_mulai)}
+                      />
+                      <InfoItem
+                        icon={ClockIcon}
+                        label="Tanggal Selesai"
+                        value={formatDate(participant.tanggal_selesai)}
+                      />
+                      <InfoItem
+                        icon={CalendarDaysIcon}
+                        label="Tanggal Daftar"
+                        value={formatDate(participant.tanggal_daftar)}
+                      />
                     </dl>
                   </div>
                 </div>

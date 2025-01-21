@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {  toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import {
   Card, CardBody, Typography, Button, Dialog,
-  DialogHeader, DialogBody, DialogFooter, Input, Alert, Tooltip
+  DialogHeader, DialogBody, DialogFooter, Select, Option, Tooltip
 } from "@material-tailwind/react";
 import {
   MapPinIcon, UsersIcon, ArrowTrendingUpIcon,
-  PencilIcon, XMarkIcon, ListBulletIcon, TableCellsIcon,
+  PencilIcon, ListBulletIcon, TableCellsIcon,
   MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
 import Sidebar from '../components/Sidebar';
@@ -22,9 +22,16 @@ const MappingPage = () => {
   const [isGridView, setIsGridView] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
-    kuotaMhs: '',
-    kuotaSiswa: ''
+    tipe_cabang: ''
   });
+
+  const BRANCH_TYPES = {
+    pusat: { label: 'Pusat', kuotaMhs: 16, kuotaSiswa: 0 },
+    utama: { label: 'Utama', kuotaMhs: 25, kuotaSiswa: 0 },
+    a: { label: 'Cabang A', kuotaMhs: 10, kuotaSiswa: 8 },
+    b: { label: 'Cabang B', kuotaMhs: 8, kuotaSiswa: 3 },
+    c: { label: 'Cabang C', kuotaMhs: 5, kuotaSiswa: 2 }
+  };
 
   const fetchBranchData = async () => {
     try {
@@ -49,8 +56,7 @@ const MappingPage = () => {
   const handleOpen = (branch = null) => {
     setSelectedBranch(branch);
     setFormData({
-      kuotaMhs: branch ? branch.kuotaMhs.toString() : '',
-      kuotaSiswa: branch ? branch.kuotaSiswa.toString() : ''
+      tipe_cabang: branch ? branch.tipe_cabang : ''
     });
     setOpen(!open);
   };
@@ -61,8 +67,7 @@ const MappingPage = () => {
       setError(null);
   
       const payload = {
-        kuotaMhs: parseInt(formData.kuotaMhs) || 0,
-        kuotaSiswa: parseInt(formData.kuotaSiswa) || 0
+        tipe_cabang: formData.tipe_cabang
       };
   
       await axios.put(
@@ -78,11 +83,11 @@ const MappingPage = () => {
       
       await fetchBranchData();
       setOpen(false);
-      setFormData({ kuotaMhs: '', kuotaSiswa: '' });
-      toast.success('Kuota magang berhasil diperbarui!');
+      setFormData({ tipe_cabang: '' });
+      toast.success('Tipe cabang dan kuota berhasil diperbarui!');
   
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Failed to update quota';
+      const errorMsg = err.response?.data?.message || 'Failed to update branch type';
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -116,6 +121,9 @@ const MappingPage = () => {
                   </Typography>
                   <div className="space-y-1">
                     <Typography className="text-sm text-gray-600">
+                      Tipe Cabang: {BRANCH_TYPES[branch.tipe_cabang]?.label || branch.tipe_cabang}
+                    </Typography>
+                    <Typography className="text-sm text-gray-600">
                       Kuota Mahasiswa: {branch.kuotaMhs}
                     </Typography>
                     <Typography className="text-sm text-gray-600">
@@ -127,7 +135,7 @@ const MappingPage = () => {
                   </div>
                 </div>
               </div>
-              <Tooltip className="bg-blue-500" content="Edit Kuota" placement="top"  interactive={false} > 
+              <Tooltip className="bg-blue-500" content="Edit Tipe Cabang" placement="top" interactive={false}>
                 <Button size="sm" className="p-2" color="blue" onClick={() => handleOpen(branch)}>
                   <PencilIcon className="h-4 w-4" />
                 </Button>
@@ -147,6 +155,11 @@ const MappingPage = () => {
             <th className="border-b border-blue-gray-100 p-4">
               <Typography variant="small" color="blue-gray" className="font-semibold leading-none">
                 Nama Unit
+              </Typography>
+            </th>
+            <th className="border-b border-blue-gray-100 p-4">
+              <Typography variant="small" color="blue-gray" className="font-semibold leading-none">
+                Tipe Cabang
               </Typography>
             </th>
             <th className="border-b border-blue-gray-100 p-4">
@@ -177,6 +190,11 @@ const MappingPage = () => {
               <td className="p-4 border-b border-blue-gray-100">
                 <Typography variant="small" color="blue-gray" className="font-normal">
                   {branch.name}
+                </Typography>
+              </td>
+              <td className="p-4 border-b border-blue-gray-100">
+                <Typography variant="small" color="blue-gray" className="font-normal">
+                  {BRANCH_TYPES[branch.tipe_cabang]?.label || branch.tipe_cabang}
                 </Typography>
               </td>
               <td className="p-4 border-b border-blue-gray-100">
@@ -219,14 +237,16 @@ const MappingPage = () => {
             </Typography>
             <div className="flex gap-4 items-center">
               <div className="relative flex-grow md:w-64">
-                <Input
-                  type="text"
+                <Select
                   label="Cari Unit Kerja"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pr-10"
-                  icon={<MagnifyingGlassIcon className="h-5 w-5 text-blue-gray-500" />}
-                />
+                  onChange={(value) => setSearchQuery(value || '')}
+                >
+                  <Option value="">Semua Unit</Option>
+                  {[...new Set(branchData.map(branch => branch.name))].map(name => (
+                    <Option key={name} value={name.toLowerCase()}>{name}</Option>
+                  ))}
+                </Select>
               </div>
               <Button
                 color="blue"
@@ -254,7 +274,6 @@ const MappingPage = () => {
                   <Typography variant="h4" className="font-bold">{totalInterns} Peserta</Typography>
                   <Typography variant="h6" className="font-normal">{totalMhs} Mahasiswa</Typography>
                   <Typography variant="h6" className="font-normal">{totalSiswa} Siswa</Typography>
-
                 </div>
               </CardBody>
             </Card>
@@ -276,27 +295,36 @@ const MappingPage = () => {
 
           <Dialog open={open} handler={handleOpen}>
             <DialogHeader>
-              Edit Kuota - {selectedBranch?.name}
+              Edit Tipe Cabang - {selectedBranch?.name}
             </DialogHeader>
             <DialogBody>
               <div className="space-y-4">
                 <div>
-                  <Typography variant="small" className="mb-2">Kuota Mahasiswa</Typography>
-                  <Input
-                    type="number"
-                    value={formData.kuotaMhs}
-                    onChange={(e) => setFormData({...formData, kuotaMhs: e.target.value})}
-                    label="Jumlah Kuota Mahasiswa"
-                  />
-                </div>
-                <div>
-                  <Typography variant="small" className="mb-2">Kuota Siswa</Typography>
-                  <Input
-                    type="number"
-                    value={formData.kuotaSiswa}
-                    onChange={(e) => setFormData({...formData, kuotaSiswa: e.target.value})}
-                    label="Jumlah Kuota Siswa"
-                  />
+                  <Typography variant="small" className="mb-2">Tipe Cabang</Typography>
+                  <Select
+                    value={formData.tipe_cabang}
+                    onChange={(value) => setFormData({ ...formData, tipe_cabang: value || '' })}
+                    label="Pilih Tipe Cabang"
+                  >
+                    {Object.entries(BRANCH_TYPES).map(([value, { label }]) => (
+                      <Option key={value} value={value}>
+                        {label}
+                      </Option>
+                    ))}
+                  </Select>
+                  {formData.tipe_cabang && (
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                      <Typography variant="small" className="text-blue-900 font-medium">
+                        Kuota Default untuk {BRANCH_TYPES[formData.tipe_cabang].label}:
+                      </Typography>
+                      <Typography variant="small" className="text-blue-800">
+                        Mahasiswa: {BRANCH_TYPES[formData.tipe_cabang].kuotaMhs}
+                      </Typography>
+                      <Typography variant="small" className="text-blue-800">
+                        Siswa: {BRANCH_TYPES[formData.tipe_cabang].kuotaSiswa}
+                      </Typography>
+                    </div>
+                  )}
                 </div>
               </div>
             </DialogBody>
