@@ -155,14 +155,14 @@ const DiterimaDetailPage = () => {
       } else {
         url = `http://localhost:3000/intern/diterima/smk/${idInstitusi}`;
       }
-
+      
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-
+      console.log("response:", response.data);
       setParticipants(response.data || []);
       setError(null);
     } catch (err) {
@@ -175,13 +175,6 @@ const DiterimaDetailPage = () => {
 
   const handlePrintSubmit = useCallback(async () => {
     try {
-      // Add console logs to show form data
-      console.log("Submitting form with data:");
-      console.log("printForm:", printForm);
-      console.log("type:", type);
-      console.log("idInstitusi:", idInstitusi);
-      console.log("idProdi:", idProdi);
-  
       const token = localStorage.getItem("token");
       
       let apiUrl;
@@ -191,7 +184,6 @@ const DiterimaDetailPage = () => {
         apiUrl = `http://localhost:3000/intern/diterima/smk/${idInstitusi}`;
       }
   
-      // Make POST request without responseType: 'blob'
       const response = await axios.post(
         apiUrl,
         printForm,
@@ -199,15 +191,23 @@ const DiterimaDetailPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-          }
+          },
+          responseType: 'blob'  // Important for handling binary data
         }
       );
   
-      // Show success message (assuming you have some notification system)
-      // For example with toast:
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'surat_magang.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+  
       toast.success("Surat berhasil dibuat!");
-      
-      // Reset form
       setPrintForm(prev => ({
         ...prev,
         nomorSurat: "",

@@ -40,10 +40,14 @@ const MappingPage = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      setBranchData(response.data);
+      // Access the unitKerja property from the response
+      const data = response.data.unitKerja || [];
+      setBranchData(Array.isArray(data) ? data : []);
+      console.log(response.data);
     } catch (err) {
       setError('Failed to fetch branch data');
       console.error(err);
+      setBranchData([]);
     } finally {
       setLoading(false);
     }
@@ -95,54 +99,65 @@ const MappingPage = () => {
     }
   };
 
-  const filteredBranchData = branchData.filter(branch => 
-    branch.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBranchData = Array.isArray(branchData) 
+  ? branchData.filter(branch => 
+      branch?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  : [];
 
   if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
 
-  const totalInterns = branchData.reduce((sum, branch) => sum + branch.kuotaMhs + branch.kuotaSiswa, 0);
-  const totalMhs = branchData.reduce((sum, branch) => sum + branch.kuotaMhs, 0);
-  const totalSiswa = branchData.reduce((sum, branch) => sum + branch.kuotaSiswa, 0);
+  
+  const calculateTotal = (data, key1, key2) => {
+    if (!Array.isArray(data)) return 0;
+    return data.reduce((sum, branch) => sum + (Number(branch[key1]) || 0) + (Number(branch[key2]) || 0), 0);
+  };
+
+  const totalInterns = calculateTotal(branchData, 'kuotaMhs', 'kuotaSiswa');
+  const availableInterns = calculateTotal(branchData, 'sisaKuotaMhs', 'sisaKuotaSiswa');
+  const totalMhs = Array.isArray(branchData) ? branchData.reduce((sum, branch) => sum + (Number(branch.kuotaMhs) || 0), 0) : 0;
+  const totalSiswa = Array.isArray(branchData) ? branchData.reduce((sum, branch) => sum + (Number(branch.kuotaSiswa) || 0), 0) : 0;
+  const availableMhs = Array.isArray(branchData) ? branchData.reduce((sum, branch) => sum + (Number(branch.sisaKuotaMhs) || 0), 0) : 0;
+  const availableSiswa = Array.isArray(branchData) ? branchData.reduce((sum, branch) => sum + (Number(branch.sisaKuotaSiswa) || 0), 0) : 0;
 
   const renderGridView = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
       {filteredBranchData.map((branch) => (
-        <Card key={branch.id} className="transform transition-all duration-300 hover:shadow-xl">
-          <CardBody className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <div className="rounded-xl p-3 bg-blue-500 shadow-blue-500/20 shadow-md">
-                  <MapPinIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <Typography variant="h6" color="blue-gray" className="font-medium">
-                    {branch.name}
-                  </Typography>
-                  <div className="space-y-1">
-                    <Typography className="text-sm text-gray-600">
-                      Tipe Cabang: {BRANCH_TYPES[branch.tipe_cabang]?.label || branch.tipe_cabang}
-                    </Typography>
-                    <Typography className="text-sm text-gray-600">
-                      Kuota Mahasiswa: {branch.kuotaMhs}
-                    </Typography>
-                    <Typography className="text-sm text-gray-600">
-                      Kuota Siswa: {branch.kuotaSiswa}
-                    </Typography>
-                    <Typography className="text-gray-700 text-lg font-bold">
-                      Total Kuota: {branch.kuotaMhs + branch.kuotaSiswa}
-                    </Typography>
-                  </div>
-                </div>
-              </div>
-              <Tooltip className="bg-blue-500" content="Edit Tipe Cabang" placement="top" interactive={false}>
-                <Button size="sm" className="p-2" color="blue" onClick={() => handleOpen(branch)}>
-                  <PencilIcon className="h-4 w-4" />
-                </Button>
-              </Tooltip>
-            </div>
-          </CardBody>
-        </Card>
+       <Card key={branch.id} className="transform transition-all duration-300 hover:shadow-xl">
+       <CardBody className="p-4 md:p-6">
+         <div className="flex items-center justify-between mb-4">
+           <div className="flex items-center gap-4">
+             <div className="rounded-xl p-3 bg-blue-500 shadow-blue-500/20 shadow-md">
+               <MapPinIcon className="h-6 w-6 text-white" />
+             </div>
+             <div>
+               <Typography variant="h6" color="blue-gray" className="font-medium">
+                 {branch.name}
+               </Typography>
+               <div className="space-y-1">
+                 <Typography className="text-sm text-gray-600">
+                   Tipe Cabang: {BRANCH_TYPES[branch.tipe_cabang]?.label || branch.tipe_cabang}
+                 </Typography>
+                 <Typography className="text-sm text-gray-600">
+                   Kuota Mahasiswa: {branch.sisaKuotaMhs}/{branch.kuotaMhs}
+                 </Typography>
+                 <Typography className="text-sm text-gray-600">
+                   Kuota Siswa: {branch.sisaKuotaSiswa}/{branch.kuotaSiswa}
+                 </Typography>
+                 <Typography className="text-gray-700 text-lg font-bold">
+                   Sisa Kuota: {branch.sisaKuotaMhs + branch.sisaKuotaSiswa}/{branch.kuotaMhs + branch.kuotaSiswa}
+                 </Typography>
+               </div>
+             </div>
+           </div>
+           <Tooltip className="bg-blue-500" content="Edit Tipe Cabang" placement="top" interactive={false}>
+             <Button size="sm" className="p-2" color="blue" onClick={() => handleOpen(branch)}>
+               <PencilIcon className="h-4 w-4" />
+             </Button>
+           </Tooltip>
+         </div>
+       </CardBody>
+     </Card>
       ))}
     </div>
   );
@@ -174,7 +189,7 @@ const MappingPage = () => {
             </th>
             <th className="border-b border-blue-gray-100 p-4">
               <Typography variant="small" color="blue-gray" className="font-semibold leading-none">
-                Total Kuota
+                Total Sisa Kuota
               </Typography>
             </th>
             <th className="border-b border-blue-gray-100 p-4">
@@ -199,17 +214,17 @@ const MappingPage = () => {
               </td>
               <td className="p-4 border-b border-blue-gray-100">
                 <Typography variant="small" color="blue-gray" className="font-normal">
-                  {branch.kuotaMhs}
+                  {branch.sisaKuotaMhs}/{branch.kuotaMhs}
                 </Typography>
               </td>
               <td className="p-4 border-b border-blue-gray-100">
                 <Typography variant="small" color="blue-gray" className="font-normal">
-                  {branch.kuotaSiswa}
+                  {branch.sisaKuotaSiswa}/{branch.kuotaSiswa}
                 </Typography>
               </td>
               <td className="p-4 border-b border-blue-gray-100">
                 <Typography variant="small" color="blue-gray" className="font-normal">
-                  {branch.kuotaMhs + branch.kuotaSiswa}
+                  {branch.sisaKuotaMhs + branch.sisaKuotaSiswa}/{branch.kuotaMhs + branch.kuotaSiswa}
                 </Typography>
               </td>
               <td className="p-4 border-b border-blue-gray-100">
@@ -270,10 +285,10 @@ const MappingPage = () => {
                   <UsersIcon className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-1">Total Kuota</Typography>
-                  <Typography variant="h4" className="font-bold">{totalInterns} Peserta</Typography>
-                  <Typography variant="h6" className="font-normal">{totalMhs} Mahasiswa</Typography>
-                  <Typography variant="h6" className="font-normal">{totalSiswa} Siswa</Typography>
+                  <Typography variant="h6" color="blue-gray" className="mb-1">Sisa Kuota</Typography>
+                  <Typography variant="h4" className="font-bold">{availableInterns}/{totalInterns} Peserta</Typography>
+                  <Typography variant="h6" className="font-normal">{availableMhs}/{totalMhs} Mahasiswa</Typography>
+                  <Typography variant="h6" className="font-normal">{availableSiswa}/{totalSiswa} Siswa</Typography>
                 </div>
               </CardBody>
             </Card>
