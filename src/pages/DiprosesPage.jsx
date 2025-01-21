@@ -47,6 +47,7 @@ const DiprosesPage = () => {
         const response = await axios.get("http://localhost:3000/intern", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log(response.data);
 
         const responseData = response.data.data || response.data;
         const dataArray = Array.isArray(responseData) ? responseData : [];
@@ -365,7 +366,7 @@ const DiprosesPage = () => {
                                       variant="small"
                                       color="blue-gray"
                                     >
-                                      {item.unitKerja.name || "-"} 
+                                      {item.unitKerja} 
                                     </Typography>
                                   </td>
                                   <td className="p-4">
