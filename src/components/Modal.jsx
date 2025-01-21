@@ -18,10 +18,11 @@ export const Modal = ({
   handleOpen,
   onSubmit,
   type = 'accept'
+  
 }) => {
   const [notes, setNotes] = React.useState("");
   const [selectedUnit, setSelectedUnit] = React.useState("");
-  const [printForm, setPrintForm] = React.useState({
+  const [ , setPrintForm] = React.useState({
     nomorSurat: "",
     perihal: "",
     pejabat: "",

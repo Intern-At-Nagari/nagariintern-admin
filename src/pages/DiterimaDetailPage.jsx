@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
   Card,
@@ -6,9 +6,17 @@ import {
   Typography,
   Spinner,
   Button,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+  Textarea,
+  Input,
+  Select,
+  Option
 } from "@material-tailwind/react";
-import { 
-  ArrowLeftIcon, 
+import {
+  ArrowLeftIcon,
   PrinterIcon,
   UserIcon,
   IdentificationIcon,
@@ -20,18 +28,105 @@ import {
   BuildingOffice2Icon,
   CalendarIcon,
   ClockIcon,
-  CalendarDaysIcon
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import { useNavigate, useLocation } from "react-router-dom";
+import { branches } from "../Data/Unit";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
-import Modal from "../components/Modal";
+import { toast } from "react-toastify";
+
+
+
+// Print Modal Component
+const PrintModal = React.memo(({ 
+  open, 
+  onClose, 
+  printForm, 
+  onSubmit, 
+  onChange 
+}) => {
+  const handleInputChange = useCallback((e, field) => {
+    onChange(field, e.target.value);
+  }, [onChange]);
+
+  return (
+    <Dialog open={open} handler={onClose} size="md">
+      <DialogHeader>Print Surat Balasan</DialogHeader>
+      <DialogBody divider className="h-[40vh] overflow-y-auto">
+        <div className="space-y-4">
+          <Input
+            label="Nomor Surat"
+            value={printForm.nomorSurat}
+            onChange={(e) => handleInputChange(e, 'nomorSurat')}
+          />
+          <Input
+            label="Perihal"
+            value={printForm.perihal}
+            onChange={(e) => handleInputChange(e, 'perihal')}
+          />
+          <Input
+            label="Pejabat"
+            value={printForm.pejabat}
+            onChange={(e) => handleInputChange(e, 'pejabat')}
+          />
+          <Input
+            label="Institusi"
+            value={printForm.institusi}
+            onChange={(e) => handleInputChange(e, 'institusi')}
+          />
+          <Input
+            label="Program Studi"
+            value={printForm.prodi}
+            onChange={(e) => handleInputChange(e, 'prodi')}
+          />
+          <Textarea
+            label="Detail Perihal"
+            value={printForm.perihal_detail}
+            onChange={(e) => handleInputChange(e, 'perihal_detail')}
+          />
+        </div>
+      </DialogBody>
+      <DialogFooter>
+        <Button
+          variant="text"
+          color="red"
+          onClick={onClose}
+          className="mr-1"
+        >
+          <span>Cancel</span>
+        </Button>
+        <Button variant="gradient" color="blue" onClick={onSubmit}>
+          <span>Confirm</span>
+        </Button>
+      </DialogFooter>
+    </Dialog>
+  );
+});
+
 
 const DiterimaDetailPage = () => {
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [printOpen, setPrintOpen] = useState(false);
+  const [printForm, setPrintForm] = useState({
+    nomorSurat: "",
+    perihal: "",
+    pejabat: "",
+    institusi: "",
+    prodi: "",
+    perihal_detail: "",
+  });
+
+
+  const handlePrintFormChange = useCallback((field, value) => {
+    setPrintForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }, []);
+  
   const navigate = useNavigate();
   const location = useLocation();
   const { type, name, prodi, idInstitusi, idProdi } = location.state || {};
@@ -40,13 +135,21 @@ const DiterimaDetailPage = () => {
     fetchData();
   }, [idInstitusi, idProdi]);
 
+  useEffect(() => {
+    if (participants.length > 0) {
+      const participant = participants[0];
+      setPrintForm(prev => ({
+        ...prev,
+      }));
+    }
+  }, [participants, type]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
       let url;
 
-      // Determine the correct API endpoint based on institution type
       if (type === "Perguruan Tinggi") {
         url = `http://localhost:3000/intern/diterima/univ/${idInstitusi}/${idProdi}`;
       } else {
@@ -60,10 +163,7 @@ const DiterimaDetailPage = () => {
         },
       });
 
-      // Set participants based on the new API response structure
       setParticipants(response.data || []);
-      console.log(response.data);
-
       setError(null);
     } catch (err) {
       setError("Failed to fetch data. Please try again later.");
@@ -73,38 +173,60 @@ const DiterimaDetailPage = () => {
     }
   };
 
-  const handlePrintSubmit = async (formData) => {
+  const handlePrintSubmit = useCallback(async () => {
     try {
+      // Add console logs to show form data
+      console.log("Submitting form with data:");
+      console.log("printForm:", printForm);
+      console.log("type:", type);
+      console.log("idInstitusi:", idInstitusi);
+      console.log("idProdi:", idProdi);
+  
       const token = localStorage.getItem("token");
+      
+      let apiUrl;
+      if (type === "Perguruan Tinggi") {
+        apiUrl = `http://localhost:3000/intern/diterima/univ/${idInstitusi}/${idProdi}`;
+      } else {
+        apiUrl = `http://localhost:3000/intern/diterima/smk/${idInstitusi}`;
+      }
+  
+      // Make POST request without responseType: 'blob'
       const response = await axios.post(
-        "http://localhost:3000/intern/diterima/print",
-        {
-          ...formData,
-          type: type === "Perguruan Tinggi" ? "mahasiswa" : "siswa"
-        },
+        apiUrl,
+        printForm,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-          },
-          responseType: 'blob'
+          }
         }
       );
+  
+      // Show success message (assuming you have some notification system)
+      // For example with toast:
+      toast.success("Surat berhasil dibuat!");
       
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'surat_balasan.docx');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      // Reset form
+      setPrintForm(prev => ({
+        ...prev,
+        nomorSurat: "",
+        institusi: "",
+        prodi: "",
+        perihal: "",
+        pejabat: "",
+        perihal_detail: "",
+      }));
+      handlePrintOpen();
     } catch (err) {
-      console.error("Error printing response letter:", err);
+      console.error("Error generating letter:", err);
+      toast.error("Gagal membuat surat!");
     }
-  };
+  }, [printForm, type, idInstitusi, idProdi]);
 
-  const handlePrintOpen = () => setPrintOpen(!printOpen);
+  const handlePrintOpen = useCallback(() => {
+    setPrintOpen(prev => !prev);
+  }, []);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("id-ID", {
@@ -123,6 +245,8 @@ const DiterimaDetailPage = () => {
       </div>
     </div>
   );
+
+  
 
   if (loading) {
     return (
@@ -188,9 +312,14 @@ const DiterimaDetailPage = () => {
           {participants.map((participant, index) => (
             <Card key={index} className="mb-4 shadow-lg">
               <CardBody className="p-6">
+                {/* Rest of your participant card content remains the same */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-6">
-                    <Typography variant="h6" color="blue-gray" className="mb-4 flex items-center gap-2">
+                    <Typography
+                      variant="h6"
+                      color="blue-gray"
+                      className="mb-4 flex items-center gap-2"
+                    >
                       <UserIcon className="h-5 w-5" />
                       Informasi Pribadi
                     </Typography>
@@ -203,7 +332,11 @@ const DiterimaDetailPage = () => {
                       <InfoItem
                         icon={IdentificationIcon}
                         label={type === "Perguruan Tinggi" ? "NIM" : "NISN"}
-                        value={type === "Perguruan Tinggi" ? participant.nim : participant.nisn}
+                        value={
+                          type === "Perguruan Tinggi"
+                            ? participant.nim
+                            : participant.nisn
+                        }
                       />
                       <InfoItem
                         icon={EnvelopeIcon}
@@ -224,7 +357,11 @@ const DiterimaDetailPage = () => {
                   </div>
 
                   <div className="space-y-6">
-                    <Typography variant="h6" color="blue-gray" className="mb-4 flex items-center gap-2">
+                    <Typography
+                      variant="h6"
+                      color="blue-gray"
+                      className="mb-4 flex items-center gap-2"
+                    >
                       <AcademicCapIcon className="h-5 w-5" />
                       Informasi Akademik
                     </Typography>
@@ -236,8 +373,16 @@ const DiterimaDetailPage = () => {
                       />
                       <InfoItem
                         icon={AcademicCapIcon}
-                        label={type === "Perguruan Tinggi" ? "Program Studi" : "Jurusan"}
-                        value={type === "Perguruan Tinggi" ? participant.program_studi : participant.jurusan}
+                        label={
+                          type === "Perguruan Tinggi"
+                            ? "Program Studi"
+                            : "Jurusan"
+                        }
+                        value={
+                          type === "Perguruan Tinggi"
+                            ? participant.program_studi
+                            : participant.jurusan
+                        }
                       />
                       <InfoItem
                         icon={BuildingOffice2Icon}
@@ -267,11 +412,12 @@ const DiterimaDetailPage = () => {
           ))}
         </div>
       </div>
-      <Modal
+      <PrintModal 
         open={printOpen}
-        handleOpen={handlePrintOpen}
+        onClose={handlePrintOpen}
+        printForm={printForm}
         onSubmit={handlePrintSubmit}
-        type="print"
+        onChange={handlePrintFormChange}
       />
     </div>
   );
