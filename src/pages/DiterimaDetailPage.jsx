@@ -29,14 +29,12 @@ import {
   CalendarIcon,
   ClockIcon,
   CalendarDaysIcon,
+  ArrowUpTrayIcon
 } from "@heroicons/react/24/outline";
 import { useNavigate, useLocation } from "react-router-dom";
-import { branches } from "../Data/Unit";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
-
-
 
 // Print Modal Component
 const PrintModal = React.memo(({ 
@@ -104,12 +102,67 @@ const PrintModal = React.memo(({
   );
 });
 
+// Upload Modal Component
+const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleSubmit = () => {
+    if (file) {
+      onSubmit(file);
+    }
+  };
+
+  return (
+    <Dialog open={open} handler={onClose} size="md">
+      <DialogHeader>Upload Surat Balasan</DialogHeader>
+      <DialogBody divider>
+        <Input 
+          type="file" 
+          accept=".pdf"
+          onChange={handleFileChange}
+          label="Upload PDF Surat"
+        />
+      </DialogBody>
+      <DialogFooter>
+        <Button
+          variant="text"
+          color="red"
+          onClick={onClose}
+          className="mr-1"
+        >
+          <span>Cancel</span>
+        </Button>
+        <Button 
+          variant="gradient" 
+          color="blue" 
+          onClick={handleSubmit}
+          disabled={!file}
+        >
+          <span>Upload</span>
+        </Button>
+      </DialogFooter>
+    </Dialog>
+  );
+});
 
 const DiterimaDetailPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { type, name, prodi, idInstitusi, idProdi } = location.state || {};
+
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [printOpen, setPrintOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [showUploadButton, setShowUploadButton] = useState(() => {
+    const savedState = localStorage.getItem(`uploadButton_${idInstitusi}_${idProdi}`);
+    return savedState === 'true';
+  });
   const [printForm, setPrintForm] = useState({
     nomorSurat: "",
     perihal: "",
@@ -119,6 +172,9 @@ const DiterimaDetailPage = () => {
     perihal_detail: "",
   });
 
+  useEffect(() => {
+    localStorage.setItem(`uploadButton_${idInstitusi}_${idProdi}`, showUploadButton);
+  }, [showUploadButton, idInstitusi, idProdi]);
 
   const handlePrintFormChange = useCallback((field, value) => {
     setPrintForm(prev => ({
@@ -126,10 +182,6 @@ const DiterimaDetailPage = () => {
       [field]: value
     }));
   }, []);
-  
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { type, name, prodi, idInstitusi, idProdi } = location.state || {};
 
   useEffect(() => {
     fetchData();
@@ -218,11 +270,41 @@ const DiterimaDetailPage = () => {
         perihal_detail: "",
       }));
       handlePrintOpen();
+      setShowUploadButton(true); // Show upload button instead of modal
     } catch (err) {
       console.error("Error generating letter:", err);
       toast.error("Gagal membuat surat!");
     }
   }, [printForm, type, idInstitusi, idProdi]);
+
+  const handleUpload = async (file) => {
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append('surat', file);
+      
+      let apiUrl;
+      if (type === "Perguruan Tinggi") {
+        apiUrl = `http://localhost:3000/intern/upload-surat/univ/${idInstitusi}/${idProdi}`;
+      } else {
+        apiUrl = `http://localhost:3000/intern/upload-surat/smk/${idInstitusi}`;
+      }
+  
+      await axios.post(apiUrl, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      toast.success("Surat berhasil diupload!");
+      setUploadOpen(false);
+      setShowUploadButton(false);
+    } catch (err) {
+      console.error("Error uploading file:", err);
+      toast.error("Gagal mengupload surat!");
+    }
+  };
 
   const handlePrintOpen = useCallback(() => {
     setPrintOpen(prev => !prev);
@@ -245,8 +327,6 @@ const DiterimaDetailPage = () => {
       </div>
     </div>
   );
-
-  
 
   if (loading) {
     return (
@@ -296,13 +376,24 @@ const DiterimaDetailPage = () => {
             >
               <ArrowLeftIcon className="h-4 w-4" /> Back
             </Button>
-            <Button
-              color="blue"
-              className="flex items-center gap-2"
-              onClick={handlePrintOpen}
-            >
-              <PrinterIcon className="h-4 w-4" /> Cetak Surat Balasan
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                color="blue"
+                className="flex items-center gap-2"
+                onClick={handlePrintOpen}
+              >
+                <PrinterIcon className="h-4 w-4" /> Cetak Surat Balasan
+              </Button>
+              {showUploadButton && (
+                <Button
+                  color="green"
+                  className="flex items-center gap-2"
+                  onClick={() => setUploadOpen(true)}
+                >
+                  <ArrowUpTrayIcon className="h-4 w-4" /> Upload Surat
+                </Button>
+              )}
+            </div>
           </div>
 
           <Typography variant="h5" color="blue-gray" className="mb-4">
@@ -312,7 +403,6 @@ const DiterimaDetailPage = () => {
           {participants.map((participant, index) => (
             <Card key={index} className="mb-4 shadow-lg">
               <CardBody className="p-6">
-                {/* Rest of your participant card content remains the same */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-6">
                     <Typography
@@ -418,6 +508,11 @@ const DiterimaDetailPage = () => {
         printForm={printForm}
         onSubmit={handlePrintSubmit}
         onChange={handlePrintFormChange}
+      />
+      <UploadModal
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onSubmit={handleUpload}
       />
     </div>
   );
