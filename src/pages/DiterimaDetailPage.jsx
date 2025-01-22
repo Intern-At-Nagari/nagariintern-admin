@@ -162,10 +162,6 @@ const DiterimaDetailPage = () => {
   const [error, setError] = useState(null);
   const [printOpen, setPrintOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [showUploadButton, setShowUploadButton] = useState(() => {
-    const savedState = localStorage.getItem(`uploadButton_${idInstitusi}_${idProdi}`);
-    return savedState === 'true';
-  });
   const [printForm, setPrintForm] = useState({
     nomorSurat: "",
     perihal: "",
@@ -174,10 +170,6 @@ const DiterimaDetailPage = () => {
     prodi: "",
     perihal_detail: "",
   });
-
-  useEffect(() => {
-    localStorage.setItem(`uploadButton_${idInstitusi}_${idProdi}`, showUploadButton);
-  }, [showUploadButton, idInstitusi, idProdi]);
 
   const handlePrintFormChange = useCallback((field, value) => {
     setPrintForm(prev => ({
@@ -281,7 +273,6 @@ const DiterimaDetailPage = () => {
         perihal_detail: "",
       }));
       handlePrintOpen();
-      setShowUploadButton(true); // Show upload button instead of modal
     } catch (err) {
       console.error("Error generating letter:", err);
       if (err.response) {
@@ -304,30 +295,28 @@ const DiterimaDetailPage = () => {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append('surat', file);
-      
-      let apiUrl;
-      if (type === "Perguruan Tinggi") {
-        apiUrl = `http://localhost:3000/intern/upload-surat/univ/${idInstitusi}/${idProdi}`;
-      } else {
-        apiUrl = `http://localhost:3000/intern/upload-surat/smk/${idInstitusi}`;
+      formData.append('fileSuratBalasan', file); // Match the field name expected by req.files
+      formData.append('email', participants[0].email);
+  
+      const response = await axios.post(
+        `http://localhost:3000/intern/send-surat-balasan/${participants[0].id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+  
+      if (response.data.status === "success") {
+        toast.success("Surat balasan berhasil dikirim!");
+        setUploadOpen(false);
       }
-  
-      await axios.post(apiUrl, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-  
-      toast.success("Surat berhasil diupload!");
-      setUploadOpen(false);
-      setShowUploadButton(false);
     } catch (err) {
-      console.error("Error uploading file:", err);
-      toast.error("Gagal mengupload surat!");
+      toast.error(err.response?.data?.message || "Gagal mengirim surat balasan!");
     }
-  };
+  }
 
   const handlePrintOpen = useCallback(() => {
     setPrintOpen(prev => !prev);
@@ -407,15 +396,13 @@ const DiterimaDetailPage = () => {
               >
                 <PrinterIcon className="h-4 w-4" /> Cetak Surat Balasan
               </Button>
-              {showUploadButton && (
-                <Button
-                  color="green"
-                  className="flex items-center gap-2"
-                  onClick={() => setUploadOpen(true)}
-                >
-                  <ArrowUpTrayIcon className="h-4 w-4" /> Upload Surat
-                </Button>
-              )}
+              <Button
+                color="green"
+                className="flex items-center gap-2"
+                onClick={() => setUploadOpen(true)}
+              >
+                <ArrowUpTrayIcon className="h-4 w-4" /> Upload Surat
+              </Button>
             </div>
           </div>
 
