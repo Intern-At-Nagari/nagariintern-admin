@@ -42,7 +42,8 @@ const PrintModal = React.memo(({
   onClose, 
   printForm, 
   onSubmit, 
-  onChange 
+  onChange,
+  type
 }) => {
   const handleInputChange = useCallback((e, field) => {
     onChange(field, e.target.value);
@@ -73,11 +74,13 @@ const PrintModal = React.memo(({
             value={printForm.institusi}
             onChange={(e) => handleInputChange(e, 'institusi')}
           />
-          <Input
-            label="Program Studi"
-            value={printForm.prodi}
-            onChange={(e) => handleInputChange(e, 'prodi')}
-          />
+          {type === "Perguruan Tinggi" && (
+            <Input
+              label="Program Studi"
+              value={printForm.prodi}
+              onChange={(e) => handleInputChange(e, 'prodi')}
+            />
+          )}
           <Textarea
             label="Detail Perihal"
             value={printForm.perihal_detail}
@@ -230,6 +233,14 @@ const DiterimaDetailPage = () => {
       const token = localStorage.getItem("token");
       
       let apiUrl;
+      let requestBody = {
+        nomorSurat: printForm.nomorSurat,
+        perihal: printForm.perihal,
+        pejabat: printForm.pejabat,
+        institusi: printForm.institusi,
+        perihal_detail: printForm.perihal_detail,
+      };
+
       if (type === "Perguruan Tinggi") {
         apiUrl = `http://localhost:3000/intern/diterima/univ/${idInstitusi}/${idProdi}`;
       } else {
@@ -238,13 +249,13 @@ const DiterimaDetailPage = () => {
   
       const response = await axios.post(
         apiUrl,
-        printForm,
+        requestBody,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          responseType: 'blob'  // Important for handling binary data
+          responseType: 'arraybuffer'  // Important for handling binary data
         }
       );
   
@@ -273,7 +284,19 @@ const DiterimaDetailPage = () => {
       setShowUploadButton(true); // Show upload button instead of modal
     } catch (err) {
       console.error("Error generating letter:", err);
-      toast.error("Gagal membuat surat!");
+      if (err.response) {
+        // Server responded with a status other than 200 range
+        console.error("Error response:", err.response.data);
+        toast.error(`Gagal membuat surat! ${err.response.data.message || err.response.statusText}`);
+      } else if (err.request) {
+        // Request was made but no response received
+        console.error("Error request:", err.request);
+        toast.error("Gagal membuat surat! No response from server.");
+      } else {
+        // Something else happened
+        console.error("Error message:", err.message);
+        toast.error(`Gagal membuat surat! ${err.message}`);
+      }
     }
   }, [printForm, type, idInstitusi, idProdi]);
 
@@ -508,6 +531,7 @@ const DiterimaDetailPage = () => {
         printForm={printForm}
         onSubmit={handlePrintSubmit}
         onChange={handlePrintFormChange}
+        type={type}
       />
       <UploadModal
         open={uploadOpen}
