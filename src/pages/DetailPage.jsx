@@ -42,12 +42,16 @@ const DetailPage = () => {
 
   const fetchUnitKerja = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/admin/unit-kerja", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setUnitKerjaList(response.data);
+      const response = await axios.get(
+        "http://localhost:3000/admin/unit-kerja",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // Access the unitKerja property from the response
+      setUnitKerjaList(response.data.unitKerja);
     } catch (err) {
       console.error("Error fetching unit kerja:", err);
     }
@@ -81,7 +85,11 @@ const DetailPage = () => {
   }, [id]);
 
   const getUnitKerjaOptions = () => {
-    if (!data || !unitKerjaList.length) return [];
+    if (!data || !unitKerjaList?.length) {
+      console.log("Data:", data);
+      console.log("Unit Kerja List:", unitKerjaList);
+      return [];
+    }
 
     return unitKerjaList.map((unit) => {
       const remainingQuota =
@@ -455,15 +463,19 @@ const DetailPage = () => {
                       value={selectedUnit}
                       onChange={(value) => setSelectedUnit(value)}
                     >
-                      {getUnitKerjaOptions().map((unit) => (
-                        <Option
-                          key={unit.id}
-                          value={unit.id}
-                          disabled={unit.disabled}
-                        >
-                          {unit.name}
-                        </Option>
-                      ))}
+                      {getUnitKerjaOptions().length > 0 ? (
+                        getUnitKerjaOptions().map((unit) => (
+                          <Option
+                            key={unit.id}
+                            value={unit.id}
+                            disabled={unit.disabled}
+                          >
+                            {unit.name}
+                          </Option>
+                        ))
+                      ) : (
+                        <Option disabled>No unit kerja available</Option>
+                      )}
                     </Select>
                     {selectedUnit && (
                       <Typography variant="small" color="gray" className="mt-2">
