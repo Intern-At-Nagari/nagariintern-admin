@@ -229,7 +229,8 @@ const DiterimaDetailPage = () => {
         nomorSurat: printForm.nomorSurat,
         perihal: printForm.perihal,
         pejabat: printForm.pejabat,
-        institusi: printForm.institusi,
+        prodi : printForm.prodi,
+        institusi : printForm.institusi,
         perihal_detail: printForm.perihal_detail,
       };
 
