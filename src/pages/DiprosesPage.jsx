@@ -52,7 +52,6 @@ const DiprosesPage = () => {
         const responseData = response.data.data || response.data;
         const dataArray = Array.isArray(responseData) ? responseData : [];
         setData(dataArray);
-        
 
         // Extract unique institutions and types from the data
         const uniqueInstitutions = [
@@ -93,16 +92,15 @@ const DiprosesPage = () => {
   };
 
   const filteredData = data.filter((item) => {
-    if (!item) return false;
+    if (!item || item.status.name !== "Diproses") return false;
 
     const matchesSearch = [
       item.biodata?.nama || "",
       item.institusi || "",
       item.type || "",
-      item.status || "",
+      item.status.name || "",
       item.jurusan || "",
       item.unitKerja || "",
-
     ]
       .join(" ")
       .toLowerCase()
@@ -220,7 +218,7 @@ const DiprosesPage = () => {
               {getCurrentPageData().length === 0 ? (
                 <div className="text-center py-8">
                   <Typography variant="h6" color="blue-gray">
-                    No data available
+                    No data found
                   </Typography>
                 </div>
               ) : (
@@ -277,15 +275,7 @@ const DiprosesPage = () => {
                                   Unit Kerja
                                 </Typography>
                               </th>
-                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                                <Typography
-                                  variant="small"
-                                  color="blue-gray"
-                                  className="font-semibold"
-                                >
-                                  Status
-                                </Typography>
-                              </th>
+                              
                               <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
                                 <Typography
                                   variant="small"
@@ -369,14 +359,7 @@ const DiprosesPage = () => {
                                       {item.unitKerja} 
                                     </Typography>
                                   </td>
-                                  <td className="p-4">
-                                    <Typography
-                                      variant="small"
-                                      color="blue-gray"
-                                    >
-                                      {item.status || "-"}
-                                    </Typography>
-                                  </td>
+                                
                                   <td className="p-4">
                                     <Typography
                                       variant="small"

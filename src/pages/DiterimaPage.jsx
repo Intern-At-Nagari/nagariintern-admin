@@ -82,32 +82,6 @@ const DiterimaPage = () => {
       item.prodi.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="lg:ml-80 min-h-screen bg-blue-gray-50 flex items-center justify-center">
-        <Spinner className="h-12 w-12" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="lg:ml-80 min-h-screen bg-blue-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Typography variant="h6" color="red" className="mb-2">
-            {error}
-          </Typography>
-          <button
-            onClick={fetchData}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />

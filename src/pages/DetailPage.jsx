@@ -27,6 +27,7 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { branches } from "../Data/Unit";
+import { toast } from "react-toastify";
 
 const DetailPage = () => {
   const { id } = useParams();
@@ -158,11 +159,13 @@ const DetailPage = () => {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      });
+      }); 
       setData(response.data);
       handleModalOpen();
+      toast.success(`Request successfully ${action === "approve" ? "approved" : "rejected"}`);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update status");
+      toast.error("Error updating status");
       console.error("Error updating status:", err);
     }
   };

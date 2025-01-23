@@ -297,15 +297,14 @@ const DiterimaDetailPage = () => {
       const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append('fileSuratBalasan', file); // Match the field name expected by req.files
-      formData.append('email', participants[0].email);
+      formData.append('responseArray', JSON.stringify(participants)); // Include the responseArray
   
       const response = await axios.post(
-        `http://localhost:3000/intern/send-surat-balasan/${participants[0].id}`,
+        `http://localhost:3000/intern/send-surat-balasan`,
         formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
           }
         }
       );
@@ -313,9 +312,11 @@ const DiterimaDetailPage = () => {
       if (response.data.status === "success") {
         toast.success("Surat balasan berhasil dikirim!");
         setUploadOpen(false);
+        console.log("Response:", response.data);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Gagal mengirim surat balasan!");
+      console.error("Error sending letter:", err);
     }
   }
 
