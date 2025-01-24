@@ -215,209 +215,208 @@ const DiprosesPage = () => {
                 </Select>
               </div>
 
-              {getCurrentPageData().length === 0 ? (
-                <div className="text-center py-8">
-                  <Typography variant="h6" color="blue-gray">
-                    No data found
-                  </Typography>
-                </div>
-              ) : (
-                <>
-                  <Card className="overflow-hidden">
-                    <CardBody className="p-0">
-                      <div className="overflow-x-auto">
-                        <table className="w-full min-w-max table-auto text-left">
-                          <thead>
-                            <tr>
-                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                                <Typography
-                                  variant="small"
-                                  color="blue-gray"
-                                  className="font-semibold"
-                                >
-                                  No
-                                </Typography>
-                              </th>
-                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                                <Typography
-                                  variant="small"
-                                  color="blue-gray"
-                                  className="font-semibold"
-                                >
-                                  Nama
-                                </Typography>
-                              </th>
+              <Card className="overflow-hidden">
+                <CardBody className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-max table-auto text-left">
+                      <thead>
+                        <tr>
+                          <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-semibold"
+                            >
+                              No
+                            </Typography>
+                          </th>
+                          <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-semibold"
+                            >
+                              Nama
+                            </Typography>
+                          </th>
 
-                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                          <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-semibold"
+                            >
+                              Institusi
+                            </Typography>
+                          </th>
+                          <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-semibold"
+                            >
+                              Prodi/Jurusan
+                            </Typography>
+                          </th>
+                          <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-semibold"
+                            >
+                              Unit Kerja
+                            </Typography>
+                          </th>
+                          
+                          <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-semibold"
+                            >
+                              Periode
+                            </Typography>
+                          </th>
+                          <th className="border-b border-blue-gray-100 bg-gray-100 p-4 text-center">
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-semibold"
+                            >
+                              Aksi
+                            </Typography>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getCurrentPageData().map((item, index) => {
+                          if (!item) return null;
+
+                          const startDate = item.tanggalMulai
+                            ? new Date(
+                                item.tanggalMulai
+                              ).toLocaleDateString("id-ID")
+                            : "-";
+                          const endDate = item.tanggalSelesai
+                            ? new Date(
+                                item.tanggalSelesai
+                              ).toLocaleDateString("id-ID")
+                            : "-";
+
+                          return (
+                            <tr
+                              key={item.id}
+                              className="even:bg-gray-100/50"
+                            >
+                              <td className="p-4">
                                 <Typography
                                   variant="small"
                                   color="blue-gray"
-                                  className="font-semibold"
                                 >
-                                  Institusi
+                                  {(currentPage - 1) * itemsPerPage +
+                                    index +
+                                    1}
                                 </Typography>
-                              </th>
-                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                              </td>
+                              <td className="p-4">
                                 <Typography
                                   variant="small"
                                   color="blue-gray"
-                                  className="font-semibold"
                                 >
-                                  Prodi/Jurusan
+                                  {item.biodata?.nama || "-"}
                                 </Typography>
-                              </th>
-                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                              </td>
+
+                              <td className="p-4">
                                 <Typography
                                   variant="small"
                                   color="blue-gray"
-                                  className="font-semibold"
                                 >
-                                  Unit Kerja
+                                  {item.institusi || "-"}
                                 </Typography>
-                              </th>
-                              
-                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                              </td>
+                              <td className="p-4">
                                 <Typography
                                   variant="small"
                                   color="blue-gray"
-                                  className="font-semibold"
                                 >
-                                  Periode
+                                  {item.jurusan || "-"}
                                 </Typography>
-                              </th>
-                              <th className="border-b border-blue-gray-100 bg-gray-100 p-4 text-center">
+                              </td>
+                              <td className="p-4">
                                 <Typography
                                   variant="small"
                                   color="blue-gray"
-                                  className="font-semibold"
                                 >
-                                  Aksi
+                                  {item.unitKerja} 
                                 </Typography>
-                              </th>
+                              </td>
+                            
+                              <td className="p-4">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                >
+                                  {startDate} - {endDate}
+                                </Typography>
+                              </td>
+                              <td className="p-4">
+                                <div className="flex gap-2 justify-center">
+                                  <Tooltip
+                                    content="Lihat detail"
+                                    className="bg-blue-500"
+                                  >
+                                    <IconButton
+                                      variant="text"
+                                      color="blue"
+                                      className="rounded-full"
+                                      onClick={() =>
+                                        handleViewClick(item.id)
+                                      }
+                                    >
+                                      <EyeIcon className="h-4 w-4" />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip
+                                    content="Hapus data"
+                                    className="bg-red-500"
+                                  >
+                                    <IconButton
+                                      variant="text"
+                                      color="red"
+                                      className="rounded-full"
+                                      onClick={() =>
+                                        handleDeleteClick(item)
+                                      }
+                                    >
+                                      <TrashIcon className="h-4 w-4" />
+                                    </IconButton>
+                                  </Tooltip>
+                                </div>
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {getCurrentPageData().map((item, index) => {
-                              if (!item) return null;
+                          );
+                        })}
+                        {filteredData.length === 0 && (
+                          <tr>
+                            <td colSpan="7" className="p-4 text-center">
+                              <Typography variant="small" color="blue-gray">
+                                No data found
+                              </Typography>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardBody>
+              </Card>
 
-                              const startDate = item.tanggalMulai
-                                ? new Date(
-                                    item.tanggalMulai
-                                  ).toLocaleDateString("id-ID")
-                                : "-";
-                              const endDate = item.tanggalSelesai
-                                ? new Date(
-                                    item.tanggalSelesai
-                                  ).toLocaleDateString("id-ID")
-                                : "-";
-
-                              return (
-                                <tr
-                                  key={item.id}
-                                  className="even:bg-gray-100/50"
-                                >
-                                  <td className="p-4">
-                                    <Typography
-                                      variant="small"
-                                      color="blue-gray"
-                                    >
-                                      {(currentPage - 1) * itemsPerPage +
-                                        index +
-                                        1}
-                                    </Typography>
-                                  </td>
-                                  <td className="p-4">
-                                    <Typography
-                                      variant="small"
-                                      color="blue-gray"
-                                    >
-                                      {item.biodata?.nama || "-"}
-                                    </Typography>
-                                  </td>
-
-                                  <td className="p-4">
-                                    <Typography
-                                      variant="small"
-                                      color="blue-gray"
-                                    >
-                                      {item.institusi || "-"}
-                                    </Typography>
-                                  </td>
-                                  <td className="p-4">
-                                    <Typography
-                                      variant="small"
-                                      color="blue-gray"
-                                    >
-                                      {item.jurusan || "-"}
-                                    </Typography>
-                                  </td>
-                                  <td className="p-4">
-                                    <Typography
-                                      variant="small"
-                                      color="blue-gray"
-                                    >
-                                      {item.unitKerja} 
-                                    </Typography>
-                                  </td>
-                                
-                                  <td className="p-4">
-                                    <Typography
-                                      variant="small"
-                                      color="blue-gray"
-                                    >
-                                      {startDate} - {endDate}
-                                    </Typography>
-                                  </td>
-                                  <td className="p-4">
-                                    <div className="flex gap-2 justify-center">
-                                      <Tooltip
-                                        content="Lihat detail"
-                                        className="bg-blue-500"
-                                      >
-                                        <IconButton
-                                          variant="text"
-                                          color="blue"
-                                          className="rounded-full"
-                                          onClick={() =>
-                                            handleViewClick(item.id)
-                                          }
-                                        >
-                                          <EyeIcon className="h-4 w-4" />
-                                        </IconButton>
-                                      </Tooltip>
-                                      <Tooltip
-                                        content="Hapus data"
-                                        className="bg-red-500"
-                                      >
-                                        <IconButton
-                                          variant="text"
-                                          color="red"
-                                          className="rounded-full"
-                                          onClick={() =>
-                                            handleDeleteClick(item)
-                                          }
-                                        >
-                                          <TrashIcon className="h-4 w-4" />
-                                        </IconButton>
-                                      </Tooltip>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </CardBody>
-                  </Card>
-
-                  <Pagination
-                    active={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                  />
-                </>
-              )}
+              <Pagination
+                active={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </>
           )}
         </div>

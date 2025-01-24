@@ -16,6 +16,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CustomAlert from "./components/CustomAlert";
 import DiterimaDetailPage from "./pages/DiterimaDetailPage";
 import "./index.css";
+import DiverifikasiDetailPage from "./pages/DiverifikasiDetailPage";
 
 function App() {
   return (
@@ -105,6 +106,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/diverifikasi/detail"
+          element={
+            <ProtectedRoute>
+              <DiverifikasiDetailPage />
+            </ProtectedRoute>
+          }
+          />
         <Route path="/intern/diterima/detail" element={<DiterimaDetailPage />} />
 
         {/* Rute Not Found */}

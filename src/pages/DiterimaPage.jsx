@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 const DiterimaPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [data, setData] = useState({ universities: [], schools: [] });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -37,6 +37,7 @@ const DiterimaPage = () => {
           "Content-Type": "application/json",
         },
       });
+      console.log("Data fetched:", response.data);
       setData(response.data);
       setError(null);
     } catch (err) {
@@ -88,7 +89,7 @@ const DiterimaPage = () => {
       <div className="px-4 md:px-8 pb-8">
         <div className="max-w-7xl mx-auto">
           <BreadcrumbsComponent />
-
+          
           <div className="mb-4">
             <div className="relative flex w-full max-w-[24rem]">
               <Input
@@ -107,139 +108,146 @@ const DiterimaPage = () => {
             </div>
           </div>
 
-          <Card className="overflow-hidden">
-            <CardBody className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-max table-auto text-left">
-                  <thead>
-                    <tr>
-                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-semibold"
-                        >
-                          No
-                        </Typography>
-                      </th>
-                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-semibold"
-                        >
-                          Tipe Institusi
-                        </Typography>
-                      </th>
-                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-semibold"
-                        >
-                          Nama Institusi
-                        </Typography>
-                      </th>
-                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-semibold"
-                        >
-                          Program Studi
-                        </Typography>
-                      </th>
-                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-semibold"
-                        >
-                          Total Diterima
-                        </Typography>
-                      </th>
-                      <th className="border-b border-blue-gray-100 bg-gray-100 p-4 text-center">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-semibold"
-                        >
-                          Aksi
-                        </Typography>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredData.map((item, index) => (
-                      <tr key={index} className="even:bg-gray-100/50">
-                        <td className="p-4">
-                          <Typography variant="small" color="blue-gray">
-                            {index + 1}
-                          </Typography>
-                        </td>
-                        <td className="p-4">
-                          <Typography variant="small" color="blue-gray">
-                            {item.type}
-                          </Typography>
-                        </td>
-                        <td className="p-4">
-                          <Typography variant="small" color="blue-gray">
-                            {item.name}
-                          </Typography>
-                        </td>
-                        <td className="p-4">
-                          <Typography variant="small" color="blue-gray">
-                            {item.prodi}
-                          </Typography>
-                        </td>
-                        <td className="p-4">
-                          <Typography variant="small" color="blue-gray">
-                            {item.total}
-                          </Typography>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex gap-2 justify-center">
-                            <Tooltip
-                              content="Lihat detail"
-                              className="bg-blue-500"
-                            >
-                              <IconButton
-                                variant="text"
-                                color="blue"
-                                className="rounded-full"
-                                onClick={() =>
-                                  navigate(`/intern/diterima/detail`, {
-                                    state: {
-                                      type: item.type,
-                                      name: item.name,
-                                      prodi: item.prodi,
-                                      idInstitusi: item.idInstitusi,
-                                      idProdi: item.idProdi
-                                    },
-                                  })
-                                }
-                              >
-                                <EyeIcon className="h-4 w-4" />
-                              </IconButton>
-                            </Tooltip>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredData.length === 0 && (
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <Card className="overflow-hidden">
+              <CardBody className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-max table-auto text-left">
+                    <thead>
                       <tr>
-                        <td colSpan="6" className="p-4 text-center">
-                          <Typography variant="small" color="blue-gray">
-                            No data found
+                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-semibold"
+                          >
+                            No
                           </Typography>
-                        </td>
+                        </th>
+                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-semibold"
+                          >
+                            Tipe Institusi
+                          </Typography>
+                        </th>
+                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-semibold"
+                          >
+                            Nama Institusi
+                          </Typography>
+                        </th>
+                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-semibold"
+                          >
+                            Program Studi
+                          </Typography>
+                        </th>
+                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-semibold"
+                          >
+                            Total Diterima
+                          </Typography>
+                        </th>
+                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4 text-center">
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-semibold"
+                          >
+                            Aksi
+                          </Typography>
+                        </th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </CardBody>
-          </Card>
+                    </thead>
+                    <tbody>
+                      {filteredData.map((item, index) => (
+                        <tr key={index} className="even:bg-gray-100/50">
+                          <td className="p-4">
+                            <Typography variant="small" color="blue-gray">
+                              {index + 1}
+                            </Typography>
+                          </td>
+                          <td className="p-4">
+                            <Typography variant="small" color="blue-gray">
+                              {item.type}
+                            </Typography>
+                          </td>
+                          <td className="p-4">
+                            <Typography variant="small" color="blue-gray">
+                              {item.name}
+                            </Typography>
+                          </td>
+                          <td className="p-4">
+                            <Typography variant="small" color="blue-gray">
+                              {item.prodi}
+                            </Typography>
+                          </td>
+                          <td className="p-4">
+                            <Typography variant="small" color="blue-gray">
+                              {item.total}
+                            </Typography>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex gap-2 justify-center">
+                              <Tooltip
+                                content="Lihat detail"
+                                className="bg-blue-500"
+                              >
+                                <IconButton
+                                  variant="text"
+                                  color="blue"
+                                  className="rounded-full"
+                                  onClick={() =>
+                                    navigate(`/intern/diterima/detail`, {
+                                      state: {
+                                        type: item.type,
+                                        name: item.name,
+                                        prodi: item.prodi,
+                                        idInstitusi: item.idInstitusi,
+                                        idProdi: item.idProdi
+                                      },
+                                    })
+                                  }
+                                >
+                                  <EyeIcon className="h-4 w-4" />
+                                </IconButton>
+                              </Tooltip>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredData.length === 0 && (
+                        <tr>
+                          <td colSpan="6" className="p-4 text-center">
+                            <Typography variant="small" color="blue-gray">
+                              No data found
+                            </Typography>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                  
+                </div>
+              </CardBody>
+            </Card>
+          )}
         </div>
       </div>
     </div>
