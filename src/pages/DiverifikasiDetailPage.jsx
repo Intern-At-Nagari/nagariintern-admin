@@ -12,8 +12,7 @@ import {
   DialogFooter,
   Textarea,
   Input,
-  Select,
-  Option,
+  IconButton,
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
@@ -32,7 +31,11 @@ import {
   ArrowUpTrayIcon,
   ArrowDownTrayIcon,
   DocumentDuplicateIcon,
-  DocumentMagnifyingGlassIcon
+  DocumentMagnifyingGlassIcon,
+  ListBulletIcon,
+  ViewColumnsIcon,
+  DocumentIcon,
+  XMarkIcon
 } from "@heroicons/react/24/outline";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
@@ -40,7 +43,6 @@ import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 import ModalIframe from "../components/ModalIframe";
 
-// Print Modal Component
 const PrintModal = React.memo(
   ({ open, onClose, printForm, onSubmit, onChange, type }) => {
     const handleInputChange = useCallback(
@@ -52,7 +54,7 @@ const PrintModal = React.memo(
 
     return (
       <Dialog open={open} handler={onClose} size="md">
-        <DialogHeader>Print Surat Balasan</DialogHeader>
+        <DialogHeader>Print Surat Pengantar</DialogHeader>
         <DialogBody divider className="h-[40vh] overflow-y-auto">
           <div className="space-y-4">
             <Input
@@ -71,10 +73,16 @@ const PrintModal = React.memo(
               onChange={(e) => handleInputChange(e, "pejabat")}
             />
             <Input
+              label="Terbilang"
+              value={printForm.terbilang}
+              onChange={(e) => handleInputChange(e, "terbilang")}
+            />
+            <Input
               label="Institusi"
               value={printForm.institusi}
               onChange={(e) => handleInputChange(e, "institusi")}
             />
+            
             {type === "Perguruan Tinggi" && (
               <Input
                 label="Program Studi"
@@ -82,10 +90,10 @@ const PrintModal = React.memo(
                 onChange={(e) => handleInputChange(e, "prodi")}
               />
             )}
-            <Textarea
-              label="Detail Perihal"
-              value={printForm.perihal_detail}
-              onChange={(e) => handleInputChange(e, "perihal_detail")}
+            <Input
+              label="Tempat Magang"
+              value={printForm.tmptMagang}
+              onChange={(e) => handleInputChange(e, "tmptMagang")}
             />
           </div>
         </DialogBody>
@@ -102,17 +110,45 @@ const PrintModal = React.memo(
   }
 );
 
-// Upload Modal Component
 const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
   const [file, setFile] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (selectedFile && selectedFile.size <= 5242880) {
+      // 5MB
+      setFile(selectedFile);
+    } else {
+      toast.error("File size should be less than 5MB");
+    }
   };
 
-  const handleSubmit = () => {
-    if (file) {
-      onSubmit(file);
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile && droppedFile.type === "application/pdf") {
+      if (droppedFile.size <= 5242880) {
+        // 5MB
+        setFile(droppedFile);
+      } else {
+        toast.error("File size should be less than 5MB");
+      }
+    } else {
+      toast.error("Please upload PDF file only");
     }
   };
 
@@ -120,12 +156,46 @@ const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
     <Dialog open={open} handler={onClose} size="md">
       <DialogHeader>Upload Surat Balasan</DialogHeader>
       <DialogBody divider>
-        <Input
-          type="file"
-          accept=".pdf"
-          onChange={handleFileChange}
-          label="Upload PDF Surat"
-        />
+        <div
+          className={`relative border-2 border-dashed rounded-lg p-6 ${
+            dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
+          }`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+        >
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handleFileChange}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
+          <div className="text-center">
+            <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <div className="mt-4 flex text-sm text-gray-600 justify-center">
+              <label className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 ">
+                <span>Upload a file</span>
+              </label>
+              <p className="pl-1">or drag and drop</p>
+            </div>
+            <p className="text-xs text-gray-500">PDF up to 5MB</p>
+          </div>
+          {file && (
+            <div className="mt-4 flex items-center justify-between p-2 bg-gray-50 rounded-md">
+              <div className="flex items-center">
+                <DocumentIcon className="h-6 w-6 text-blue-500 mr-2" />
+                <span className="text-sm text-gray-500">{file.name}</span>
+              </div>
+              <button
+                onClick={() => setFile(null)}
+                className="p-1 hover:bg-gray-200 rounded-full"
+              >
+                <XMarkIcon className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+          )}
+        </div>
       </DialogBody>
       <DialogFooter>
         <Button variant="text" color="red" onClick={onClose} className="mr-1">
@@ -134,7 +204,7 @@ const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
         <Button
           variant="gradient"
           color="blue"
-          onClick={handleSubmit}
+          onClick={() => onSubmit(file)}
           disabled={!file}
         >
           <span>Upload</span>
@@ -143,6 +213,126 @@ const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
     </Dialog>
   );
 });
+
+const TableView = ({ participants, type, handleDocumentView, formatDate }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full min-w-max table-auto text-left">
+      <thead>
+        <tr>
+          {[
+            "No",
+            "Nama",
+            type === "Perguruan Tinggi" ? "NIM" : "NISN",
+            "Email",
+            "No. HP",
+            "Unit Kerja",
+            "Periode",
+            "Dokumen",
+          ].map((head) => (
+            <th
+              key={head}
+              className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+            >
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal leading-none opacity-70"
+              >
+                {head}
+              </Typography>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {participants.map((participant, index) => (
+          <tr key={index} className="even:bg-blue-gray-50/50">
+            <td className="p-4">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal"
+              >
+                {index + 1}
+              </Typography>
+            </td>
+            <td className="p-4">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal"
+              >
+                {participant.nama_peserta}
+              </Typography>
+            </td>
+            <td className="p-4">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal"
+              >
+                {type === "Perguruan Tinggi"
+                  ? participant.nim
+                  : participant.nisn}
+              </Typography>
+            </td>
+            <td className="p-4">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal"
+              >
+                {participant.email}
+              </Typography>
+            </td>
+            <td className="p-4">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal"
+              >
+                {participant.no_hp}
+              </Typography>
+            </td>
+            <td className="p-4">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal"
+              >
+                {participant.unit_kerja}
+              </Typography>
+            </td>
+            <td className="p-4">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal"
+              >
+                {formatDate(participant.tanggal_mulai)} -{" "}
+                {formatDate(participant.tanggal_selesai)}
+              </Typography>
+            </td>
+            <td className="p-4">
+              <div className="flex gap-2">
+                {participant.dokumen_urls?.map((url, idx) => (
+                  <IconButton
+                    key={idx}
+                    variant="outlined"
+                    color="blue"
+                    onClick={() => handleDocumentView(url)}
+                  >
+                    <DocumentMagnifyingGlassIcon className="h-4 w-4" />
+                  </IconButton>
+                ))}
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 
 const DiverifikasiDetailPage = () => {
   const navigate = useNavigate();
@@ -154,6 +344,7 @@ const DiverifikasiDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [printOpen, setPrintOpen] = useState(false);
+  const [isListView, setIsListView] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [isWaliModalOpen, setIsWaliModalOpen] = useState(false);
   const [isPribadiModalOpen, setIsPribadiModalOpen] = useState(false);
@@ -164,8 +355,15 @@ const DiverifikasiDetailPage = () => {
     pejabat: "",
     institusi: "",
     prodi: "",
-    perihal_detail: "",
+    tmptMagang: "",
   });
+
+  const toggleView = () => setIsListView(!isListView);
+
+  const handleDocumentView = (url) => {
+    setSelectedPdfUrl(`http://localhost:3000/uploads/${url}`);
+    handleWaliModal();
+  };
 
   const handlePrintFormChange = useCallback((field, value) => {
     setPrintForm((prev) => ({
@@ -223,20 +421,21 @@ const DiverifikasiDetailPage = () => {
     try {
       const token = localStorage.getItem("token");
 
-      let apiUrl;
-      let requestBody = {
+      const requestBody = {
         nomorSurat: printForm.nomorSurat,
         perihal: printForm.perihal,
         pejabat: printForm.pejabat,
-        prodi: printForm.prodi,
+        terbilang: printForm.terbilang,
         institusi: printForm.institusi,
-        perihal_detail: printForm.perihal_detail,
+        prodi: printForm.prodi,
+        tmptMagang: printForm.tmptMagang,
       };
 
+      let apiUrl;
       if (type === "Perguruan Tinggi") {
-        apiUrl = `http://localhost:3000/intern/diterima/univ/${idInstitusi}/${idProdi}`;
+        apiUrl = `http://localhost:3000/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
       } else {
-        apiUrl = `http://localhost:3000/intern/diterima/smk/${idInstitusi}`;
+        apiUrl = `http://localhost:3000/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
       }
 
       const response = await axios.post(apiUrl, requestBody, {
@@ -244,15 +443,14 @@ const DiverifikasiDetailPage = () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        responseType: "arraybuffer", // Important for handling binary data
+        responseType: "arraybuffer",
       });
 
-      // Create blob and download
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "surat_magang.pdf");
+      link.setAttribute("download", "surat_pengantar.pdf");
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -262,44 +460,28 @@ const DiverifikasiDetailPage = () => {
       setPrintForm((prev) => ({
         ...prev,
         nomorSurat: "",
-        institusi: "",
-        prodi: "",
         perihal: "",
         pejabat: "",
-        perihal_detail: "",
+        terbilang: "",
+        institusi: "",
+        prodi: "",
       }));
       handlePrintOpen();
     } catch (err) {
       console.error("Error generating letter:", err);
-      if (err.response) {
-        // Server responded with a status other than 200 range
-        console.error("Error response:", err.response.data);
-        toast.error(
-          `Gagal membuat surat! ${
-            err.response.data.message || err.response.statusText
-          }`
-        );
-      } else if (err.request) {
-        // Request was made but no response received
-        console.error("Error request:", err.request);
-        toast.error("Gagal membuat surat! No response from server.");
-      } else {
-        // Something else happened
-        console.error("Error message:", err.message);
-        toast.error(`Gagal membuat surat! ${err.message}`);
-      }
+      toast.error(err.response?.data?.message || "Gagal membuat surat!");
     }
-  }, [printForm, type, idInstitusi, idProdi]);
+  }, [printForm, type, idInstitusi, idProdi, idUnitKerja]);
 
   const handleUpload = async (file) => {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append("fileSuratBalasan", file); // Match the field name expected by req.files
-      formData.append("responseArray", JSON.stringify(participants)); // Include the responseArray
+      formData.append("SuratPengantar", file);
+      formData.append("responseArray", JSON.stringify(participants));
 
       const response = await axios.post(
-        `http://localhost:3000/intern/send-surat-balasan`,
+        `http://localhost:3000/intern/send-surat-pengantar`,
         formData,
         {
           headers: {
@@ -380,247 +562,270 @@ const DiverifikasiDetailPage = () => {
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
       <div className="px-4 md:px-8 pb-8">
-      <div className="max-w-7xl mx-auto">
-        <BreadcrumbsComponent />
+        <div className="max-w-7xl mx-auto">
+          <BreadcrumbsComponent />
 
-        <div className="flex justify-between items-center mb-4">
-        <Button
-          color="blue"
-          className="flex items-center gap-2"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeftIcon className="h-4 w-4" /> Back
-        </Button>
-        <div className="flex gap-2">
-          <Button
-          color="blue"
-          className="flex items-center gap-2"
-          onClick={handlePrintOpen}
-          >
-          <PrinterIcon className="h-4 w-4" /> Cetak Surat Pengantar
-          </Button>
-          <Button
-          color="green"
-          className="flex items-center gap-2"
-          onClick={() => setUploadOpen(true)}
-          >
-          <ArrowUpTrayIcon className="h-4 w-4" /> Upload Surat
-          </Button>
-        </div>
-        </div>
-
-        <Typography variant="h5" color="blue-gray" className="mb-4">
-        {name} - {prodi !== "-" ? prodi : "All Programs"}
-        </Typography>
-
-        {participants.map((participant, index) => (
-        <Card key={index} className="mb-4 shadow-lg">
-          <CardBody className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-            <Typography
-              variant="h6"
-              color="blue-gray"
-              className="mb-4 flex items-center gap-2"
-            >
-              <UserIcon className="h-5 w-5" />
-              Informasi Pribadi
-            </Typography>
-            <dl className="space-y-4">
-              <InfoItem
-              icon={UserIcon}
-              label="Nama"
-              value={participant.nama_peserta}
-              />
-              <InfoItem
-              icon={IdentificationIcon}
-              label={type === "Perguruan Tinggi" ? "NIM" : "NISN"}
-              value={
-                type === "Perguruan Tinggi"
-                ? participant.nim
-                : participant.nisn
-              }
-              />
-              <InfoItem
-              icon={EnvelopeIcon}
-              label="Email"
-              value={participant.email}
-              />
-              <InfoItem
-              icon={PhoneIcon}
-              label="No. HP"
-              value={participant.no_hp}
-              />
-              <InfoItem
-              icon={MapPinIcon}
-              label="Alamat"
-              value={participant.alamat}
-              />
-            </dl>
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-2">
+              <Button
+                color="blue"
+                className="flex items-center gap-2"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeftIcon className="h-4 w-4" /> Back
+              </Button>
+              <IconButton color="blue" onClick={toggleView}>
+                {isListView ? (
+                  <ViewColumnsIcon className="h-4 w-4" />
+                ) : (
+                  <ListBulletIcon className="h-4 w-4" />
+                )}
+              </IconButton>
             </div>
-
-            <div className="space-y-6">
-            <Typography
-              variant="h6"
-              color="blue-gray"
-              className="mb-4 flex items-center gap-2"
-            >
-              <AcademicCapIcon className="h-5 w-5" />
-              Informasi Akademik
-            </Typography>
-            <dl className="space-y-4">
-              <InfoItem
-              icon={BuildingOfficeIcon}
-              label="Institusi"
-              value={participant.institusi}
-              />
-              <InfoItem
-              icon={AcademicCapIcon}
-              label={
-                type === "Perguruan Tinggi"
-                ? "Program Studi"
-                : "Jurusan"
-              }
-              value={
-                type === "Perguruan Tinggi"
-                ? participant.program_studi
-                : participant.jurusan
-              }
-              />
-              <InfoItem
-              icon={BuildingOffice2Icon}
-              label="Unit Kerja"
-              value={participant.unit_kerja}
-              />
-              <InfoItem
-              icon={CalendarIcon}
-              label="Tanggal Mulai"
-              value={formatDate(participant.tanggal_mulai)}
-              />
-              <InfoItem
-              icon={ClockIcon}
-              label="Tanggal Selesai"
-              value={formatDate(participant.tanggal_selesai)}
-              />
-              <InfoItem
-              icon={CalendarDaysIcon}
-              label="Tanggal Daftar"
-              value={formatDate(participant.tanggal_daftar)}
-              />
-            </dl>
+            <div className="flex gap-2">
+              <Button
+                color="blue"
+                className="flex items-center gap-2"
+                onClick={handlePrintOpen}
+              >
+                <PrinterIcon className="h-4 w-4" /> Cetak Surat Pengantar
+              </Button>
+              <Button
+                color="green"
+                className="flex items-center gap-2"
+                onClick={() => setUploadOpen(true)}
+              >
+                <ArrowUpTrayIcon className="h-4 w-4" /> Upload Surat
+              </Button>
             </div>
           </div>
 
-          <div className="mt-8">
-            <Typography
-            variant="h6"
-            color="blue-gray"
-            className="mb-4 flex items-center gap-2"
-            >
-            <DocumentDuplicateIcon className="h-5 w-5" />
-            Surat Pernyataan
-            </Typography>
-            {participant.dokumen_urls && participant.dokumen_urls.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {participant.dokumen_urls[0] && (
-              <div className="flex gap-2">
-                <Button
-                variant="outlined"
-                className="flex items-center gap-2 normal-case flex-1"
-                onClick={() =>
-                  window.open(
-                  `http://localhost:3000/uploads/${participant.dokumen_urls[0]}`,
-                  "_blank"
-                  )
-                }
-                >
-                <ArrowDownTrayIcon className="w-4 h-4" />
-                Surat Pernyataan Wali
-                </Button>
-                <Button
-                variant="outlined"
-                color="blue"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  setSelectedPdfUrl(
-                  `http://localhost:3000/uploads/${participant.dokumen_urls[0]}`
-                  );
-                  handleWaliModal();
-                }}
-                >
-                <DocumentMagnifyingGlassIcon className="w-4 h-4" />
-                </Button>
-              </div>
-              )}
-              {participant.dokumen_urls[1] && (
-              <div className="flex gap-2">
-                <Button
-                variant="outlined"
-                className="flex items-center gap-2 normal-case flex-1"
-                onClick={() =>
-                  window.open(
-                  `http://localhost:3000/uploads/${participant.dokumen_urls[1]}`,
-                  "_blank"
-                  )
-                }
-                >
-                <ArrowDownTrayIcon className="w-4 h-4" />
-                Surat Pernyataan Pribadi
-                </Button>
-                <Button
-                variant="outlined"
-                color="blue"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  setSelectedPdfUrl(
-                  `http://localhost:3000/uploads/${participant.dokumen_urls[1]}`
-                  );
-                  handlePribadiModal();
-                }}
-                >
-                <DocumentMagnifyingGlassIcon className="w-4 h-4" />
-                </Button>
-              </div>
-              )}
-            </div>
-            ) : (
-            <Typography color="red" className="text-center">
-              Surat Pernyataan Belum Diupload
-            </Typography>
-            )}
-          </div>
-          </CardBody>
-        </Card>
-        ))}
-      </div>
+          <Typography variant="h5" color="blue-gray" className="mb-4">
+            {name} - {prodi !== "-" ? prodi : "All Programs"}
+          </Typography>
+
+          {isListView ? (
+            <Card className="shadow-lg">
+              <CardBody>
+                <TableView
+                  participants={participants}
+                  type={type}
+                  handleDocumentView={handleDocumentView}
+                  formatDate={formatDate}
+                />
+              </CardBody>
+            </Card>
+          ) : (
+            participants.map((participant, index) => (
+              <Card key={index} className="mb-4 shadow-lg">
+                <CardBody className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <Typography
+                        variant="h6"
+                        color="blue-gray"
+                        className="mb-4 flex items-center gap-2"
+                      >
+                        <UserIcon className="h-5 w-5" />
+                        Informasi Pribadi
+                      </Typography>
+                      <dl className="space-y-4">
+                        <InfoItem
+                          icon={UserIcon}
+                          label="Nama"
+                          value={participant.nama_peserta}
+                        />
+                        <InfoItem
+                          icon={IdentificationIcon}
+                          label={type === "Perguruan Tinggi" ? "NIM" : "NISN"}
+                          value={
+                            type === "Perguruan Tinggi"
+                              ? participant.nim
+                              : participant.nisn
+                          }
+                        />
+                        <InfoItem
+                          icon={EnvelopeIcon}
+                          label="Email"
+                          value={participant.email}
+                        />
+                        <InfoItem
+                          icon={PhoneIcon}
+                          label="No. HP"
+                          value={participant.no_hp}
+                        />
+                        <InfoItem
+                          icon={MapPinIcon}
+                          label="Alamat"
+                          value={participant.alamat}
+                        />
+                      </dl>
+                    </div>
+
+                    <div className="space-y-6">
+                      <Typography
+                        variant="h6"
+                        color="blue-gray"
+                        className="mb-4 flex items-center gap-2"
+                      >
+                        <AcademicCapIcon className="h-5 w-5" />
+                        Informasi Akademik
+                      </Typography>
+                      <dl className="space-y-4">
+                        <InfoItem
+                          icon={BuildingOfficeIcon}
+                          label="Institusi"
+                          value={participant.institusi}
+                        />
+                        <InfoItem
+                          icon={AcademicCapIcon}
+                          label={
+                            type === "Perguruan Tinggi"
+                              ? "Program Studi"
+                              : "Jurusan"
+                          }
+                          value={
+                            type === "Perguruan Tinggi"
+                              ? participant.program_studi
+                              : participant.jurusan
+                          }
+                        />
+                        <InfoItem
+                          icon={BuildingOffice2Icon}
+                          label="Unit Kerja"
+                          value={participant.unit_kerja}
+                        />
+                        <InfoItem
+                          icon={CalendarIcon}
+                          label="Tanggal Mulai"
+                          value={formatDate(participant.tanggal_mulai)}
+                        />
+                        <InfoItem
+                          icon={ClockIcon}
+                          label="Tanggal Selesai"
+                          value={formatDate(participant.tanggal_selesai)}
+                        />
+                        <InfoItem
+                          icon={CalendarDaysIcon}
+                          label="Tanggal Daftar"
+                          value={formatDate(participant.tanggal_daftar)}
+                        />
+                      </dl>
+                    </div>
+                  </div>
+
+                  <div className="mt-8">
+                    <Typography
+                      variant="h6"
+                      color="blue-gray"
+                      className="mb-4 flex items-center gap-2"
+                    >
+                      <DocumentDuplicateIcon className="h-5 w-5" />
+                      Surat Pernyataan
+                    </Typography>
+                    {participant.dokumen_urls &&
+                    participant.dokumen_urls.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {participant.dokumen_urls[0] && (
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outlined"
+                              className="flex items-center gap-2 normal-case flex-1"
+                              onClick={() =>
+                                window.open(
+                                  `http://localhost:3000/uploads/${participant.dokumen_urls[0]}`,
+                                  "_blank"
+                                )
+                              }
+                            >
+                              <ArrowDownTrayIcon className="w-4 h-4" />
+                              Surat Pernyataan Wali
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="blue"
+                              className="flex items-center gap-2"
+                              onClick={() => {
+                                setSelectedPdfUrl(
+                                  `http://localhost:3000/uploads/${participant.dokumen_urls[0]}`
+                                );
+                                handleWaliModal();
+                              }}
+                            >
+                              <DocumentMagnifyingGlassIcon className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
+                        {participant.dokumen_urls[1] && (
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outlined"
+                              className="flex items-center gap-2 normal-case flex-1"
+                              onClick={() =>
+                                window.open(
+                                  `http://localhost:3000/uploads/${participant.dokumen_urls[1]}`,
+                                  "_blank"
+                                )
+                              }
+                            >
+                              <ArrowDownTrayIcon className="w-4 h-4" />
+                              Surat Pernyataan Pribadi
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="blue"
+                              className="flex items-center gap-2"
+                              onClick={() => {
+                                setSelectedPdfUrl(
+                                  `http://localhost:3000/uploads/${participant.dokumen_urls[1]}`
+                                );
+                                handlePribadiModal();
+                              }}
+                            >
+                              <DocumentMagnifyingGlassIcon className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <Typography color="red" className="text-center">
+                        Surat Pernyataan Belum Diupload
+                      </Typography>
+                    )}
+                  </div>
+                </CardBody>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
       <PrintModal
-      open={printOpen}
-      onClose={handlePrintOpen}
-      printForm={printForm}
-      onSubmit={handlePrintSubmit}
-      onChange={handlePrintFormChange}
-      type={type}
+        open={printOpen}
+        onClose={handlePrintOpen}
+        printForm={printForm}
+        onSubmit={handlePrintSubmit}
+        onChange={handlePrintFormChange}
+        type={type}
       />
       <ModalIframe
-      isOpen={isWaliModalOpen}
-      handleOpen={handleWaliModal}
-      pdfUrl={selectedPdfUrl}
-      title="Surat Pernyataan Wali"
+        isOpen={isWaliModalOpen}
+        handleOpen={handleWaliModal}
+        pdfUrl={selectedPdfUrl}
+        title="Surat Pernyataan Wali"
       />
       <ModalIframe
-      isOpen={isPribadiModalOpen}
-      handleOpen={handlePribadiModal}
-      pdfUrl={selectedPdfUrl}
-      title="Surat Pernyataan Pribadi"
+        isOpen={isPribadiModalOpen}
+        handleOpen={handlePribadiModal}
+        pdfUrl={selectedPdfUrl}
+        title="Surat Pernyataan Pribadi"
       />
       <UploadModal
-      open={uploadOpen}
-      onClose={() => setUploadOpen(false)}
-      onSubmit={handleUpload}
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onSubmit={handleUpload}
       />
     </div>
-    );
+  );
 };
 
 export default DiverifikasiDetailPage;
