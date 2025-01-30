@@ -11,20 +11,15 @@ import {
 } from "@material-tailwind/react";
 import {
   EyeIcon,
-  TrashIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Pagination from "../components/Pagination";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
-import Modal from "../components/Modal";
-
 const DiprosesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -123,28 +118,11 @@ const DiprosesPage = () => {
     window.location.href = `/detail/${id}`;
   };
 
-  const handleDeleteClick = (item) => {
-    setSelectedItem(item);
-    setDeleteOpen(true);
-  };
 
-  const handleDeleteConfirm = async () => {
-    if (!selectedItem?.id) return;
 
-    try {
-      await axios.delete(`http://localhost:3000/intern/${selectedItem.id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      setData(data.filter((item) => item.id !== selectedItem.id));
-      setDeleteOpen(false);
-      setSelectedItem(null);
-    } catch (err) {
-      console.error("Error deleting item:", err);
-      setError("Failed to delete item");
-    }
-  };
+  
 
-  const handleDeleteOpen = () => setDeleteOpen(!deleteOpen);
+
 
   if (error) {
     return (
@@ -377,21 +355,7 @@ const DiprosesPage = () => {
                                       <EyeIcon className="h-4 w-4" />
                                     </IconButton>
                                   </Tooltip>
-                                  <Tooltip
-                                    content="Hapus data"
-                                    className="bg-red-500"
-                                  >
-                                    <IconButton
-                                      variant="text"
-                                      color="red"
-                                      className="rounded-full"
-                                      onClick={() =>
-                                        handleDeleteClick(item)
-                                      }
-                                    >
-                                      <TrashIcon className="h-4 w-4" />
-                                    </IconButton>
-                                  </Tooltip>
+                                  
                                 </div>
                               </td>
                             </tr>
@@ -410,24 +374,20 @@ const DiprosesPage = () => {
                     </table>
                   </div>
                 </CardBody>
-              </Card>
-
-              <Pagination
+                <Pagination
                 active={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
               />
+              </Card>
+
+          
             </>
           )}
         </div>
       </div>
 
-      <Modal
-        open={deleteOpen}
-        handleOpen={handleDeleteOpen}
-        onSubmit={handleDeleteConfirm}
-        type="delete"
-      />
+      
     </div>
   );
 };

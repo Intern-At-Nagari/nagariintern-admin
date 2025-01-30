@@ -40,10 +40,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
+import AnimatedButton from "../components/AnimatedButton";
+import Pagination from "../components/Pagination";
+
 
 // Print Modal Component
 const PrintModal = React.memo(
-  ({ open, onClose, printForm, onSubmit, onChange, type }) => {
+  ({ open, onClose, printForm, onSubmit, onChange, type, isLoading }) => {
     const handleInputChange = useCallback(
       (e, field) => {
         onChange(field, e.target.value);
@@ -90,13 +93,17 @@ const PrintModal = React.memo(
             />
           </div>
         </DialogBody>
-        <DialogFooter>
-          <Button variant="text" color="red" onClick={onClose} className="mr-1">
-            <span>Cancel</span>
+        <DialogFooter className="space-x-2">
+          <Button variant="text" color="red" onClick={onClose}>
+            Cancel
           </Button>
-          <Button variant="gradient" color="blue" onClick={onSubmit}>
-            <span>Confirm</span>
-          </Button>
+          <AnimatedButton
+            onClick={onSubmit}
+            disabled={isLoading}
+            isLoading={isLoading}
+          >
+            Confirm
+          </AnimatedButton>
         </DialogFooter>
       </Dialog>
     );
@@ -104,14 +111,13 @@ const PrintModal = React.memo(
 );
 
 // Upload Modal Component
-const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
+const UploadModal = React.memo(({ open, onClose, onSubmit, isLoading }) => {
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile && selectedFile.size <= 5242880) {
-      // 5MB
       setFile(selectedFile);
     } else {
       toast.error("File size should be less than 5MB");
@@ -121,11 +127,7 @@ const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+    setDragActive(e.type === "dragenter" || e.type === "dragover");
   };
 
   const handleDrop = (e) => {
@@ -136,7 +138,6 @@ const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile && droppedFile.type === "application/pdf") {
       if (droppedFile.size <= 5242880) {
-        // 5MB
         setFile(droppedFile);
       } else {
         toast.error("File size should be less than 5MB");
@@ -168,7 +169,7 @@ const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
           <div className="text-center">
             <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400" />
             <div className="mt-4 flex text-sm text-gray-600 justify-center">
-              <label className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 ">
+              <label className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500">
                 <span>Upload a file</span>
               </label>
               <p className="pl-1">or drag and drop</p>
@@ -191,18 +192,17 @@ const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
           )}
         </div>
       </DialogBody>
-      <DialogFooter>
-        <Button variant="text" color="red" onClick={onClose} className="mr-1">
-          <span>Cancel</span>
+      <DialogFooter className="space-x-2">
+        <Button variant="text" color="red" onClick={onClose}>
+          Cancel
         </Button>
-        <Button
-          variant="gradient"
-          color="blue"
+        <AnimatedButton
           onClick={() => onSubmit(file)}
-          disabled={!file}
+          disabled={!file || isLoading}
+          isLoading={isLoading}
         >
-          <span>Upload</span>
-        </Button>
+          Upload
+        </AnimatedButton>
       </DialogFooter>
     </Dialog>
   );
@@ -216,7 +216,7 @@ const TableView = ({ participants, type, formatDate }) => (
           {[
             "No",
             "Nama",
-            type === "Perguruan Tinggi" ? "NIM" : "NISN", 
+            type === "Perguruan Tinggi" ? "NIM" : "NISN",
             "Email",
             "No. HP",
             "Unit Kerja",
@@ -319,9 +319,11 @@ const DiterimaDetailPage = () => {
   const { type, name, prodi, idInstitusi, idProdi } = location.state || {};
 
   const [participants, setParticipants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [printOpen, setPrintOpen] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [isListView, setIsListView] = useState(false);
   const [printForm, setPrintForm] = useState({
@@ -332,6 +334,9 @@ const DiterimaDetailPage = () => {
     prodi: "",
     perihal_detail: "",
   });
+
+
+  
 
   const handlePrintFormChange = useCallback((field, value) => {
     setPrintForm((prev) => ({
@@ -385,6 +390,7 @@ const DiterimaDetailPage = () => {
   };
 
   const handlePrintSubmit = useCallback(async () => {
+    setPrintLoading(true);
     try {
       const token = localStorage.getItem("token");
 
@@ -453,10 +459,13 @@ const DiterimaDetailPage = () => {
         console.error("Error message:", err.message);
         toast.error(`Gagal membuat surat! ${err.message}`);
       }
+    } finally {
+      setPrintLoading(false);
     }
   }, [printForm, type, idInstitusi, idProdi]);
 
   const handleUpload = async (file) => {
+    setUploadLoading(true);
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
@@ -483,6 +492,8 @@ const DiterimaDetailPage = () => {
         err.response?.data?.message || "Gagal mengirim surat balasan!"
       );
       console.error("Error sending letter:", err);
+    } finally {
+      setUploadLoading(false);
     }
   };
 
@@ -697,7 +708,10 @@ const DiterimaDetailPage = () => {
                   </div>
                 </CardBody>
               </Card>
-            ))
+              
+            )
+          )
+            
           )}
         </div>
       </div>
@@ -708,11 +722,13 @@ const DiterimaDetailPage = () => {
         onSubmit={handlePrintSubmit}
         onChange={handlePrintFormChange}
         type={type}
+        isLoading={printLoading}
       />
       <UploadModal
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
         onSubmit={handleUpload}
+        isLoading={uploadLoading}
       />
     </div>
   );

@@ -10,21 +10,18 @@ import {
 import { EyeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
-import Pagination from "../components/Pagination";
+import Pagination from "../components/Pagination"; // Ensure this is imported
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
-import Modal from "../components/Modal";
 import { useNavigate } from "react-router-dom";
 
 const DiverifikasiPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 10; // Items per page
 
   useEffect(() => {
     fetchData();
@@ -105,7 +102,7 @@ const DiverifikasiPage = () => {
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to the first page when searching
   };
 
   const navigate = useNavigate();
@@ -124,19 +121,7 @@ const DiverifikasiPage = () => {
     return filteredData.slice(startIndex, endIndex);
   };
 
-  const handleDeleteClick = (item) => {
-    setSelectedItem(item);
-    setDeleteOpen(true);
-  };
-
-  const handleDeleteConfirm = () => {
-    // Handle delete logic here
-    setDeleteOpen(false);
-    setSelectedItem(null);
-  };
-
-  const handleDeleteOpen = () => setDeleteOpen(!deleteOpen);
-
+ 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
@@ -299,23 +284,18 @@ const DiverifikasiPage = () => {
                   </table>
                 </div>
               </CardBody>
+              {/* Pagination Component */}
+              <Pagination
+                active={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </Card>
           )}
-
-          <Pagination
-            active={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
         </div>
       </div>
 
-      <Modal
-        open={deleteOpen}
-        handleOpen={handleDeleteOpen}
-        onSubmit={handleDeleteConfirm}
-        type="delete"
-      />
+      
     </div>
   );
 };

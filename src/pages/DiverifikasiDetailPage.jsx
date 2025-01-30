@@ -35,16 +35,18 @@ import {
   ListBulletIcon,
   ViewColumnsIcon,
   DocumentIcon,
-  XMarkIcon
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 import ModalIframe from "../components/ModalIframe";
+import AnimatedButton from "../components/AnimatedButton";
+import { set } from "date-fns";
 
 const PrintModal = React.memo(
-  ({ open, onClose, printForm, onSubmit, onChange, type }) => {
+  ({ open, onClose, printForm, onSubmit, onChange, type, isLoading }) => {
     const handleInputChange = useCallback(
       (e, field) => {
         onChange(field, e.target.value);
@@ -82,7 +84,7 @@ const PrintModal = React.memo(
               value={printForm.institusi}
               onChange={(e) => handleInputChange(e, "institusi")}
             />
-            
+
             {type === "Perguruan Tinggi" && (
               <Input
                 label="Program Studi"
@@ -101,16 +103,20 @@ const PrintModal = React.memo(
           <Button variant="text" color="red" onClick={onClose} className="mr-1">
             <span>Cancel</span>
           </Button>
-          <Button variant="gradient" color="blue" onClick={onSubmit}>
-            <span>Confirm</span>
-          </Button>
+          <AnimatedButton
+            onClick={onSubmit}
+            disabled={isLoading}
+            isLoading={isLoading}
+          >
+            Confirm
+          </AnimatedButton>
         </DialogFooter>
       </Dialog>
     );
   }
 );
 
-const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
+const UploadModal = React.memo(({ open, onClose, onSubmit, isLoading }) => {
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
 
@@ -201,14 +207,13 @@ const UploadModal = React.memo(({ open, onClose, onSubmit }) => {
         <Button variant="text" color="red" onClick={onClose} className="mr-1">
           <span>Cancel</span>
         </Button>
-        <Button
-          variant="gradient"
-          color="blue"
+        <AnimatedButton
           onClick={() => onSubmit(file)}
-          disabled={!file}
+          disabled={!file || isLoading}
+          isLoading={isLoading}
         >
-          <span>Upload</span>
-        </Button>
+          Upload
+        </AnimatedButton>
       </DialogFooter>
     </Dialog>
   );
@@ -341,13 +346,15 @@ const DiverifikasiDetailPage = () => {
     location.state || {};
 
   const [participants, setParticipants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [printOpen, setPrintOpen] = useState(false);
   const [isListView, setIsListView] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [isWaliModalOpen, setIsWaliModalOpen] = useState(false);
   const [isPribadiModalOpen, setIsPribadiModalOpen] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState("");
   const [printForm, setPrintForm] = useState({
     nomorSurat: "",
@@ -418,6 +425,7 @@ const DiverifikasiDetailPage = () => {
   const handlePribadiModal = () => setIsPribadiModalOpen(!isPribadiModalOpen);
 
   const handlePrintSubmit = useCallback(async () => {
+    setPrintLoading(true);
     try {
       const token = localStorage.getItem("token");
 
@@ -470,10 +478,13 @@ const DiverifikasiDetailPage = () => {
     } catch (err) {
       console.error("Error generating letter:", err);
       toast.error(err.response?.data?.message || "Gagal membuat surat!");
+    } finally{
+      setPrintLoading(false);
     }
   }, [printForm, type, idInstitusi, idProdi, idUnitKerja]);
 
   const handleUpload = async (file) => {
+    setUploadLoading(true);
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
@@ -500,6 +511,8 @@ const DiverifikasiDetailPage = () => {
         err.response?.data?.message || "Gagal mengirim surat balasan!"
       );
       console.error("Error sending letter:", err);
+    } finally {
+      setUploadLoading(false);
     }
   };
 
@@ -806,6 +819,7 @@ const DiverifikasiDetailPage = () => {
         onSubmit={handlePrintSubmit}
         onChange={handlePrintFormChange}
         type={type}
+        isLoading={printLoading}
       />
       <ModalIframe
         isOpen={isWaliModalOpen}
@@ -819,10 +833,11 @@ const DiverifikasiDetailPage = () => {
         pdfUrl={selectedPdfUrl}
         title="Surat Pernyataan Pribadi"
       />
-      <UploadModal
+     <UploadModal
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
         onSubmit={handleUpload}
+        isLoading={uploadLoading}
       />
     </div>
   );

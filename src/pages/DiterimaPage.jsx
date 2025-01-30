@@ -16,12 +16,15 @@ import {
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../components/Pagination"; // Import the Pagination component
 
 const DiterimaPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [data, setData] = useState({ universities: [], schools: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Pagination state
+  const [itemsPerPage] = useState(10); // Items per page
 
   useEffect(() => {
     fetchData();
@@ -54,6 +57,7 @@ const DiterimaPage = () => {
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to the first page when searching
   };
 
   const navigate = useNavigate();
@@ -66,7 +70,7 @@ const DiterimaPage = () => {
         prodi: prodi.nama_prodi,
         total: prodi.total_diterima,
         idInstitusi: uni.id_univ,
-        idProdi: prodi.id_prodi
+        idProdi: prodi.id_prodi,
       }))
     ),
     ...data.schools.map((school) => ({
@@ -75,7 +79,7 @@ const DiterimaPage = () => {
       prodi: "-",
       total: school.total_diterima,
       idInstitusi: school.id_smk,
-      idProdi: null
+      idProdi: null,
     })),
   ].filter(
     (item) =>
@@ -83,13 +87,24 @@ const DiterimaPage = () => {
       item.prodi.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
       <div className="px-4 md:px-8 pb-8">
         <div className="max-w-7xl mx-auto">
           <BreadcrumbsComponent />
-          
+
           <div className="mb-4">
             <div className="relative flex w-full max-w-[24rem]">
               <Input
@@ -176,11 +191,11 @@ const DiterimaPage = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredData.map((item, index) => (
+                      {currentItems.map((item, index) => (
                         <tr key={index} className="even:bg-gray-100/50">
                           <td className="p-4">
                             <Typography variant="small" color="blue-gray">
-                              {index + 1}
+                              {indexOfFirstItem + index + 1}
                             </Typography>
                           </td>
                           <td className="p-4">
@@ -220,7 +235,7 @@ const DiterimaPage = () => {
                                         name: item.name,
                                         prodi: item.prodi,
                                         idInstitusi: item.idInstitusi,
-                                        idProdi: item.idProdi
+                                        idProdi: item.idProdi,
                                       },
                                     })
                                   }
@@ -243,9 +258,14 @@ const DiterimaPage = () => {
                       )}
                     </tbody>
                   </table>
-                  
                 </div>
               </CardBody>
+              {/* Pagination Component */}
+              <Pagination
+                active={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
             </Card>
           )}
         </div>
