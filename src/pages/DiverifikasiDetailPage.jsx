@@ -43,10 +43,10 @@ import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 import ModalIframe from "../components/ModalIframe";
 import AnimatedButton from "../components/AnimatedButton";
-import { set } from "date-fns";
 
-const PrintModal = React.memo(
-  ({ open, onClose, printForm, onSubmit, onChange, type, isLoading }) => {
+
+const PrintModal = React.memo(({ open, onClose, printForm, onSubmit, onChange, type, isLoading }) => {
+  console.log("PrintModal received printForm:", printForm);
     const handleInputChange = useCallback(
       (e, field) => {
         onChange(field, e.target.value);
@@ -360,6 +360,7 @@ const DiverifikasiDetailPage = () => {
     nomorSurat: "",
     perihal: "",
     pejabat: "",
+    terbilang: "",
     institusi: "",
     prodi: "",
     tmptMagang: "",
@@ -378,6 +379,10 @@ const DiverifikasiDetailPage = () => {
       [field]: value,
     }));
   }, []);
+  const toTitleCase = (str) => {
+    return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
 
   useEffect(() => {
     fetchData();
@@ -388,6 +393,13 @@ const DiverifikasiDetailPage = () => {
       const participant = participants[0];
       setPrintForm((prev) => ({
         ...prev,
+        institusi: toTitleCase(participant.institusi || ""),
+        prodi: type === "Perguruan Tinggi" ? toTitleCase(participant.program_studi || "") : toTitleCase(participant.jurusan || ""),
+        nomorSurat: prev.nomorSurat,
+        perihal: prev.perihal,
+        pejabat: prev.pejabat,
+        terbilang: prev.terbilang,
+        tmptMagang: toTitleCase(participant.unit_kerja || "")
       }));
     }
   }, [participants, type]);
@@ -397,21 +409,28 @@ const DiverifikasiDetailPage = () => {
       setLoading(true);
       const token = localStorage.getItem("token");
       let url;
-
+  
       if (type === "Perguruan Tinggi") {
         url = `http://localhost:3000/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
       } else {
         url = `http://localhost:3000/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
       }
-
+  
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-      console.log("response:", response.data);
-      setParticipants(response.data || []);
+      
+      console.log("API Response:", response.data);
+      
+      if (response.data && response.data.length > 0) {
+        setParticipants(response.data);
+        const firstParticipant = response.data[0];
+        console.log("First participant data:", firstParticipant);
+      }
+      
       setError(null);
     } catch (err) {
       setError("Failed to fetch data. Please try again later.");
@@ -420,7 +439,6 @@ const DiverifikasiDetailPage = () => {
       setLoading(false);
     }
   };
-
   const handleWaliModal = () => setIsWaliModalOpen(!isWaliModalOpen);
   const handlePribadiModal = () => setIsPribadiModalOpen(!isPribadiModalOpen);
 

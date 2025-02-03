@@ -8,15 +8,14 @@ import MappingPage from "./pages/MappingPage";
 import NotFound from "./pages/NotFound";
 import Diverifikasi from "./pages/DiverifikasiPage";
 import Diterima from "./pages/DiterimaPage";
-import SedangBerlangsungPage from "./pages/SedangBerlangsungPage";
-import SelesaiPage from "./pages/SelesaiPage";
-import CetakSertifPage from "./pages/CetakSertifPage";
 import AnggaranPage from "./pages/AnggaranPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CustomAlert from "./components/CustomAlert";
 import DiterimaDetailPage from "./pages/DiterimaDetailPage";
 import "./index.css";
 import DiverifikasiDetailPage from "./pages/DiverifikasiDetailPage";
+import SchedulePage from "./pages/SchedulePage";
+import CreateAccountPage from "./pages/CreateAccountPage";
 
 function App() {
   return (
@@ -74,30 +73,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/sedang-berlangsung"
-          element={
-            <ProtectedRoute>
-              <SedangBerlangsungPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/selesai"
-          element={
-            <ProtectedRoute>
-              <SelesaiPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/cetak-sertif"
-          element={
-            <ProtectedRoute>
-              <CetakSertifPage />
-            </ProtectedRoute>
-          }
-        />
+       
+  
         <Route
           path="/anggaran"
           element={
@@ -114,6 +91,24 @@ function App() {
             </ProtectedRoute>
           }
           />
+        
+        <Route
+          path="/atur-jadwal-pendaftaran"
+          element={
+            <ProtectedRoute>
+              <SchedulePage />
+            </ProtectedRoute>
+          }
+          />
+        <Route
+          path="/tambah-akun-cabang"
+          element={
+            <ProtectedRoute>
+              <CreateAccountPage />
+            </ProtectedRoute>
+          }
+          />
+
         <Route path="/intern/diterima/detail" element={<DiterimaDetailPage />} />
 
         {/* Rute Not Found */}

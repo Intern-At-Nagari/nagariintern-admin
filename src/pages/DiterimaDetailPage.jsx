@@ -41,7 +41,7 @@ import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 import AnimatedButton from "../components/AnimatedButton";
-import Pagination from "../components/Pagination";
+
 
 
 // Print Modal Component
@@ -335,6 +335,9 @@ const DiterimaDetailPage = () => {
     perihal_detail: "",
   });
 
+  const toTitleCase = (str) => {
+    return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  };
 
   
 
@@ -354,6 +357,11 @@ const DiterimaDetailPage = () => {
       const participant = participants[0];
       setPrintForm((prev) => ({
         ...prev,
+        institusi: toTitleCase(participant.institusi || ""),
+        prodi: type === "Perguruan Tinggi" ? toTitleCase(participant.program_studi || "") : toTitleCase(participant.jurusan || ""),
+        nomorSurat: prev.nomorSurat,
+        perihal: prev.perihal,
+        pejabat: prev.pejabat,
       }));
     }
   }, [participants, type]);

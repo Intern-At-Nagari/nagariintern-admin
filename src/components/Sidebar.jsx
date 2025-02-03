@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 import {
   UserCircleIcon,
   DocumentTextIcon,
-  ClipboardDocumentCheckIcon,
-  UserGroupIcon,
-  ArrowRightEndOnRectangleIcon ,
-  ChevronDownIcon,
   Squares2X2Icon,
   Bars3Icon,
   XMarkIcon,
-  BanknotesIcon
+  BanknotesIcon,
+  ChevronDownIcon,
+  ArrowRightEndOnRectangleIcon,
+  UserGroupIcon,
+  Cog6ToothIcon
 } from "@heroicons/react/24/outline";
 import { Typography } from "@material-tailwind/react";
 
@@ -19,7 +19,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [openPermintaan, setOpenPermintaan] = useState(false);
-  const [openMonitoring, setOpenMonitoring] = useState(false);
+  const [openPengaturan, setOpenPengaturan] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [hoveredItem, setHoveredItem] = useState(null);
@@ -31,16 +31,16 @@ const Sidebar = () => {
     setUserData(user);
 
     const path = location.pathname.slice(1);
-    if (["diproses",  "diterima", "diverifikasi"].includes(path)) {
+    if (["diproses", "diterima", "diverifikasi"].includes(path)) {
       setActiveItem(path.charAt(0).toUpperCase() + path.slice(1));
       setActiveDropdown("Permintaan");
       setOpenPermintaan(true);
-    } else if (["sedang-berlangsung", "selesai"].includes(path)) {
+    } else if (["tambah-akun-cabang", "atur-jadwal-pendaftaran"].includes(path)) {
       setActiveItem(
-        path === "sedang-berlangsung" ? "Sedang Berlangsung" : "Selesai"
+        path === "tambah-akun-cabang" ? "Buat Akun Cabang" : "Atur Jadwal Pendaftaran"
       );
-      setActiveDropdown("Monitoring");
-      setOpenMonitoring(true);
+      setActiveDropdown("Pengaturan");
+      setOpenPengaturan(true);
     } else if (path === "mapping") {
       setActiveItem("Pemetaan");
     } else if (path === "anggaran") {
@@ -63,10 +63,11 @@ const Sidebar = () => {
     setActiveDropdown(dropdown);
     if (dropdown === "Permintaan") {
       setOpenPermintaan(true);
-    } else if (dropdown === "Monitoring") {
-      setOpenMonitoring(true);
+    } else if (dropdown === "Pengaturan") {
+      setOpenPengaturan(true);
     }
   };
+
   const getPemetaanClassName = () => {
     const isActive = activeItem === "Pemetaan";
     const isHovered = hoveredItem === "Pemetaan";
@@ -78,6 +79,7 @@ const Sidebar = () => {
           : "hover:bg-white/20 hover:text-white hover:translate-x-1"
       }`;
   };
+
   const getAnggaranClassName = () => {
     const isActive = activeItem === "Anggaran";
     const isHovered = hoveredItem === "Anggaran";
@@ -103,13 +105,21 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => {
-    // Hapus data yang terkait dengan sesi pengguna
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
-    // Arahkan pengguna ke halaman login
     navigate("/");
   };
+
+  const pengaturanItems = [
+    {
+      label: "Buat Akun Cabang",
+      path: "/tambah-akun-cabang",
+    },
+    { 
+      label: "Atur Jadwal Pendaftaran", 
+      path: "/atur-jadwal-pendaftaran" 
+    },
+  ];
 
   return (
     <>
@@ -164,7 +174,11 @@ const Sidebar = () => {
               {/* Permintaan Dropdown */}
               <button
                 onClick={() => setOpenPermintaan(!openPermintaan)}
-                className="flex items-center justify-between w-full p-3 hover:bg-white/20 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                className={`flex items-center justify-between w-full p-3 rounded-xl transition-all duration-300 ${
+                  activeDropdown === "Permintaan" 
+                  ? "bg-white/20 text-white translate-x-1"
+                  : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <DocumentTextIcon className="h-5 w-5" />
@@ -182,11 +196,15 @@ const Sidebar = () => {
                 }`}
               >
                 <div className="ml-7 space-y-1 pt-1">
-                  {["Diproses",  "Diterima", "Diverifikasi"].map((item) => (
+                  {["Diproses", "Diterima", "Diverifikasi"].map((item) => (
                     <a
                       key={item}
                       href={`/${item.toLowerCase()}`}
-                      onClick={() => handleItemClick(item, "Permintaan")}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(`/${item.toLowerCase()}`);
+                        handleItemClick(item, "Permintaan");
+                      }}
                       onMouseEnter={() => setHoveredItem(item)}
                       onMouseLeave={() => setHoveredItem(null)}
                       className={getItemClassName(item, "Permintaan")}
@@ -197,43 +215,45 @@ const Sidebar = () => {
                 </div>
               </div>
 
-              {/* Monitoring Dropdown */}
+              {/* Pengaturan Sistem Dropdown */}
               <button
-                onClick={() => setOpenMonitoring(!openMonitoring)}
-                className="flex items-center justify-between w-full p-3 hover:bg-white/20 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                onClick={() => setOpenPengaturan(!openPengaturan)}
+                className={`flex items-center justify-between w-full p-3 rounded-xl transition-all duration-300 ${
+                  activeDropdown === "Pengaturan"
+                  ? "bg-white/20 text-white translate-x-1"
+                  : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+                }`}
               >
                 <div className="flex items-center gap-3">
-                  <ClipboardDocumentCheckIcon className="h-5 w-5" />
+                  <Cog6ToothIcon className="h-5 w-5" />
                   <span className="font-medium text-white">
-                    Monitoring Peserta
+                    Pengaturan Sistem
                   </span>
                 </div>
                 <ChevronDownIcon
                   className={`h-4 w-4 transition-transform duration-500 ease-in-out ${
-                    openMonitoring ? "rotate-180" : "rotate-0"
+                    openPengaturan ? "rotate-180" : "rotate-0"
                   }`}
                 />
               </button>
               <div
                 className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  openMonitoring ? "max-h-32 opacity-100" : "max-h-0 opacity-0"
+                  openPengaturan ? "max-h-32 opacity-100" : "max-h-0 opacity-0"
                 }`}
               >
                 <div className="ml-7 space-y-1 pt-1">
-                  {[
-                    {
-                      label: "Sedang Berlangsung",
-                      path: "/sedang-berlangsung",
-                    },
-                    { label: "Selesai", path: "/selesai" },
-                  ].map(({ label, path }) => (
+                  {pengaturanItems.map(({ label, path }) => (
                     <a
                       key={label}
                       href={path}
-                      onClick={() => handleItemClick(label, "Monitoring")}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(path);
+                        handleItemClick(label, "Pengaturan");
+                      }}
                       onMouseEnter={() => setHoveredItem(label)}
                       onMouseLeave={() => setHoveredItem(null)}
-                      className={getItemClassName(label, "Monitoring")}
+                      className={getItemClassName(label, "Pengaturan")}
                     >
                       {label}
                     </a>
@@ -244,7 +264,11 @@ const Sidebar = () => {
               {/* Pemetaan Link */}
               <a
                 href="/mapping"
-                onClick={() => setActiveItem("Pemetaan")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/mapping");
+                  setActiveItem("Pemetaan");
+                }}
                 onMouseEnter={() => setHoveredItem("Pemetaan")}
                 onMouseLeave={() => setHoveredItem(null)}
                 className={getPemetaanClassName()}
@@ -252,10 +276,15 @@ const Sidebar = () => {
                 <UserGroupIcon className="h-5 w-5" />
                 <span className="font-medium text-white">Pemetaan</span>
               </a>
+
               {/* Anggaran Link */}
               <a
                 href="/anggaran"
-                onClick={() => setActiveItem("Anggaran")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/anggaran");
+                  setActiveItem("Anggaran");
+                }}
                 onMouseEnter={() => setHoveredItem("Anggaran")}
                 onMouseLeave={() => setHoveredItem(null)}
                 className={getAnggaranClassName()}

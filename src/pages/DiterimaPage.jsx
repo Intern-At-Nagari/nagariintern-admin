@@ -8,10 +8,12 @@ import {
   Input,
   Spinner,
   Tooltip,
+  Button
 } from "@material-tailwind/react";
 import {
   MagnifyingGlassIcon,
   EyeIcon,
+  PrinterIcon
 } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
@@ -104,6 +106,19 @@ const DiterimaPage = () => {
       <div className="px-4 md:px-8 pb-8">
         <div className="max-w-7xl mx-auto">
           <BreadcrumbsComponent />
+          <div className="flex justify-between items-center mb-4">
+           
+            <div className="flex gap-2">
+              <Button
+                color="blue"
+                className="flex items-center gap-2"
+                // onClick={handlePrintOpen}
+              >
+                <PrinterIcon className="h-4 w-4" /> Cetak Lampiran Rekomendasi
+              </Button>
+           
+            </div>
+          </div>
 
           <div className="mb-4">
             <div className="relative flex w-full max-w-[24rem]">

@@ -8,25 +8,30 @@ const routeMap = {
   '/diproses': ['Home', 'Permintaan', 'Diproses'],
   '/diverifikasi': ['Home', 'Permintaan', 'Diverifikasi'],
   '/diterima': ['Home', 'Permintaan', 'Diterima'],
-  '/sedang-berlangsung': ['Home', 'Monitoring Peserta', 'Sedang Berlangsung'],
-  '/monitoring/completed': ['Home', 'Monitoring Peserta', 'Selesai'],
   '/mapping': ['Home', 'Pemetaan'],
-  '/selesai': ['Home','Monitoring', 'Selesai'],
-  '/cetak-sertif': ['Home', 'Cetak Sertifikat'],
   '/anggaran': ['Home', 'Anggaran'],
   '/intern/diterima/detail': ['Home', 'Permintaan', 'Diterima', 'Detail'],
   '/diverifikasi/detail': ['Home', 'Permintaan', 'Diverifikasi', 'Detail'],
+  '/atur-jadwal-pendaftaran': ['Home','Pengaturan Sistem', 'Jadwal'],
+  '/tambah-akun-cabang':['Home','Pengaturan Sistem', 'Buat Akun Cabang'],
+};
+
+// Helper function to reverse map paths to routes
+const getRouteForPaths = (paths) => {
+  const pathString = paths.join('/');
+  // Find the key in routeMap that matches the pathString
+  return Object.keys(routeMap).find((key) => routeMap[key].join('/') === pathString);
 };
 
 const BreadcrumbsComponent = () => {
   const pathname = window.location.pathname;
-  
+
   const getPathsForRoute = (path) => {
     // Handle detail/:id route
     if (path.match(/^\/detail\/\d+$/)) {
-      return ['Home', 'Permintaan', 'Detail'];
+      return ['Home', 'Permintaan', 'Diproses', 'Detail'];
     }
-    
+
     // Handle other static routes
     return routeMap[path] || ['Home'];
   };
@@ -42,6 +47,9 @@ const BreadcrumbsComponent = () => {
         >
           {paths.map((path, index) => {
             const isLast = index === paths.length - 1;
+            const currentPaths = paths.slice(0, index + 1); // Get the current path slice
+            const route = getRouteForPaths(currentPaths); // Get the corresponding route
+
             return isLast ? (
               <span key={path} className="text-blue-gray-900 font-medium">
                 {path}
@@ -49,7 +57,7 @@ const BreadcrumbsComponent = () => {
             ) : (
               <a
                 key={path}
-                href={index === 0 ? "/dashboard" : "#"}
+                href={route || "/"} // Use the route or fallback to "/"
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
               >
                 {index === 0 && <HomeIcon className="h-4 w-4" />}
