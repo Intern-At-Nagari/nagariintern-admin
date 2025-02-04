@@ -450,7 +450,10 @@ const DetailPage = () => {
               <Button
                 variant="filled"
                 color={modalType === "reject" ? "red" : "blue"}
-                onClick={handleSubmit}
+                onClick={async () => {
+                  await handleSubmit();
+                  navigate("/diproses");
+                }}
                 disabled={
                   modalType === "accept" &&
                   (!selectedUnit ||

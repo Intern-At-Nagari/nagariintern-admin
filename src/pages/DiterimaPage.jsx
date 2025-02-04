@@ -8,25 +8,36 @@ import {
   Input,
   Spinner,
   Tooltip,
-  Button
+  Button,
+  Dialog,
 } from "@material-tailwind/react";
 import {
   MagnifyingGlassIcon,
   EyeIcon,
-  PrinterIcon
+  PrinterIcon,
 } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { useNavigate } from "react-router-dom";
-import Pagination from "../components/Pagination"; // Import the Pagination component
+import Pagination from "../components/Pagination";
+import { toast } from "react-toastify";
 
 const DiterimaPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [data, setData] = useState({ universities: [], schools: [] });
+  const [data, setData] = useState({
+    universities: [],
+    schools: [],
+    participantDetails: [],
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const [itemsPerPage] = useState(10); // Items per page
+
+  // Add new states for modal
+  const [openPrintModal, setOpenPrintModal] = useState(false);
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false); // Add new state for download loading
 
   useEffect(() => {
     fetchData();
@@ -36,12 +47,15 @@ const DiterimaPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3000/intern/diterima", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.get(
+        "http://localhost:3000/intern/diterima",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       console.log("Data fetched:", response.data);
       setData(response.data);
       setError(null);
@@ -100,6 +114,62 @@ const DiterimaPage = () => {
     setCurrentPage(page);
   };
 
+  // Add handlers for modal
+  const handlePrintOpen = () => setOpenPrintModal(true);
+  const handlePrintClose = () => {
+    setOpenPrintModal(false);
+    setSelectedTypes([]);
+  };
+
+  const handleTypeSelect = (type) => {
+    if (selectedTypes.includes(type)) {
+      setSelectedTypes(selectedTypes.filter((t) => t !== type));
+    } else {
+      setSelectedTypes([...selectedTypes, type]);
+    }
+  };
+
+  const handlePrint = async () => {
+    setIsGenerating(true);
+    const token = localStorage.getItem("token");
+
+    try {
+      for (const type of selectedTypes) {
+        const url =
+          type === "mahasiswa"
+            ? "http://localhost:3000/generate-lampiran-rekomen-mhs"
+            : "http://localhost:3000/generate-lampiran-rekomen-siswa";
+
+        const response = await axios({
+          url,
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob", // Important for file download
+        });
+
+        // Create download link
+        const downloadUrl = window.URL.createObjectURL(
+          new Blob([response.data])
+        );
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.setAttribute("download", `lampiran_${type}.docx`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+      handlePrintClose();
+    } catch (error) {
+      console.error("Error generating document:", error);
+      alert("Gagal menghasilkan dokumen. Silakan coba lagi.");
+    } finally {
+      setIsGenerating(false);
+      toast.success("Dokumen berhasil digenerate.");
+    }
+  };
+
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
@@ -107,16 +177,14 @@ const DiterimaPage = () => {
         <div className="max-w-7xl mx-auto">
           <BreadcrumbsComponent />
           <div className="flex justify-between items-center mb-4">
-           
             <div className="flex gap-2">
               <Button
                 color="blue"
                 className="flex items-center gap-2"
-                // onClick={handlePrintOpen}
+                onClick={handlePrintOpen}
               >
                 <PrinterIcon className="h-4 w-4" /> Cetak Lampiran Rekomendasi
               </Button>
-           
             </div>
           </div>
 
@@ -285,6 +353,51 @@ const DiterimaPage = () => {
           )}
         </div>
       </div>
+
+      {/* Add Print Modal */}
+      <Dialog open={openPrintModal} handler={handlePrintClose}>
+        <div className="p-6">
+          <h3 className="text-lg font-medium mb-4">Pilih Tipe Lampiran</h3>
+
+          <div className="space-y-3">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={selectedTypes.includes("mahasiswa")}
+                onChange={() => handleTypeSelect("mahasiswa")}
+                className="form-checkbox"
+              />
+              <span>Lampiran Mahasiswa</span>
+            </label>
+
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={selectedTypes.includes("siswa")}
+                onChange={() => handleTypeSelect("siswa")}
+                className="form-checkbox"
+              />
+              <span>Lampiran Siswa</span>
+            </label>
+          </div>
+
+          <div className="mt-6 flex justify-end gap-3">
+            <Button variant="text" color="red" onClick={handlePrintClose}>
+              Cancel
+            </Button>
+            <Button color="blue" onClick={handlePrint} disabled={isGenerating}>
+              {isGenerating ? (
+                <div className="flex items-center gap-2">
+                  <Spinner size="sm" />
+                  Generating...
+                </div>
+              ) : (
+                "Cetak"
+              )}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 };

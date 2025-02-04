@@ -42,11 +42,10 @@ import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 import ModalIframe from "../components/ModalIframe";
-import AnimatedButton from "../components/AnimatedButton";
 
-
-const PrintModal = React.memo(({ open, onClose, printForm, onSubmit, onChange, type, isLoading }) => {
-  console.log("PrintModal received printForm:", printForm);
+const PrintModal = React.memo(
+  ({ open, onClose, printForm, onSubmit, onChange, type, isLoading }) => {
+    console.log("PrintModal received printForm:", printForm);
     const handleInputChange = useCallback(
       (e, field) => {
         onChange(field, e.target.value);
@@ -103,13 +102,16 @@ const PrintModal = React.memo(({ open, onClose, printForm, onSubmit, onChange, t
           <Button variant="text" color="red" onClick={onClose} className="mr-1">
             <span>Cancel</span>
           </Button>
-          <AnimatedButton
-            onClick={onSubmit}
-            disabled={isLoading}
-            isLoading={isLoading}
-          >
-            Confirm
-          </AnimatedButton>
+          <Button color="blue" onClick={onSubmit} disabled={isLoading}>
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <Spinner size="sm" />
+                Processing...
+              </div>
+            ) : (
+              "Confirm"
+            )}
+          </Button>
         </DialogFooter>
       </Dialog>
     );
@@ -207,13 +209,20 @@ const UploadModal = React.memo(({ open, onClose, onSubmit, isLoading }) => {
         <Button variant="text" color="red" onClick={onClose} className="mr-1">
           <span>Cancel</span>
         </Button>
-        <AnimatedButton
+        <Button
+          color="blue"
           onClick={() => onSubmit(file)}
           disabled={!file || isLoading}
-          isLoading={isLoading}
         >
-          Upload
-        </AnimatedButton>
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Spinner size="sm" />
+              Uploading...
+            </div>
+          ) : (
+            "Upload"
+          )}
+        </Button>
       </DialogFooter>
     </Dialog>
   );
@@ -353,6 +362,7 @@ const DiverifikasiDetailPage = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [isWaliModalOpen, setIsWaliModalOpen] = useState(false);
   const [isPribadiModalOpen, setIsPribadiModalOpen] = useState(false);
+  const [isTabunganModalOpen, setTabunganModalOpen] = useState(false);
   const [printLoading, setPrintLoading] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState("");
@@ -383,7 +393,6 @@ const DiverifikasiDetailPage = () => {
     return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-
   useEffect(() => {
     fetchData();
   }, [idInstitusi, idProdi, idUnitKerja]);
@@ -394,12 +403,15 @@ const DiverifikasiDetailPage = () => {
       setPrintForm((prev) => ({
         ...prev,
         institusi: toTitleCase(participant.institusi || ""),
-        prodi: type === "Perguruan Tinggi" ? toTitleCase(participant.program_studi || "") : toTitleCase(participant.jurusan || ""),
+        prodi:
+          type === "Perguruan Tinggi"
+            ? toTitleCase(participant.program_studi || "")
+            : toTitleCase(participant.jurusan || ""),
         nomorSurat: prev.nomorSurat,
         perihal: prev.perihal,
         pejabat: prev.pejabat,
         terbilang: prev.terbilang,
-        tmptMagang: toTitleCase(participant.unit_kerja || "")
+        tmptMagang: toTitleCase(participant.unit_kerja || ""),
       }));
     }
   }, [participants, type]);
@@ -409,28 +421,28 @@ const DiverifikasiDetailPage = () => {
       setLoading(true);
       const token = localStorage.getItem("token");
       let url;
-  
+
       if (type === "Perguruan Tinggi") {
         url = `http://localhost:3000/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
       } else {
         url = `http://localhost:3000/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
       }
-  
+
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-      
+
       console.log("API Response:", response.data);
-      
+
       if (response.data && response.data.length > 0) {
         setParticipants(response.data);
         const firstParticipant = response.data[0];
         console.log("First participant data:", firstParticipant);
       }
-      
+
       setError(null);
     } catch (err) {
       setError("Failed to fetch data. Please try again later.");
@@ -441,6 +453,7 @@ const DiverifikasiDetailPage = () => {
   };
   const handleWaliModal = () => setIsWaliModalOpen(!isWaliModalOpen);
   const handlePribadiModal = () => setIsPribadiModalOpen(!isPribadiModalOpen);
+  const handleTabunganModal = () => setTabunganModalOpen(!isTabunganModalOpen);
 
   const handlePrintSubmit = useCallback(async () => {
     setPrintLoading(true);
@@ -496,7 +509,7 @@ const DiverifikasiDetailPage = () => {
     } catch (err) {
       console.error("Error generating letter:", err);
       toast.error(err.response?.data?.message || "Gagal membuat surat!");
-    } finally{
+    } finally {
       setPrintLoading(false);
     }
   }, [printForm, type, idInstitusi, idProdi, idUnitKerja]);
@@ -531,6 +544,7 @@ const DiverifikasiDetailPage = () => {
       console.error("Error sending letter:", err);
     } finally {
       setUploadLoading(false);
+      navigate("/diverifikasi");
     }
   };
 
@@ -756,66 +770,54 @@ const DiverifikasiDetailPage = () => {
                     </Typography>
                     {participant.dokumen_urls &&
                     participant.dokumen_urls.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {participant.dokumen_urls[0] && (
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outlined"
-                              className="flex items-center gap-2 normal-case flex-1"
-                              onClick={() =>
-                                window.open(
-                                  `http://localhost:3000/uploads/${participant.dokumen_urls[0]}`,
-                                  "_blank"
-                                )
-                              }
-                            >
-                              <ArrowDownTrayIcon className="w-4 h-4" />
-                              Surat Pernyataan Wali
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              color="blue"
-                              className="flex items-center gap-2"
-                              onClick={() => {
-                                setSelectedPdfUrl(
-                                  `http://localhost:3000/uploads/${participant.dokumen_urls[0]}`
-                                );
-                                handleWaliModal();
-                              }}
-                            >
-                              <DocumentMagnifyingGlassIcon className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <Button
+                            variant="outlined"
+                            color="blue"
+                            className="flex items-center gap-2 normal-case"
+                            onClick={() => {
+                              setSelectedPdfUrl(
+                                `http://localhost:3000/uploads/${participant.dokumen_urls[0]}`
+                              );
+                              handleWaliModal();
+                            }}
+                          >
+                            <DocumentMagnifyingGlassIcon className="w-4 h-4" />
+                            Lihat Surat Pernyataan Wali
+                          </Button>
                         )}
                         {participant.dokumen_urls[1] && (
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outlined"
-                              className="flex items-center gap-2 normal-case flex-1"
-                              onClick={() =>
-                                window.open(
-                                  `http://localhost:3000/uploads/${participant.dokumen_urls[1]}`,
-                                  "_blank"
-                                )
-                              }
-                            >
-                              <ArrowDownTrayIcon className="w-4 h-4" />
-                              Surat Pernyataan Pribadi
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              color="blue"
-                              className="flex items-center gap-2"
-                              onClick={() => {
-                                setSelectedPdfUrl(
-                                  `http://localhost:3000/uploads/${participant.dokumen_urls[1]}`
-                                );
-                                handlePribadiModal();
-                              }}
-                            >
-                              <DocumentMagnifyingGlassIcon className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <Button
+                            variant="outlined"
+                            color="blue"
+                            className="flex items-center gap-2 normal-case"
+                            onClick={() => {
+                              setSelectedPdfUrl(
+                                `http://localhost:3000/uploads/${participant.dokumen_urls[1]}`
+                              );
+                              handlePribadiModal();
+                            }}
+                          >
+                            <DocumentMagnifyingGlassIcon className="w-4 h-4" />
+                            Lihat Surat Pernyataan Pribadi
+                          </Button>
+                        )}
+                        {participant.dokumen_urls[2] && (
+                          <Button
+                            variant="outlined"
+                            color="blue"
+                            className="flex items-center gap-2 normal-case"
+                            onClick={() => {
+                              setSelectedPdfUrl(
+                                `http://localhost:3000/uploads/${participant.dokumen_urls[2]}`
+                              );
+                              handleTabunganModal();
+                            }}
+                          >
+                            <DocumentMagnifyingGlassIcon className="w-4 h-4" />
+                            Lihat Buku Tabungan
+                          </Button>
                         )}
                       </div>
                     ) : (
@@ -851,7 +853,13 @@ const DiverifikasiDetailPage = () => {
         pdfUrl={selectedPdfUrl}
         title="Surat Pernyataan Pribadi"
       />
-     <UploadModal
+      <ModalIframe
+        isOpen={isTabunganModalOpen}
+        handleOpen={handleTabunganModal}
+        pdfUrl={selectedPdfUrl}
+        title="File Buku Tabungan"
+      />
+      <UploadModal
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
         onSubmit={handleUpload}

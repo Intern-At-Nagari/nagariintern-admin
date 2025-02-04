@@ -40,7 +40,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
-import AnimatedButton from "../components/AnimatedButton";
 
 
 
@@ -97,13 +96,20 @@ const PrintModal = React.memo(
           <Button variant="text" color="red" onClick={onClose}>
             Cancel
           </Button>
-          <AnimatedButton
+          <Button 
+            color="blue"
             onClick={onSubmit}
             disabled={isLoading}
-            isLoading={isLoading}
           >
-            Confirm
-          </AnimatedButton>
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <Spinner size="sm" />
+                Processing...
+              </div>
+            ) : (
+              'Confirm'
+            )}
+          </Button>
         </DialogFooter>
       </Dialog>
     );
@@ -196,13 +202,20 @@ const UploadModal = React.memo(({ open, onClose, onSubmit, isLoading }) => {
         <Button variant="text" color="red" onClick={onClose}>
           Cancel
         </Button>
-        <AnimatedButton
+        <Button
+          color="blue"
           onClick={() => onSubmit(file)}
           disabled={!file || isLoading}
-          isLoading={isLoading}
         >
-          Upload
-        </AnimatedButton>
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Spinner size="sm" />
+              Uploading...
+            </div>
+          ) : (
+            'Upload'
+          )}
+        </Button>
       </DialogFooter>
     </Dialog>
   );
@@ -477,33 +490,36 @@ const DiterimaDetailPage = () => {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append("fileSuratBalasan", file); // Match the field name expected by req.files
-      formData.append("responseArray", JSON.stringify(participants)); // Include the responseArray
+      formData.append("fileSuratBalasan", file); 
+      formData.append("responseArray", JSON.stringify(participants));
 
       const response = await axios.post(
-        `http://localhost:3000/intern/send-surat-balasan`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      `http://localhost:3000/intern/send-surat-balasan`,
+      formData,
+      {
+        headers: {
+        Authorization: `Bearer ${token}`,
+        },
+      }
       );
 
       if (response.data.status === "success") {
-        toast.success("Surat balasan berhasil dikirim!");
-        setUploadOpen(false);
-        console.log("Response:", response.data);
+      toast.success("Surat balasan berhasil dikirim!");
+      setUploadOpen(false);
+      console.log("Response:", response.data);
+      navigate("/diterima"); // Add this line to redirect
       }
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "Gagal mengirim surat balasan!"
+      err.response?.data?.message || "Gagal mengirim surat balasan!"
       );
       console.error("Error sending letter:", err);
     } finally {
       setUploadLoading(false);
     }
-  };
+    };
+
+
 
   const handlePrintOpen = useCallback(() => {
     setPrintOpen((prev) => !prev);
