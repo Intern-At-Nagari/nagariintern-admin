@@ -137,9 +137,9 @@ const DiterimaDetailPage = () => {
       };
 
       if (type === "Perguruan Tinggi") {
-        apiUrl = `${API_BASE_URL}/intern/print/univ/${idInstitusi}/${idProdi}`;
+        apiUrl = `${API_BASE_URL}/intern/diterima/univ/${idInstitusi}/${idProdi}`;
       } else {
-        apiUrl = `${API_BASE_URL}/intern/print/smk/${idInstitusi}`;
+        apiUrl = `${API_BASE_URL}/intern/diterima/smk/${idInstitusi}`;
       }
 
       const response = await axios.post(apiUrl, requestBody, {
@@ -184,7 +184,7 @@ const DiterimaDetailPage = () => {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append("SuratBalasan", file);
+      formData.append("fileSuratBalasan", file);
       formData.append("responseArray", JSON.stringify(participants));
 
       const response = await axios.post(

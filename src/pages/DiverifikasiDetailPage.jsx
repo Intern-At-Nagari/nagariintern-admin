@@ -74,6 +74,9 @@ const DiverifikasiDetailPage = () => {
     setSelectedPdfUrl(`${API_BASE_URL}/uploads/${url}`);
     handleWaliModal();
   };
+  const toTitleCase = (str) => {
+    return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  };
 
   const handlePrintFormChange = useCallback((field, value) => {
     setPrintForm((prev) => ({ ...prev, [field]: value }));
@@ -90,6 +93,22 @@ const DiverifikasiDetailPage = () => {
   useEffect(() => {
     fetchData();
   }, [idInstitusi, idProdi, idUnitKerja]);
+
+  useEffect(() => {
+      if (participants.length > 0) {
+        const participant = participants[0];
+        setPrintForm((prev) => ({
+          ...prev,
+          institusi: toTitleCase(participant.institusi || ""),
+          prodi:
+            type === "Perguruan Tinggi"
+              ? toTitleCase(participant.program_studi || "")
+              : toTitleCase(participant.jurusan || ""),
+          nomorSurat: prev.nomorSurat,
+
+        }));
+      }
+    }, [participants, type]);
 
   const fetchData = async () => {
     try {
