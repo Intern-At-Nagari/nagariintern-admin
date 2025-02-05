@@ -27,6 +27,9 @@ import {
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import axios from "axios";
+import MappingGridView from "../components/MappingGridView";
+import MappingListView from "../components/MappingListView";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const MappingPage = () => {
@@ -35,7 +38,7 @@ const MappingPage = () => {
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState(null);
-  const [isGridView, setIsGridView] = useState(false); // Set default to table view
+  const [isGridView, setIsGridView] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [formData, setFormData] = useState({
@@ -85,6 +88,9 @@ const MappingPage = () => {
     setSelectedBranch(branch);
     setFormData({
       tipe_cabang: branch ? branch.tipe_cabang : "",
+      isCustomQuota: branch ? branch.isCustomQuota : false,
+      kuotaMhs: branch ? branch.kuotaMhs : 0,
+      kuotaSiswa: branch ? branch.kuotaSiswa : 0,
     });
     setOpen(!open);
   };
@@ -186,195 +192,6 @@ const MappingPage = () => {
       )
     : 0;
 
-  const renderGridView = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-      {searchResults.map((branch) => (
-        <Card
-          key={branch.id}
-          className="transform transition-all duration-300 hover:shadow-xl"
-        >
-          <CardBody className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <div className="rounded-xl p-3 bg-blue-500 shadow-blue-500/20 shadow-md">
-                  <MapPinIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <Typography
-                    variant="h6"
-                    color="blue-gray"
-                    className="font-medium"
-                  >
-                    {branch.name}
-                  </Typography>
-                  <div className="space-y-1">
-                    <Typography className="text-sm text-gray-600">
-                      Tipe Cabang:{" "}
-                      {BRANCH_TYPES[branch.tipe_cabang]?.label ||
-                        branch.tipe_cabang}
-                    </Typography>
-                    <Typography className="text-sm text-gray-600">
-                      Kuota Mahasiswa: {branch.sisaKuotaMhs}/{branch.kuotaMhs}
-                    </Typography>
-                    <Typography className="text-sm text-gray-600">
-                      Kuota Siswa: {branch.sisaKuotaSiswa}/{branch.kuotaSiswa}
-                    </Typography>
-                    <Typography className="text-gray-700 text-lg font-bold">
-                      Sisa Kuota: {branch.sisaKuotaMhs + branch.sisaKuotaSiswa}/
-                      {branch.kuotaMhs + branch.kuotaSiswa}
-                    </Typography>
-                  </div>
-                </div>
-              </div>
-              <Tooltip
-                className="bg-blue-500"
-                content="Edit Tipe Cabang"
-                placement="top"
-                interactive={false}
-              >
-                <Button
-                  size="sm"
-                  className="p-2"
-                  color="blue"
-                  onClick={() => handleOpen(branch)}
-                >
-                  <PencilIcon className="h-4 w-4" />
-                </Button>
-              </Tooltip>
-            </div>
-          </CardBody>
-        </Card>
-      ))}
-    </div>
-  );
-
-  const renderListView = () => (
-    <Card className="w-full overflow-x-auto border border-blue-gray-100">
-      <table className="w-full min-w-max table-auto text-left">
-        <thead>
-          <tr className="bg-white">
-            <th className="border-b border-blue-gray-100 p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-semibold leading-none"
-              >
-                Nama Unit
-              </Typography>
-            </th>
-            <th className="border-b border-blue-gray-100 p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-semibold leading-none"
-              >
-                Tipe Cabang
-              </Typography>
-            </th>
-            <th className="border-b border-blue-gray-100 p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-semibold leading-none"
-              >
-                Kuota Mahasiswa
-              </Typography>
-            </th>
-            <th className="border-b border-blue-gray-100 p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-semibold leading-none"
-              >
-                Kuota Siswa
-              </Typography>
-            </th>
-            <th className="border-b border-blue-gray-100 p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-semibold leading-none"
-              >
-                Total Sisa Kuota
-              </Typography>
-            </th>
-            <th className="border-b border-blue-gray-100 p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-semibold leading-none"
-              >
-                Aksi
-              </Typography>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {searchResults.map((branch) => (
-            <tr key={branch.id} className="hover:bg-blue-gray-50 bg-white">
-              <td className="p-4 border-b border-blue-gray-100">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {branch.name}
-                </Typography>
-              </td>
-              <td className="p-4 border-b border-blue-gray-100">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {BRANCH_TYPES[branch.tipe_cabang]?.label ||
-                    branch.tipe_cabang}
-                </Typography>
-              </td>
-              <td className="p-4 border-b border-blue-gray-100">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {branch.sisaKuotaMhs}/{branch.kuotaMhs}
-                </Typography>
-              </td>
-              <td className="p-4 border-b border-blue-gray-100">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {branch.sisaKuotaSiswa}/{branch.kuotaSiswa}
-                </Typography>
-              </td>
-              <td className="p-4 border-b border-blue-gray-100">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {branch.sisaKuotaMhs + branch.sisaKuotaSiswa}/
-                  {branch.kuotaMhs + branch.kuotaSiswa}
-                </Typography>
-              </td>
-              <td className="p-4 border-b border-blue-gray-100">
-                <Button
-                  size="sm"
-                  color="blue"
-                  onClick={() => handleOpen(branch)}
-                >
-                  <PencilIcon className="h-4 w-4" />
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Card>
-  );
-
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
@@ -464,7 +281,11 @@ const MappingPage = () => {
             </Card>
           </div>
 
-          {isGridView ? renderGridView() : renderListView()}
+          {isGridView ? (
+            <MappingGridView searchResults={searchResults} BRANCH_TYPES={BRANCH_TYPES} handleOpen={handleOpen} />
+          ) : (
+            <MappingListView searchResults={searchResults} BRANCH_TYPES={BRANCH_TYPES} handleOpen={handleOpen} />
+          )}
 
           <Dialog open={open} handler={handleOpen}>
             <DialogHeader>

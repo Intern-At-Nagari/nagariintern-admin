@@ -1,330 +1,40 @@
-import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
+import React, { useState, useCallback, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Card,
   CardBody,
   Typography,
-  Spinner,
   Button,
-  Dialog,
-  DialogHeader,
-  DialogBody,
-  DialogFooter,
-  Textarea,
-  Input,
   IconButton,
-  Select,
-  Option,
+  Spinner,
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
+  ViewColumnsIcon,
+  ListBulletIcon,
   PrinterIcon,
+  ArrowUpTrayIcon,
   UserIcon,
   IdentificationIcon,
   EnvelopeIcon,
   PhoneIcon,
   MapPinIcon,
-  BuildingOfficeIcon,
   AcademicCapIcon,
+  BuildingOfficeIcon,
   BuildingOffice2Icon,
   CalendarIcon,
   ClockIcon,
   CalendarDaysIcon,
-  ArrowUpTrayIcon,
-  DocumentIcon,
-  XMarkIcon,
-  ViewColumnsIcon,
-  ListBulletIcon,
 } from "@heroicons/react/24/outline";
-import { useNavigate, useLocation } from "react-router-dom";
+import PrintModal from "../components/DiterimaDetail/PrintModal";
+import UploadModal from "../components/DiterimaDetail/UploadModal";
+import TableView from "../components/DiterimaDetail/TableView";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
+import axios from "axios";
 import { toast } from "react-toastify";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-// Print Modal Component
-const PrintModal = React.memo(
-  ({ open, onClose, printForm, onSubmit, onChange, type, isLoading }) => {
-    const handleInputChange = useCallback(
-      (e, field) => {
-        onChange(field, e.target.value);
-      },
-      [onChange]
-    );
-
-    return (
-      <Dialog open={open} handler={onClose} size="md">
-        <DialogHeader>Print Surat Balasan</DialogHeader>
-        <DialogBody divider className="h-[40vh] overflow-y-auto">
-          <div className="space-y-4">
-            <Input
-              label="Nomor Surat"
-              value={printForm.nomorSurat}
-              onChange={(e) => handleInputChange(e, "nomorSurat")}
-            />
-            <Input
-              label="Perihal"
-              value={printForm.perihal}
-              onChange={(e) => handleInputChange(e, "perihal")}
-            />
-            <Input
-              label="Pejabat"
-              value={printForm.pejabat}
-              onChange={(e) => handleInputChange(e, "pejabat")}
-            />
-            <Input
-              label="Institusi"
-              value={printForm.institusi}
-              onChange={(e) => handleInputChange(e, "institusi")}
-            />
-            {type === "Perguruan Tinggi" && (
-              <Input
-                label="Program Studi"
-                value={printForm.prodi}
-                onChange={(e) => handleInputChange(e, "prodi")}
-              />
-            )}
-            <Textarea
-              label="Detail Perihal"
-              value={printForm.perihal_detail}
-              onChange={(e) => handleInputChange(e, "perihal_detail")}
-            />
-          </div>
-        </DialogBody>
-        <DialogFooter className="space-x-2">
-          <Button variant="text" color="red" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button 
-            color="blue"
-            onClick={onSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <Spinner size="sm" />
-                Processing...
-              </div>
-            ) : (
-              'Confirm'
-            )}
-          </Button>
-        </DialogFooter>
-      </Dialog>
-    );
-  }
-);
-
-// Upload Modal Component
-const UploadModal = React.memo(({ open, onClose, onSubmit, isLoading }) => {
-  const [file, setFile] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.size <= 5242880) {
-      setFile(selectedFile);
-    } else {
-      toast.error("File size should be less than 5MB");
-    }
-  };
-
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(e.type === "dragenter" || e.type === "dragover");
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type === "application/pdf") {
-      if (droppedFile.size <= 5242880) {
-        setFile(droppedFile);
-      } else {
-        toast.error("File size should be less than 5MB");
-      }
-    } else {
-      toast.error("Please upload PDF file only");
-    }
-  };
-
-  return (
-    <Dialog open={open} handler={onClose} size="md">
-      <DialogHeader>Upload Surat Balasan</DialogHeader>
-      <DialogBody divider>
-        <div
-          className={`relative border-2 border-dashed rounded-lg p-6 ${
-            dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
-          }`}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-        >
-          <input
-            type="file"
-            accept=".pdf"
-            onChange={handleFileChange}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          />
-          <div className="text-center">
-            <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <div className="mt-4 flex text-sm text-gray-600 justify-center">
-              <label className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500">
-                <span>Upload a file</span>
-              </label>
-              <p className="pl-1">or drag and drop</p>
-            </div>
-            <p className="text-xs text-gray-500">PDF up to 5MB</p>
-          </div>
-          {file && (
-            <div className="mt-4 flex items-center justify-between p-2 bg-gray-50 rounded-md">
-              <div className="flex items-center">
-                <DocumentIcon className="h-6 w-6 text-blue-500 mr-2" />
-                <span className="text-sm text-gray-500">{file.name}</span>
-              </div>
-              <button
-                onClick={() => setFile(null)}
-                className="p-1 hover:bg-gray-200 rounded-full"
-              >
-                <XMarkIcon className="h-5 w-5 text-gray-500" />
-              </button>
-            </div>
-          )}
-        </div>
-      </DialogBody>
-      <DialogFooter className="space-x-2">
-        <Button variant="text" color="red" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          color="blue"
-          onClick={() => onSubmit(file)}
-          disabled={!file || isLoading}
-        >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <Spinner size="sm" />
-              Uploading...
-            </div>
-          ) : (
-            'Upload'
-          )}
-        </Button>
-      </DialogFooter>
-    </Dialog>
-  );
-});
-
-const TableView = ({ participants, type, formatDate }) => (
-  <div className="overflow-x-auto">
-    <table className="w-full min-w-max table-auto text-left">
-      <thead>
-        <tr>
-          {[
-            "No",
-            "Nama",
-            type === "Perguruan Tinggi" ? "NIM" : "NISN",
-            "Email",
-            "No. HP",
-            "Unit Kerja",
-            "Periode",
-          ].map((head) => (
-            <th
-              key={head}
-              className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
-            >
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal leading-none opacity-70"
-              >
-                {head}
-              </Typography>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {participants.map((participant, index) => (
-          <tr key={index} className="even:bg-blue-gray-50/50">
-            <td className="p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal"
-              >
-                {index + 1}
-              </Typography>
-            </td>
-            <td className="p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal"
-              >
-                {participant.nama_peserta}
-              </Typography>
-            </td>
-            <td className="p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal"
-              >
-                {type === "Perguruan Tinggi"
-                  ? participant.nim
-                  : participant.nisn}
-              </Typography>
-            </td>
-            <td className="p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal"
-              >
-                {participant.email}
-              </Typography>
-            </td>
-            <td className="p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal"
-              >
-                {participant.no_hp}
-              </Typography>
-            </td>
-            <td className="p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal"
-              >
-                {participant.unit_kerja}
-              </Typography>
-            </td>
-            <td className="p-4">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal"
-              >
-                {formatDate(participant.tanggal_mulai)} -{" "}
-                {formatDate(participant.tanggal_selesai)}
-              </Typography>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
 
 const DiterimaDetailPage = () => {
   const navigate = useNavigate();
@@ -352,8 +62,6 @@ const DiterimaDetailPage = () => {
     return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  
-
   const handlePrintFormChange = useCallback((field, value) => {
     setPrintForm((prev) => ({
       ...prev,
@@ -371,7 +79,10 @@ const DiterimaDetailPage = () => {
       setPrintForm((prev) => ({
         ...prev,
         institusi: toTitleCase(participant.institusi || ""),
-        prodi: type === "Perguruan Tinggi" ? toTitleCase(participant.program_studi || "") : toTitleCase(participant.jurusan || ""),
+        prodi:
+          type === "Perguruan Tinggi"
+            ? toTitleCase(participant.program_studi || "")
+            : toTitleCase(participant.jurusan || ""),
         nomorSurat: prev.nomorSurat,
         perihal: prev.perihal,
         pejabat: prev.pejabat,
@@ -426,9 +137,9 @@ const DiterimaDetailPage = () => {
       };
 
       if (type === "Perguruan Tinggi") {
-        apiUrl = `${API_BASE_URL}/intern/diterima/univ/${idInstitusi}/${idProdi}`;
+        apiUrl = `${API_BASE_URL}/intern/print/univ/${idInstitusi}/${idProdi}`;
       } else {
-        apiUrl = `${API_BASE_URL}/intern/diterima/smk/${idInstitusi}`;
+        apiUrl = `${API_BASE_URL}/intern/print/smk/${idInstitusi}`;
       }
 
       const response = await axios.post(apiUrl, requestBody, {
@@ -436,7 +147,7 @@ const DiterimaDetailPage = () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        responseType: "arraybuffer", // Important for handling binary data
+        responseType: "arraybuffer",
       });
 
       // Create blob and download
@@ -444,42 +155,25 @@ const DiterimaDetailPage = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "surat_magang.pdf");
+      link.setAttribute("download", "surat_balasan.pdf");
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
       toast.success("Surat berhasil dibuat!");
-      setPrintForm((prev) => ({
-        ...prev,
+      setPrintForm({
         nomorSurat: "",
-        institusi: "",
-        prodi: "",
         perihal: "",
         pejabat: "",
+        institusi: "",
+        prodi: "",
         perihal_detail: "",
-      }));
+      });
       handlePrintOpen();
     } catch (err) {
       console.error("Error generating letter:", err);
-      if (err.response) {
-        // Server responded with a status other than 200 range
-        console.error("Error response:", err.response.data);
-        toast.error(
-          `Gagal membuat surat! ${
-            err.response.data.message || err.response.statusText
-          }`
-        );
-      } else if (err.request) {
-        // Request was made but no response received
-        console.error("Error request:", err.request);
-        toast.error("Gagal membuat surat! No response from server.");
-      } else {
-        // Something else happened
-        console.error("Error message:", err.message);
-        toast.error(`Gagal membuat surat! ${err.message}`);
-      }
+      toast.error(err.response?.data?.message || "Gagal membuat surat!");
     } finally {
       setPrintLoading(false);
     }
@@ -490,36 +184,33 @@ const DiterimaDetailPage = () => {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append("fileSuratBalasan", file); 
+      formData.append("SuratBalasan", file);
       formData.append("responseArray", JSON.stringify(participants));
 
       const response = await axios.post(
-      `${API_BASE_URL}/intern/send-surat-balasan`,
-      formData,
-      {
-        headers: {
-        Authorization: `Bearer ${token}`,
-        },
-      }
+        `${API_BASE_URL}/intern/send-surat-balasan`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response.data.status === "success") {
-      toast.success("Surat balasan berhasil dikirim!");
-      setUploadOpen(false);
-      console.log("Response:", response.data);
-      navigate("/diterima"); // Add this line to redirect
+        toast.success("Surat balasan berhasil dikirim!");
+        setUploadOpen(false);
       }
     } catch (err) {
       toast.error(
-      err.response?.data?.message || "Gagal mengirim surat balasan!"
+        err.response?.data?.message || "Gagal mengirim surat balasan!"
       );
       console.error("Error sending letter:", err);
     } finally {
       setUploadLoading(false);
+      navigate("/diterima");
     }
-    };
-
-
+  };
 
   const handlePrintOpen = useCallback(() => {
     setPrintOpen((prev) => !prev);
@@ -732,10 +423,7 @@ const DiterimaDetailPage = () => {
                   </div>
                 </CardBody>
               </Card>
-              
-            )
-          )
-            
+            ))
           )}
         </div>
       </div>

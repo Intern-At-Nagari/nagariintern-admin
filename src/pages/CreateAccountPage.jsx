@@ -91,6 +91,14 @@ const CreateAccountPage = () => {
       password: "",
     });
   };
+  const handleOpenEditModal = (accountId) => {
+    setSelectedAccountId(accountId);
+    setFormData((prev) => ({
+      ...prev,
+      password: "", // Reset password field
+    }));
+    setIsEditModalVisible(true);
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -98,7 +106,7 @@ const CreateAccountPage = () => {
 
   const handleEditPassword = async (e) => {
     e.preventDefault();
-    
+
     // Move validation checks to a separate function
     const validatePassword = (password) => {
       if (!password) {
@@ -111,11 +119,11 @@ const CreateAccountPage = () => {
       }
       return true;
     };
-  
+
     if (!validatePassword(formData.password)) {
       return;
     }
-  
+
     setLoading(true);
     try {
       const response = await axios.patch(
@@ -127,7 +135,7 @@ const CreateAccountPage = () => {
           },
         }
       );
-  
+
       // Remove sensitive data logging
       if (response.data.status === "success") {
         toast.success("Kata sandi berhasil diubah");
@@ -245,10 +253,7 @@ const CreateAccountPage = () => {
                     <td className="p-4">{account.createdAt}</td>
                     <td className="p-4">
                       <Button
-                        onClick={() => {
-                          setSelectedAccountId(account.id);
-                          setIsEditModalVisible(true);
-                        }}
+                        onClick={() => handleOpenEditModal(account.id)}
                         color="blue"
                         variant="text"
                       >
