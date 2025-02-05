@@ -18,6 +18,8 @@ import {
 } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 const SchedulePage = () => {
   const [open, setOpen] = useState(false);
@@ -91,7 +93,7 @@ const SchedulePage = () => {
   const fetchSchedules = async () => {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/jadwal-pendaftaran', {
+        const response = await fetch('${API_BASE_URL}/jadwal-pendaftaran', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -170,8 +172,8 @@ const SchedulePage = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/admin/jadwal-pendaftaran/${editData.id}`, {
-        method: 'PUT',
+      const response = await fetch(`${API_BASE_URL}/admin/jadwal-pendaftaran/${editData.id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -200,7 +202,7 @@ const handleSubmit = async (e) => {
     e.preventDefault();
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/admin/jadwal-pendaftaran', {
+        const response = await fetch('${API_BASE_URL}/admin/jadwal-pendaftaran', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

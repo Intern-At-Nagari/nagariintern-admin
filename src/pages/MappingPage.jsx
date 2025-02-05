@@ -27,6 +27,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import axios from "axios";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const MappingPage = () => {
   const [branchData, setBranchData] = useState([]);
@@ -55,7 +56,7 @@ const MappingPage = () => {
   const fetchBranchData = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/admin/unit-kerja",
+        `${API_BASE_URL}/admin/unit-kerja`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -102,8 +103,8 @@ const MappingPage = () => {
         }),
       };
 
-      const response = await axios.put(
-        `http://localhost:3000/admin/unit-kerja/${selectedBranch.id}`,
+      const response = await axios.patch(
+        `${API_BASE_URL}/admin/unit-kerja/${selectedBranch.id}`,
         payload,
         {
           headers: {

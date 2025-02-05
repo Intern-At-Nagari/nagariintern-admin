@@ -13,6 +13,8 @@ import Sidebar from "../components/Sidebar";
 import Pagination from "../components/Pagination"; // Ensure this is imported
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { useNavigate } from "react-router-dom";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 const DiverifikasiPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,7 +38,7 @@ const DiverifikasiPage = () => {
       if (!token) throw new Error("No authentication token found");
 
       const response = await axios.get(
-        "http://localhost:3000/admin/diverifikasi",
+        `${API_BASE_URL}/admin/diverifikasi`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

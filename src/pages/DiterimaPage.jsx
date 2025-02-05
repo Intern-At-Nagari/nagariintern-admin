@@ -22,6 +22,8 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import { toast } from "react-toastify";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; 
+
 const DiterimaPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [data, setData] = useState({
@@ -48,7 +50,7 @@ const DiterimaPage = () => {
       setLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:3000/intern/diterima",
+        `${API_BASE_URL}/intern/diterima`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -137,8 +139,8 @@ const DiterimaPage = () => {
       for (const type of selectedTypes) {
         const url =
           type === "mahasiswa"
-            ? "http://localhost:3000/generate-lampiran-rekomen-mhs"
-            : "http://localhost:3000/generate-lampiran-rekomen-siswa";
+            ? `${API_BASE_URL}/generate-lampiran-rekomen-mhs`
+            : `${API_BASE_URL}/generate-lampiran-rekomen-siswa`;
 
         const response = await axios({
           url,

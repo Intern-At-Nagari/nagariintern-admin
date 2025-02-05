@@ -41,7 +41,7 @@ import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Print Modal Component
 const PrintModal = React.memo(
@@ -388,9 +388,9 @@ const DiterimaDetailPage = () => {
       let url;
 
       if (type === "Perguruan Tinggi") {
-        url = `http://localhost:3000/intern/diterima/univ/${idInstitusi}/${idProdi}`;
+        url = `${API_BASE_URL}/intern/diterima/univ/${idInstitusi}/${idProdi}`;
       } else {
-        url = `http://localhost:3000/intern/diterima/smk/${idInstitusi}`;
+        url = `${API_BASE_URL}/intern/diterima/smk/${idInstitusi}`;
       }
 
       const response = await axios.get(url, {
@@ -426,9 +426,9 @@ const DiterimaDetailPage = () => {
       };
 
       if (type === "Perguruan Tinggi") {
-        apiUrl = `http://localhost:3000/intern/diterima/univ/${idInstitusi}/${idProdi}`;
+        apiUrl = `${API_BASE_URL}/intern/diterima/univ/${idInstitusi}/${idProdi}`;
       } else {
-        apiUrl = `http://localhost:3000/intern/diterima/smk/${idInstitusi}`;
+        apiUrl = `${API_BASE_URL}/intern/diterima/smk/${idInstitusi}`;
       }
 
       const response = await axios.post(apiUrl, requestBody, {
@@ -494,7 +494,7 @@ const DiterimaDetailPage = () => {
       formData.append("responseArray", JSON.stringify(participants));
 
       const response = await axios.post(
-      `http://localhost:3000/intern/send-surat-balasan`,
+      `${API_BASE_URL}/intern/send-surat-balasan`,
       formData,
       {
         headers: {

@@ -17,6 +17,8 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Pagination from "../components/Pagination";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const DiprosesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,7 +41,7 @@ const DiprosesPage = () => {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No authentication token found");
 
-        const response = await axios.get("http://localhost:3000/intern", {
+        const response = await axios.get(`${API_BASE_URL}/intern`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log(response.data);

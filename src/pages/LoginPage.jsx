@@ -14,6 +14,7 @@ import adminImage from "../assets/admin.png";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { toast } from 'react-toastify';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const AdminLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -42,7 +43,7 @@ const AdminLoginPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:3000/auth/login", formData);
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
       const { data } = response;
       console.log(data);
 

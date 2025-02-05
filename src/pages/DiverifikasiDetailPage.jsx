@@ -43,6 +43,8 @@ import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 import ModalIframe from "../components/ModalIframe";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const PrintModal = React.memo(
   ({ open, onClose, printForm, onSubmit, onChange, type, isLoading }) => {
     console.log("PrintModal received printForm:", printForm);
@@ -379,7 +381,7 @@ const DiverifikasiDetailPage = () => {
   const toggleView = () => setIsListView(!isListView);
 
   const handleDocumentView = (url) => {
-    setSelectedPdfUrl(`http://localhost:3000/uploads/${url}`);
+    setSelectedPdfUrl(`${API_BASE_URL}/uploads/${url}`);
     handleWaliModal();
   };
 
@@ -423,9 +425,9 @@ const DiverifikasiDetailPage = () => {
       let url;
 
       if (type === "Perguruan Tinggi") {
-        url = `http://localhost:3000/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
+        url = `${API_BASE_URL}/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
       } else {
-        url = `http://localhost:3000/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
+        url = `${API_BASE_URL}/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
       }
 
       const response = await axios.get(url, {
@@ -472,9 +474,9 @@ const DiverifikasiDetailPage = () => {
 
       let apiUrl;
       if (type === "Perguruan Tinggi") {
-        apiUrl = `http://localhost:3000/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
+        apiUrl = `${API_BASE_URL}/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
       } else {
-        apiUrl = `http://localhost:3000/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
+        apiUrl = `${API_BASE_URL}/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
       }
 
       const response = await axios.post(apiUrl, requestBody, {
@@ -523,7 +525,7 @@ const DiverifikasiDetailPage = () => {
       formData.append("responseArray", JSON.stringify(participants));
 
       const response = await axios.post(
-        `http://localhost:3000/intern/send-surat-pengantar`,
+        `${API_BASE_URL}/intern/send-surat-pengantar`,
         formData,
         {
           headers: {
@@ -778,7 +780,7 @@ const DiverifikasiDetailPage = () => {
                             className="flex items-center gap-2 normal-case"
                             onClick={() => {
                               setSelectedPdfUrl(
-                                `http://localhost:3000/uploads/${participant.dokumen_urls[0]}`
+                                `${API_BASE_URL}/uploads/${participant.dokumen_urls[0]}`
                               );
                               handleWaliModal();
                             }}
@@ -794,7 +796,7 @@ const DiverifikasiDetailPage = () => {
                             className="flex items-center gap-2 normal-case"
                             onClick={() => {
                               setSelectedPdfUrl(
-                                `http://localhost:3000/uploads/${participant.dokumen_urls[1]}`
+                                `${API_BASE_URL}/uploads/${participant.dokumen_urls[1]}`
                               );
                               handlePribadiModal();
                             }}
@@ -810,7 +812,7 @@ const DiverifikasiDetailPage = () => {
                             className="flex items-center gap-2 normal-case"
                             onClick={() => {
                               setSelectedPdfUrl(
-                                `http://localhost:3000/uploads/${participant.dokumen_urls[2]}`
+                                `${API_BASE_URL}/uploads/${participant.dokumen_urls[2]}`
                               );
                               handleTabunganModal();
                             }}

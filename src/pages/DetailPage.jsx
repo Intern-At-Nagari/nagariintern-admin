@@ -30,6 +30,8 @@ import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 import ModalIframe from "../components/ModalIframe";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const DetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -50,7 +52,7 @@ const DetailPage = () => {
   const fetchUnitKerja = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/admin/unit-kerja",
+        `${API_BASE_URL}/admin/unit-kerja`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -68,7 +70,7 @@ const DetailPage = () => {
       setLoading(true);
       try {
         const [internResponse] = await Promise.all([
-          axios.get(`http://localhost:3000/intern/${id}`, {
+          axios.get(`${API_BASE_URL}/intern/${id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
@@ -136,7 +138,7 @@ const DetailPage = () => {
         modalType === "accept" ? { penempatan: selectedUnit } : {};
 
       await axios.patch(
-        `http://localhost:3000/intern/${id}/${action}`,
+        `${API_BASE_URL}/intern/${id}/${action}`,
         payload,
         {
           headers: {
@@ -146,7 +148,7 @@ const DetailPage = () => {
         }
       );
 
-      const response = await axios.get(`http://localhost:3000/intern/${id}`, {
+      const response = await axios.get(`${API_BASE_URL}/intern/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -347,7 +349,7 @@ const DetailPage = () => {
                       className="flex items-center gap-2 normal-case flex-1"
                       onClick={() => {
                         handleDocumentModal(
-                          `http://localhost:3000/uploads/${data.Dokumens[doc.index].url}`,
+                          `${API_BASE_URL}/uploads/${data.Dokumens[doc.index].url}`,
                           doc.label
                         );
                       }}
