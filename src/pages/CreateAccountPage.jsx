@@ -11,14 +11,23 @@ import {
 import { toast } from "react-toastify";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
+import Pagination from "../components/Pagination";
 import { branches } from "../data/Unit";
 import axios from "axios";
-import { PencilIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { 
+  PencilIcon, 
+  EyeIcon, 
+  EyeSlashIcon,
+  MagnifyingGlassIcon 
+} from "@heroicons/react/24/outline";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const CreateAccountPage = () => {
   const [accounts, setAccounts] = useState([]);
+  const [filteredAccounts, setFilteredAccounts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +38,8 @@ const CreateAccountPage = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+
+  const itemsPerPage = 10;
 
   // Fetch existing accounts
   const fetchAccounts = async () => {
@@ -42,15 +53,17 @@ const CreateAccountPage = () => {
         }
       );
       if (response.data.status === "success") {
-        setAccounts(
-          response.data.data.map((account) => ({
-            id: account.User.id,
-            email: account.User.email,
-            unitKerja: account.UnitKerja.name,
-            isVerified: account.User.isVerified ? "Ya" : "Tidak",
-            createdAt: new Date(account.createdAt).toLocaleString(),
-          }))
-        );
+        const accountsData = response.data.data.map((account) => ({
+          id: account.User.id,
+          email: account.User.email,
+          unitKerja: account.UnitKerja.name,
+          isVerified: account.User.isVerified ? "Ya" : "Tidak",
+          createdAt: new Date(account.createdAt).toLocaleString(),
+        }));
+        // Sort accounts by creation date (newest first)
+        accountsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setAccounts(accountsData);
+        setFilteredAccounts(accountsData);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Gagal mengambil akun");
@@ -60,6 +73,17 @@ const CreateAccountPage = () => {
   useEffect(() => {
     fetchAccounts();
   }, []);
+
+  // Handle search
+  useEffect(() => {
+    const filtered = accounts.filter(
+      (account) =>
+        account.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        account.unitKerja.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredAccounts(filtered);
+    setCurrentPage(1); // Reset to first page when searching
+  }, [searchQuery, accounts]);
 
   const TABLE_HEAD = [
     "Email",
@@ -77,6 +101,10 @@ const CreateAccountPage = () => {
     }));
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
   const handleSelectChange = (value) => {
     setFormData((prev) => ({
       ...prev,
@@ -91,11 +119,12 @@ const CreateAccountPage = () => {
       password: "",
     });
   };
+
   const handleOpenEditModal = (accountId) => {
     setSelectedAccountId(accountId);
     setFormData((prev) => ({
       ...prev,
-      password: "", // Reset password field
+      password: "",
     }));
     setIsEditModalVisible(true);
   };
@@ -107,7 +136,6 @@ const CreateAccountPage = () => {
   const handleEditPassword = async (e) => {
     e.preventDefault();
 
-    // Move validation checks to a separate function
     const validatePassword = (password) => {
       if (!password) {
         toast.error("Harap isi kata sandi");
@@ -136,7 +164,6 @@ const CreateAccountPage = () => {
         }
       );
 
-      // Remove sensitive data logging
       if (response.data.status === "success") {
         toast.success("Kata sandi berhasil diubah");
         setIsEditModalVisible(false);
@@ -144,7 +171,6 @@ const CreateAccountPage = () => {
         await fetchAccounts();
       }
     } catch (error) {
-      // More specific error handling
       if (error.response?.status === 404) {
         toast.error("Akun tidak ditemukan");
       } else if (error.response?.status === 400) {
@@ -186,7 +212,7 @@ const CreateAccountPage = () => {
         toast.success("Akun berhasil dibuat. Email verifikasi telah dikirim!");
         setIsCreateModalVisible(false);
         resetForm();
-        fetchAccounts();
+        await fetchAccounts();
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Gagal membuat akun");
@@ -201,70 +227,103 @@ const CreateAccountPage = () => {
     resetForm();
   };
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredAccounts.length / itemsPerPage);
+  const getCurrentPageData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredAccounts.slice(startIndex, startIndex + itemsPerPage);
+  };
+
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
       <div className="flex-1 p-6">
         <BreadcrumbsComponent />
-        <div className="mb-4 flex justify-between items-center">
+        <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <Typography variant="h5" color="blue-gray">
             Manajemen Akun
           </Typography>
-          <Button onClick={() => setIsCreateModalVisible(true)} color="blue">
-            Buat Akun Baru
-          </Button>
+          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+            <div className="relative flex w-full md:w-72">
+              <Input
+                type="search"
+                label="Cari akun..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="pr-20"
+                containerProps={{
+                  className: "min-w-0",
+                }}
+                icon={
+                  <MagnifyingGlassIcon className="h-5 w-5 text-blue-gray-500" />
+                }
+              />
+            </div>
+            <Button onClick={() => setIsCreateModalVisible(true)} color="blue">
+              Buat Akun Baru
+            </Button>
+          </div>
         </div>
 
-        <Card className="h-full w-full overflow-scroll">
-          <table className="w-full min-w-max table-auto text-left">
-            <thead>
-              <tr>
-                {TABLE_HEAD.map((head) => (
-                  <th
-                    key={head}
-                    className="border-b border-blue-gray-100 bg-gray-100 p-4"
-                  >
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal leading-none opacity-70"
-                    >
-                      {head}
-                    </Typography>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.length === 0 ? (
+        <Card className="h-full w-full overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-max table-auto text-left">
+              <thead>
                 <tr>
-                  <td colSpan={5} className="p-4 text-center">
-                    <Typography variant="small" color="blue-gray">
-                      Belum ada akun yang dibuat
-                    </Typography>
-                  </td>
-                </tr>
-              ) : (
-                accounts.map((account, index) => (
-                  <tr key={index} className="even:bg-blue-gray-50/50">
-                    <td className="p-4">{account.email}</td>
-                    <td className="p-4">{account.unitKerja}</td>
-                    <td className="p-4">{account.isVerified}</td>
-                    <td className="p-4">{account.createdAt}</td>
-                    <td className="p-4">
-                      <Button
-                        onClick={() => handleOpenEditModal(account.id)}
-                        color="blue"
-                        variant="text"
+                  {TABLE_HEAD.map((head) => (
+                    <th
+                      key={head}
+                      className="border-b border-blue-gray-100 bg-gray-100 p-4"
+                    >
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal leading-none opacity-70"
                       >
-                        <PencilIcon className="h-5 w-5" />
-                      </Button>
+                        {head}
+                      </Typography>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {getCurrentPageData().length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-4 text-center">
+                      <Typography variant="small" color="blue-gray">
+                        {searchQuery ? "Tidak ada hasil pencarian" : "Belum ada akun yang dibuat"}
+                      </Typography>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  getCurrentPageData().map((account, index) => (
+                    <tr key={account.id} className="even:bg-blue-gray-50/50">
+                      <td className="p-4">{account.email}</td>
+                      <td className="p-4">{account.unitKerja}</td>
+                      <td className="p-4">{account.isVerified}</td>
+                      <td className="p-4">{account.createdAt}</td>
+                      <td className="p-4">
+                        <Button
+                          onClick={() => handleOpenEditModal(account.id)}
+                          color="blue"
+                          variant="text"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          {filteredAccounts.length > 0 && (
+            <Pagination
+              active={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </Card>
 
         <Dialog

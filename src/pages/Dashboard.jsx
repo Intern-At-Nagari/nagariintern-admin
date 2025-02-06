@@ -45,6 +45,7 @@ const Dashboard = () => {
         });
         
         if (!response.ok) {
+          localStorage.removeItem('token');
           throw new Error('Failed to fetch dashboard data');
         }
 
@@ -81,14 +82,20 @@ const Dashboard = () => {
       1: "Diproses",
       2: "Diterima",
       3: "Surat Pernyataan",
-      4: "Mulai Magang"
+      4: "Mulai Magang",
+      5: "Ditolak",
+      6: "Menolak",
+      7: "Selesai"
     };
 
     const colors = {
       1: "#f59e0b",
       2: "#10b981",
       3: "#8b5cf6",
-      4: "#ec4899"
+      4: "#ec4899",
+      5: "#ef4444",
+      6: "#f97316",
+      7: "#3b82f6"
     };
 
     return Object.entries(dashboardData.statusCounts).map(([status, count]) => ({

@@ -16,6 +16,7 @@ import "./index.css";
 import DiverifikasiDetailPage from "./pages/DiverifikasiDetailPage";
 import SchedulePage from "./pages/SchedulePage";
 import CreateAccountPage from "./pages/CreateAccountPage";
+import HistoryPage from "./pages/HistoryPage";
 
 function App() {
   return (
@@ -105,6 +106,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CreateAccountPage />
+            </ProtectedRoute>
+          }
+          />
+        <Route
+          path="/riwayat-pendaftar-magang"
+          element={
+            <ProtectedRoute>
+              <HistoryPage/>
             </ProtectedRoute>
           }
           />

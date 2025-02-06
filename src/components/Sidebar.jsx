@@ -11,7 +11,8 @@ import {
   ChevronDownIcon,
   ArrowRightEndOnRectangleIcon,
   UserGroupIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  ClockIcon
 } from "@heroicons/react/24/outline";
 import { Typography } from "@material-tailwind/react";
 
@@ -45,6 +46,8 @@ const Sidebar = () => {
       setActiveItem("Pemetaan");
     } else if (path === "anggaran") {
       setActiveItem("Anggaran");
+    } else if (path === "riwayat-pendaftar-magang") {
+      setActiveItem("Riwayat Pendaftar Magang");
     }
   }, [location]);
 
@@ -83,6 +86,17 @@ const Sidebar = () => {
   const getAnggaranClassName = () => {
     const isActive = activeItem === "Anggaran";
     const isHovered = hoveredItem === "Anggaran";
+
+    return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 
+      ${
+        isActive || isHovered
+          ? "bg-white/20 text-white translate-x-1"
+          : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+      }`;
+  };
+  const gethistoryClassname = () => {
+    const isActive = activeItem === "Riwayat Pendaftar Magang";
+    const isHovered = hoveredItem === "Riwayat Pendaftar Magang";
 
     return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 
       ${
@@ -291,6 +305,21 @@ const Sidebar = () => {
               >
                 <BanknotesIcon className="h-5 w-5" />
                 <span className="font-medium text-white">Anggaran</span>
+              </a>
+              {/* history */}
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/riwayat-pendaftar-magang");
+                  setActiveItem("Riwayat Pendaftar Magang");
+                }}
+                onMouseEnter={() => setHoveredItem("Riwayat Pendaftar Magang")}
+                onMouseLeave={() => setHoveredItem(null)}
+                className={gethistoryClassname()}
+              >
+                <ClockIcon className="h-5 w-5" />
+                <span className="font-medium text-white">Riwayat Pendaftar</span>
               </a>
 
               {/* Logout Section */}
