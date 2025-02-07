@@ -22,7 +22,15 @@ const Pagination = ({ active, totalPages, onPageChange }) => {
 
   const renderPageButtons = () => {
     const buttons = [];
-    for (let i = 1; i <= totalPages; i++) {
+    let start = Math.max(1, active - 2);
+    let end = Math.min(totalPages, start + 4);
+    
+    // Adjust start if we're near the end
+    if (end === totalPages) {
+      start = Math.max(1, end - 4);
+    }
+  
+    for (let i = start; i <= end; i++) {
       buttons.push(
         <IconButton key={i} {...getItemProps(i)} color="blue">
           {i}
@@ -31,6 +39,7 @@ const Pagination = ({ active, totalPages, onPageChange }) => {
     }
     return buttons;
   };
+  
 
   return (
     <div className="flex items-center justify-center gap-4 border-t border-blue-gray-50 p-4 ">

@@ -21,8 +21,9 @@ import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import { toast } from "react-toastify";
+import TableComponent from "../components/TableComponent";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const DiterimaPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,13 +34,12 @@ const DiterimaPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // Pagination state
-  const [itemsPerPage] = useState(10); // Items per page
-
-  // Add new states for modal
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [openPrintModal, setOpenPrintModal] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState([]);
-  const [isGenerating, setIsGenerating] = useState(false); // Add new state for download loading
+  const [isGenerating, setIsGenerating] = useState(false);
+
 
   useEffect(() => {
     fetchData();
@@ -49,15 +49,12 @@ const DiterimaPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${API_BASE_URL}/intern/diterima`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(`${API_BASE_URL}/intern/diterima`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       console.log("Data fetched:", response.data);
       setData(response.data);
       setError(null);
@@ -81,8 +78,9 @@ const DiterimaPage = () => {
   const navigate = useNavigate();
 
   const filteredData = [
-    ...data.universities.flatMap((uni) =>
+    ...data.universities.flatMap((uni, index) =>
       uni.prodi.map((prodi) => ({
+        id: `uni-${uni.id_univ}-${prodi.id_prodi}`, // Add unique id
         type: "Perguruan Tinggi",
         name: uni.nama_institusi,
         prodi: prodi.nama_prodi,
@@ -91,7 +89,8 @@ const DiterimaPage = () => {
         idProdi: prodi.id_prodi,
       }))
     ),
-    ...data.schools.map((school) => ({
+    ...data.schools.map((school, index) => ({
+      id: `school-${school.id_smk}`, // Add unique id
       type: "Sekolah",
       name: school.nama_institusi,
       prodi: "-",
@@ -104,11 +103,6 @@ const DiterimaPage = () => {
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.prodi.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -129,6 +123,24 @@ const DiterimaPage = () => {
     } else {
       setSelectedTypes([...selectedTypes, type]);
     }
+  };
+
+  const handleViewDetail = (item) => {
+    if (!item) {
+      console.error("Item is undefined");
+      toast.error("Error accessing data. Please try again.");
+      return;
+    }
+
+    navigate(`/intern/diterima/detail`, {
+      state: {
+        type: item.type,
+        name: item.name,
+        prodi: item.prodi,
+        idInstitusi: item.idInstitusi,
+        idProdi: item.idProdi,
+      },
+    });
   };
 
   const handlePrint = async () => {
@@ -172,6 +184,13 @@ const DiterimaPage = () => {
     }
   };
 
+  const columns = [
+    { label: "No" },
+    { label: "Tipe Institusi", accessor: "type" },
+    { label: "Nama Institusi", accessor: "name" },
+    { label: "Program Studi", accessor: "prodi" },
+    { label: "Total Diterima", accessor: "total" },
+  ];
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
@@ -213,145 +232,33 @@ const DiterimaPage = () => {
               <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
             </div>
           ) : (
-            <Card className="overflow-hidden">
-              <CardBody className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-max table-auto text-left">
-                    <thead>
-                      <tr>
-                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-semibold"
-                          >
-                            No
-                          </Typography>
-                        </th>
-                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-semibold"
-                          >
-                            Tipe Institusi
-                          </Typography>
-                        </th>
-                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-semibold"
-                          >
-                            Nama Institusi
-                          </Typography>
-                        </th>
-                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-semibold"
-                          >
-                            Program Studi
-                          </Typography>
-                        </th>
-                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-semibold"
-                          >
-                            Total Diterima
-                          </Typography>
-                        </th>
-                        <th className="border-b border-blue-gray-100 bg-gray-100 p-4 text-center">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-semibold"
-                          >
-                            Aksi
-                          </Typography>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentItems.map((item, index) => (
-                        <tr key={index} className="even:bg-gray-100/50">
-                          <td className="p-4">
-                            <Typography variant="small" color="blue-gray">
-                              {indexOfFirstItem + index + 1}
-                            </Typography>
-                          </td>
-                          <td className="p-4">
-                            <Typography variant="small" color="blue-gray">
-                              {item.type}
-                            </Typography>
-                          </td>
-                          <td className="p-4">
-                            <Typography variant="small" color="blue-gray">
-                              {item.name}
-                            </Typography>
-                          </td>
-                          <td className="p-4">
-                            <Typography variant="small" color="blue-gray">
-                              {item.prodi}
-                            </Typography>
-                          </td>
-                          <td className="p-4">
-                            <Typography variant="small" color="blue-gray">
-                              {item.total}
-                            </Typography>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex gap-2 justify-center">
-                              <Tooltip
-                                content="Lihat detail"
-                                className="bg-blue-500"
-                              >
-                                <IconButton
-                                  variant="text"
-                                  color="blue"
-                                  className="rounded-full"
-                                  onClick={() =>
-                                    navigate(`/intern/diterima/detail`, {
-                                      state: {
-                                        type: item.type,
-                                        name: item.name,
-                                        prodi: item.prodi,
-                                        idInstitusi: item.idInstitusi,
-                                        idProdi: item.idProdi,
-                                      },
-                                    })
-                                  }
-                                >
-                                  <EyeIcon className="h-4 w-4" />
-                                </IconButton>
-                              </Tooltip>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                      {filteredData.length === 0 && (
-                        <tr>
-                          <td colSpan="6" className="p-4 text-center">
-                            <Typography variant="small" color="blue-gray">
-                              No data found
-                            </Typography>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardBody>
-              {/* Pagination Component */}
-              <Pagination
-                active={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            </Card>
+            <TableComponent
+              data={filteredData}
+              columns={columns}
+              currentPage={currentPage}
+              itemsPerPage={itemsPerPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              actionIcon="eye"
+              actionTooltip="Lihat detail"
+              handleViewClick={(id) => {
+                const item = filteredData.find((item) => item.id === id);
+                if (item) {
+                  navigate(`/intern/diterima/detail`, {
+                    state: {
+                      type: item.type,
+                      name: item.name,
+                      prodi: item.prodi,
+                      idInstitusi: item.idInstitusi,
+                      idProdi: item.idProdi,
+                    },
+                  });
+                } else {
+                  console.error("Item not found for id:", id);
+                  toast.error("Error accessing data. Please try again.");
+                }
+              }}
+            />
           )}
         </div>
       </div>

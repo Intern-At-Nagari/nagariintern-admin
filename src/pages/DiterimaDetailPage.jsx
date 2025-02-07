@@ -48,7 +48,7 @@ const DiterimaDetailPage = () => {
   const [printLoading, setPrintLoading] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [isListView, setIsListView] = useState(false);
+  const [isListView, setIsListView] = useState(true);
   const [printForm, setPrintForm] = useState({
     nomorSurat: "",
     perihal: "",
@@ -285,9 +285,9 @@ const DiterimaDetailPage = () => {
               </Button>
               <IconButton color="blue" onClick={toggleView}>
                 {isListView ? (
-                  <ViewColumnsIcon className="h-4 w-4" />
-                ) : (
                   <ListBulletIcon className="h-4 w-4" />
+                ) : (
+                  <ViewColumnsIcon className="h-4 w-4" />
                 )}
               </IconButton>
             </div>

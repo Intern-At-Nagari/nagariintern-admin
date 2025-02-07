@@ -11,14 +11,14 @@ import {
 import { toast } from "react-toastify";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
-import Pagination from "../components/Pagination";
+import TableComponent from "../components/TableComponent";
 import { branches } from "../data/Unit";
 import axios from "axios";
-import { 
-  PencilIcon, 
-  EyeIcon, 
+import {
+  PencilIcon,
+  EyeIcon,
   EyeSlashIcon,
-  MagnifyingGlassIcon 
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -61,7 +61,9 @@ const CreateAccountPage = () => {
           createdAt: new Date(account.createdAt).toLocaleString(),
         }));
         // Sort accounts by creation date (newest first)
-        accountsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        accountsData.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
         setAccounts(accountsData);
         setFilteredAccounts(accountsData);
       }
@@ -233,6 +235,28 @@ const CreateAccountPage = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredAccounts.slice(startIndex, startIndex + itemsPerPage);
   };
+  const columns = [
+    {
+      label: "No",
+      accessor: "no",
+    },
+    {
+      label: "Email",
+      accessor: "email",
+    },
+    {
+      label: "Unit Kerja",
+      accessor: "unitKerja",
+    },
+    {
+      label: "Status Verifikasi",
+      accessor: "isVerified",
+    },
+    {
+      label: "Dibuat Pada",
+      accessor: "createdAt",
+    },
+  ];
 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
@@ -240,9 +264,6 @@ const CreateAccountPage = () => {
       <div className="flex-1 p-6">
         <BreadcrumbsComponent />
         <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <Typography variant="h5" color="blue-gray">
-            Manajemen Akun
-          </Typography>
           <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
             <div className="relative flex w-full md:w-72">
               <Input
@@ -265,66 +286,23 @@ const CreateAccountPage = () => {
           </div>
         </div>
 
-        <Card className="h-full w-full overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-max table-auto text-left">
-              <thead>
-                <tr>
-                  {TABLE_HEAD.map((head) => (
-                    <th
-                      key={head}
-                      className="border-b border-blue-gray-100 bg-gray-100 p-4"
-                    >
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal leading-none opacity-70"
-                      >
-                        {head}
-                      </Typography>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {getCurrentPageData().length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-4 text-center">
-                      <Typography variant="small" color="blue-gray">
-                        {searchQuery ? "Tidak ada hasil pencarian" : "Belum ada akun yang dibuat"}
-                      </Typography>
-                    </td>
-                  </tr>
-                ) : (
-                  getCurrentPageData().map((account, index) => (
-                    <tr key={account.id} className="even:bg-blue-gray-50/50">
-                      <td className="p-4">{account.email}</td>
-                      <td className="p-4">{account.unitKerja}</td>
-                      <td className="p-4">{account.isVerified}</td>
-                      <td className="p-4">{account.createdAt}</td>
-                      <td className="p-4">
-                        <Button
-                          onClick={() => handleOpenEditModal(account.id)}
-                          color="blue"
-                          variant="text"
-                        >
-                          <PencilIcon className="h-5 w-5" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
           </div>
-          {filteredAccounts.length > 0 && (
-            <Pagination
-              active={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          )}
-        </Card>
+        ) : (
+          <TableComponent
+            data={filteredAccounts}
+            columns={columns}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            handleViewClick={handleOpenEditModal}
+            actionIcon="pencil"
+            actionTooltip="Edit"
+          />
+        )}
 
         <Dialog
           open={isCreateModalVisible}

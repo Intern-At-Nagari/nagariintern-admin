@@ -17,6 +17,8 @@ import DiverifikasiDetailPage from "./pages/DiverifikasiDetailPage";
 import SchedulePage from "./pages/SchedulePage";
 import CreateAccountPage from "./pages/CreateAccountPage";
 import HistoryPage from "./pages/HistoryPage";
+import DetailDonePage from "./pages/DetailDonePage";
+import OngoingPage from "./pages/OngoingPage";
 
 function App() {
   return (
@@ -114,6 +116,22 @@ function App() {
           element={
             <ProtectedRoute>
               <HistoryPage/>
+            </ProtectedRoute>
+          }
+          />
+        <Route
+          path="/riwayat-pendaftar-magang/detail/:id"
+          element={
+            <ProtectedRoute>
+              <DetailDonePage/>
+            </ProtectedRoute>
+          }
+          />
+        <Route
+          path="/monitoring-peserta-magang"
+          element={
+            <ProtectedRoute>
+              <OngoingPage/>
             </ProtectedRoute>
           }
           />

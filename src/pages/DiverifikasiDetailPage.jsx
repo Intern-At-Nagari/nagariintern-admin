@@ -7,7 +7,6 @@ import {
   Spinner,
   Button,
   IconButton,
-  
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
@@ -50,7 +49,7 @@ const DiverifikasiDetailPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [printOpen, setPrintOpen] = useState(false);
-  const [isListView, setIsListView] = useState(false);
+  const [isListView, setIsListView] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [isWaliModalOpen, setIsWaliModalOpen] = useState(false);
   const [isPribadiModalOpen, setIsPribadiModalOpen] = useState(false);
@@ -69,6 +68,13 @@ const DiverifikasiDetailPage = () => {
   });
 
   const toggleView = () => setIsListView(!isListView);
+
+  const getUnitName = () => {
+    if (participants && participants.length > 0) {
+      return participants[0].unit_kerja || idUnitKerja;
+    }
+    return idUnitKerja !== "-" ? idUnitKerja : "All Units";
+  };
 
   const handleDocumentView = (url) => {
     setSelectedPdfUrl(`${API_BASE_URL}/uploads/${url}`);
@@ -95,20 +101,27 @@ const DiverifikasiDetailPage = () => {
   }, [idInstitusi, idProdi, idUnitKerja]);
 
   useEffect(() => {
-      if (participants.length > 0) {
-        const participant = participants[0];
-        setPrintForm((prev) => ({
-          ...prev,
-          institusi: toTitleCase(participant.institusi || ""),
-          prodi:
-            type === "Perguruan Tinggi"
-              ? toTitleCase(participant.program_studi || "")
-              : toTitleCase(participant.jurusan || ""),
-          nomorSurat: prev.nomorSurat,
-
-        }));
-      }
-    }, [participants, type]);
+    if (participants.length > 0) {
+      const participant = participants[0];
+      setPrintForm((prev) => ({
+        ...prev,
+        institusi: toTitleCase(participant.institusi || ""),
+        prodi:
+          type === "Perguruan Tinggi"
+            ? toTitleCase(participant.program_studi || "")
+            : toTitleCase(participant.jurusan || ""),
+        prodi:
+          type === "Perguruan Tinggi"
+            ? toTitleCase(participant.program_studi || "")
+            : toTitleCase(participant.jurusan || ""),
+        nomorSurat: prev.nomorSurat,
+        perihal: prev.perihal,
+        pejabat: prev.pejabat,
+        terbilang: prev.terbilang,
+        tmptMagang: toTitleCase(participant.unit_kerja || ""),
+      }));
+    }
+  }, [participants, type]);
 
   const fetchData = async () => {
     try {
@@ -285,7 +298,7 @@ const DiverifikasiDetailPage = () => {
   }
 
   return (
-    <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
+    <div className="lg:ml-80 min-h-screen bg-blue-</Typography>gray-50">
       <Sidebar />
       <div className="px-4 md:px-8 pb-8">
         <div className="max-w-7xl mx-auto">
@@ -302,9 +315,9 @@ const DiverifikasiDetailPage = () => {
               </Button>
               <IconButton color="blue" onClick={toggleView}>
                 {isListView ? (
-                  <ViewColumnsIcon className="h-4 w-4" />
-                ) : (
                   <ListBulletIcon className="h-4 w-4" />
+                ) : (
+                  <ViewColumnsIcon className="h-4 w-4" />
                 )}
               </IconButton>
             </div>
@@ -327,7 +340,8 @@ const DiverifikasiDetailPage = () => {
           </div>
 
           <Typography variant="h5" color="blue-gray" className="mb-4">
-            {name} - {prodi !== "-" ? prodi : "All Programs"}
+            {name} - {type === "Perguruan Tinggi" ? `${prodi} - ` : ""}
+            {getUnitName()}
           </Typography>
 
           {isListView ? (

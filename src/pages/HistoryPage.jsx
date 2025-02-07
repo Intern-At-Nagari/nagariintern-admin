@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams} from "react-router-dom";
 import {
     Card,
     CardBody,
@@ -99,7 +100,7 @@ const HistoryPage = () => {
     };
 
     const handleViewClick = (id) => {
-        window.location.href = `/detail/${id}`;
+        window.location.href = `/riwayat-pendaftar-magang/detail/${id}`;
     };
 
     return (

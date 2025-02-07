@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Typography } from "@material-tailwind/react";
 import {
-  UserCircleIcon,
-  DocumentTextIcon,
-  Squares2X2Icon,
   Bars3Icon,
   XMarkIcon,
-  BanknotesIcon,
   ChevronDownIcon,
-  ArrowRightEndOnRectangleIcon,
-  UserGroupIcon,
   Cog6ToothIcon,
-  ClockIcon
+  DocumentTextIcon,
+  Squares2X2Icon,
+  UserCircleIcon,
+  UserGroupIcon,
+  BanknotesIcon,
+  ClockIcon,
+  ArrowRightEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import { Typography } from "@material-tailwind/react";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -36,9 +35,19 @@ const Sidebar = () => {
       setActiveItem(path.charAt(0).toUpperCase() + path.slice(1));
       setActiveDropdown("Permintaan");
       setOpenPermintaan(true);
-    } else if (["tambah-akun-cabang", "atur-jadwal-pendaftaran"].includes(path)) {
+    } else if (
+      [
+        "tambah-akun-cabang",
+        "atur-jadwal-pendaftaran",
+        "monitoring-peserta-magang",
+      ].includes(path)
+    ) {
       setActiveItem(
-        path === "tambah-akun-cabang" ? "Buat Akun Cabang" : "Atur Jadwal Pendaftaran"
+        path === "tambah-akun-cabang"
+          ? "Buat Akun Cabang"
+          : path === "atur-jadwal-pendaftaran"
+          ? "Atur Jadwal Pendaftaran"
+          : "Monitoring Peserta"
       );
       setActiveDropdown("Pengaturan");
       setOpenPengaturan(true);
@@ -75,47 +84,44 @@ const Sidebar = () => {
     const isActive = activeItem === "Pemetaan";
     const isHovered = hoveredItem === "Pemetaan";
 
-    return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 
-      ${
-        isActive || isHovered
-          ? "bg-white/20 text-white translate-x-1"
-          : "hover:bg-white/20 hover:text-white hover:translate-x-1"
-      }`;
+    return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
+      isActive || isHovered
+        ? "bg-white/20 text-white translate-x-1"
+        : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+    }`;
   };
 
   const getAnggaranClassName = () => {
     const isActive = activeItem === "Anggaran";
     const isHovered = hoveredItem === "Anggaran";
 
-    return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 
-      ${
-        isActive || isHovered
-          ? "bg-white/20 text-white translate-x-1"
-          : "hover:bg-white/20 hover:text-white hover:translate-x-1"
-      }`;
+    return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
+      isActive || isHovered
+        ? "bg-white/20 text-white translate-x-1"
+        : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+    }`;
   };
-  const gethistoryClassname = () => {
+
+  const getHistoryClassName = () => {
     const isActive = activeItem === "Riwayat Pendaftar Magang";
     const isHovered = hoveredItem === "Riwayat Pendaftar Magang";
 
-    return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 
-      ${
-        isActive || isHovered
-          ? "bg-white/20 text-white translate-x-1"
-          : "hover:bg-white/20 hover:text-white hover:translate-x-1"
-      }`;
+    return `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
+      isActive || isHovered
+        ? "bg-white/20 text-white translate-x-1"
+        : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+    }`;
   };
 
   const getItemClassName = (item, dropdown) => {
     const isActive = activeItem === item && activeDropdown === dropdown;
     const isHovered = hoveredItem === item;
 
-    return `block p-3 rounded-xl transition-all duration-300 text-blue-100 
-      ${
-        isActive || isHovered
-          ? "bg-white/20 text-white translate-x-1"
-          : "hover:bg-white/20 hover:text-white hover:translate-x-1"
-      }`;
+    return `block p-3 rounded-xl transition-all duration-300 text-blue-100 ${
+      isActive || isHovered
+        ? "bg-white/20 text-white translate-x-1"
+        : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+    }`;
   };
 
   const handleLogout = () => {
@@ -125,14 +131,9 @@ const Sidebar = () => {
   };
 
   const pengaturanItems = [
-    {
-      label: "Buat Akun Cabang",
-      path: "/tambah-akun-cabang",
-    },
-    { 
-      label: "Atur Jadwal Pendaftaran", 
-      path: "/atur-jadwal-pendaftaran" 
-    },
+    { label: "Buat Akun Cabang", path: "/tambah-akun-cabang" },
+    { label: "Atur Jadwal Pendaftaran", path: "/atur-jadwal-pendaftaran" },
+    { label: "Monitoring Peserta", path: "/monitoring-peserta-magang" },
   ];
 
   return (
@@ -156,8 +157,9 @@ const Sidebar = () => {
       )}
 
       <div
-        className={`fixed top-0 left-0 z-40 h-full transform transition-transform duration-300 ease-in-out lg:translate-x-0 
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 z-40 h-full transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="min-h-screen bg-slate-100 p-4">
           <div className="w-72 min-h-[calc(100vh-2rem)] bg-gradient-to-b from-blue-600 to-blue-800 p-6 text-white shadow-xl rounded-3xl relative">
@@ -189,9 +191,9 @@ const Sidebar = () => {
               <button
                 onClick={() => setOpenPermintaan(!openPermintaan)}
                 className={`flex items-center justify-between w-full p-3 rounded-xl transition-all duration-300 ${
-                  activeDropdown === "Permintaan" 
-                  ? "bg-white/20 text-white translate-x-1"
-                  : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+                  activeDropdown === "Permintaan"
+                    ? "bg-white/20 text-white translate-x-1"
+                    : "hover:bg-white/20 hover:text-white hover:translate-x-1"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -234,8 +236,8 @@ const Sidebar = () => {
                 onClick={() => setOpenPengaturan(!openPengaturan)}
                 className={`flex items-center justify-between w-full p-3 rounded-xl transition-all duration-300 ${
                   activeDropdown === "Pengaturan"
-                  ? "bg-white/20 text-white translate-x-1"
-                  : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+                    ? "bg-white/20 text-white translate-x-1"
+                    : "hover:bg-white/20 hover:text-white hover:translate-x-1"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -252,24 +254,24 @@ const Sidebar = () => {
               </button>
               <div
                 className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  openPengaturan ? "max-h-32 opacity-100" : "max-h-0 opacity-0"
+                  openPengaturan ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
                 }`}
               >
                 <div className="ml-7 space-y-1 pt-1">
-                  {pengaturanItems.map(({ label, path }) => (
+                  {pengaturanItems.map((item) => (
                     <a
-                      key={label}
-                      href={path}
+                      key={item.label}
+                      href={item.path}
                       onClick={(e) => {
                         e.preventDefault();
-                        navigate(path);
-                        handleItemClick(label, "Pengaturan");
+                        navigate(item.path);
+                        handleItemClick(item.label, "Pengaturan");
                       }}
-                      onMouseEnter={() => setHoveredItem(label)}
+                      onMouseEnter={() => setHoveredItem(item.label)}
                       onMouseLeave={() => setHoveredItem(null)}
-                      className={getItemClassName(label, "Pengaturan")}
+                      className={getItemClassName(item.label, "Pengaturan")}
                     >
-                      {label}
+                      {item.label}
                     </a>
                   ))}
                 </div>
@@ -306,7 +308,8 @@ const Sidebar = () => {
                 <BanknotesIcon className="h-5 w-5" />
                 <span className="font-medium text-white">Anggaran</span>
               </a>
-              {/* history */}
+
+              {/* History Link */}
               <a
                 href="#"
                 onClick={(e) => {
@@ -316,10 +319,12 @@ const Sidebar = () => {
                 }}
                 onMouseEnter={() => setHoveredItem("Riwayat Pendaftar Magang")}
                 onMouseLeave={() => setHoveredItem(null)}
-                className={gethistoryClassname()}
+                className={getHistoryClassName()}
               >
                 <ClockIcon className="h-5 w-5" />
-                <span className="font-medium text-white">Riwayat Pendaftar</span>
+                <span className="font-medium text-white">
+                  Riwayat Pendaftar
+                </span>
               </a>
 
               {/* Logout Section */}

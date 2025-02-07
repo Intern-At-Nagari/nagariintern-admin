@@ -227,9 +227,6 @@ const SchedulePage = () => {
           <BreadcrumbsComponent />
 
           <div className="flex justify-between items-center mb-6">
-            <Typography variant="h4" color="blue-gray">
-              Jadwal Pendaftaran
-            </Typography>
             <Button color="blue" onClick={handleOpen}>
               Buat Jadwal
             </Button>

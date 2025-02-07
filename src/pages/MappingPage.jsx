@@ -11,15 +11,12 @@ import {
   DialogFooter,
   Select,
   Option,
-  Tooltip,
   Input,
   Switch
 } from "@material-tailwind/react";
 import {
-  MapPinIcon,
   UsersIcon,
   ArrowTrendingUpIcon,
-  PencilIcon,
   ListBulletIcon,
   TableCellsIcon,
   MagnifyingGlassIcon,
