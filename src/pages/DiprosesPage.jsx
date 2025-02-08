@@ -4,11 +4,12 @@ import {
   Select,
   Option,
 } from "@material-tailwind/react";
-import { EyeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import TableComponent from "../components/TableComponent";
+import CustomLoading from "../components/CustomLoading";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const DiprosesPage = () => {
@@ -199,9 +200,7 @@ return (
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
+        <CustomLoading/>
       ) : (
         <TableComponent
           data={filteredData}

@@ -75,7 +75,7 @@ const TableComponent = ({
                     <Typography
                       variant="small"
                       color="blue-gray"
-                      className="font-semibold"
+                      className="font-normal leading-none"
                     >
                       {col.label}
                     </Typography>
@@ -85,7 +85,7 @@ const TableComponent = ({
                   <Typography
                     variant="small"
                     color="blue-gray"
-                    className="font-semibold"
+                    className="font-normal leading-none"
                   >
                     Aksi
                   </Typography>

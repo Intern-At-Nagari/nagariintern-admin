@@ -4,16 +4,11 @@ import {
   EnvelopeIcon,
   LockClosedIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Card,
-  Input,
-  Button,
-  Typography,
-} from "@material-tailwind/react";
+import { Card, Input, Button, Typography, Spinner } from "@material-tailwind/react";
 import adminImage from "../assets/admin.png";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const AdminLoginPage = () => {
@@ -25,7 +20,7 @@ const AdminLoginPage = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate("/dashboard"); 
+      navigate("/dashboard");
     }
   }, []);
   const navigate = useNavigate();
@@ -48,26 +43,29 @@ const AdminLoginPage = () => {
       console.log(data);
 
       // Check if the user is an admin or superadmin
-      if (data.user.role !== 'admin' && data.user.role !== 'SuperAdmin') {
+      if (data.user.role !== "admin" && data.user.role !== "SuperAdmin") {
         setError("Access denied. This login page is for administrators only.");
-        toast.error("Access denied. This login page is for administrators only.");
+        toast.error(
+          "Access denied. This login page is for administrators only."
+        );
         return;
       }
 
       // Save tokens to localStorage
       localStorage.setItem("token", data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));      
-      localStorage.setItem("userRole", data.user.role); 
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      localStorage.setItem("userRole", data.user.role);
       // Redirect to admin dashboard
-      navigate('/dashboard');
+      navigate("/dashboard");
       toast.success("Login successful!");
-
     } catch (err) {
       let errorMessage;
       if (err.response?.status === 403) {
-        errorMessage = "Access denied. This login page is for administrators only.";
+        errorMessage =
+          "Access denied. This login page is for administrators only.";
       } else {
-        errorMessage = err.response?.data?.error || "Login gagal. Silakan coba lagi.";
+        errorMessage =
+          err.response?.data?.error || "Login gagal. Silakan coba lagi.";
       }
       setError(errorMessage);
       toast.error(errorMessage);
@@ -88,7 +86,8 @@ const AdminLoginPage = () => {
               </h2>
               <p className="text-gray-600 mt-2">Admin Login Panel</p>
               <p className="text-sm text-gray-500 mt-1">
-                For administrator access only. Users please login through the user portal.
+                For administrator access only. Users please login through the
+                user portal.
               </p>
             </div>
 
@@ -150,13 +149,18 @@ const AdminLoginPage = () => {
                 className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all flex items-center justify-center space-x-2 group"
                 disabled={isLoading}
               >
-                <span>{isLoading ? "Loading..." : "Admin Log In"}</span>
-                {!isLoading && (
-                  <ArrowRightIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <Spinner className="h-4 w-4" />
+                    <span>Loading...</span>
+                  </div>
+                ) : (
+                  <>
+                    <span>Admin Log In</span>
+                    <ArrowRightIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </>
                 )}
               </Button>
-
-            
             </form>
           </div>
 
@@ -167,7 +171,9 @@ const AdminLoginPage = () => {
 
             <div className="relative z-10 text-center">
               <h2 className="text-3xl font-bold mb-4">Administrator Portal</h2>
-              <p className="text-blue-100 mb-4 text-2xl font-bold">Restricted Access</p>
+              <p className="text-blue-100 mb-4 text-2xl font-bold">
+                Restricted Access
+              </p>
               <div className="w-64 h-64 mx-auto">
                 <img
                   src={adminImage}

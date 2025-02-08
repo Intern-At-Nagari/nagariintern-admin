@@ -12,7 +12,7 @@ import {
   Select,
   Option,
   Input,
-  Switch
+  Switch,
 } from "@material-tailwind/react";
 import {
   UsersIcon,
@@ -26,6 +26,7 @@ import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import axios from "axios";
 import MappingGridView from "../components/MappingGridView";
 import MappingListView from "../components/MappingListView";
+import CustomLoading from "../components/CustomLoading";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -55,14 +56,11 @@ const MappingPage = () => {
 
   const fetchBranchData = async () => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/admin/unit-kerja`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_BASE_URL}/admin/unit-kerja`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       const data = response.data.unitKerja || [];
       setBranchData(Array.isArray(data) ? data : []);
       setSearchResults(Array.isArray(data) ? data : []);
@@ -189,218 +187,223 @@ const MappingPage = () => {
       )
     : 0;
 
+  if (loading) {
+    return <CustomLoading />;
+  }
+
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
-      <div className="px-4 md:px-8 pb-8">
-        <div className="max-w-7xl mx-auto">
-          <BreadcrumbsComponent />
+      <div className="flex-1 p-6">
+        <BreadcrumbsComponent />
 
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-            <Typography
-              variant="h3"
-              className="font-bold text-gray-800 text-2xl md:text-3xl"
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+          <Typography
+            variant="h3"
+            className="font-bold text-gray-800 text-2xl md:text-3xl"
+          >
+            Pemetaan Peserta Magang
+          </Typography>
+          <div className="flex gap-4 items-center">
+            <div className="relative flex w-full md:w-72">
+              <Input
+                type="text"
+                label="Cari Unit Kerja"
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pr-20"
+                containerProps={{
+                  className: "min-w-0",
+                }}
+                icon={
+                  <MagnifyingGlassIcon className="h-5 w-5 text-blue-gray-300" />
+                }
+              />
+            </div>
+            <Button
+              color="blue"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => setIsGridView(!isGridView)}
             >
-              Pemetaan Peserta Magang
-            </Typography>
-            <div className="flex gap-4 items-center">
-              <div className="relative flex w-full md:w-72">
-                <Input
-                  type="text"
-                  label="Cari Unit Kerja"
-                  value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pr-20"
-                  containerProps={{
-                    className: "min-w-0",
-                  }}
-                  icon={
-                    <MagnifyingGlassIcon className="h-5 w-5 text-blue-gray-300" />
+              {isGridView ? (
+                <>
+                  <ListBulletIcon className="h-4 w-4" /> List View
+                </>
+              ) : (
+                <>
+                  <TableCellsIcon className="h-4 w-4" /> Grid View
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Card className="shadow-lg">
+            <CardBody className="flex items-center gap-4 p-4 md:p-6">
+              <div className="rounded-xl p-3 bg-blue-500 shadow-blue-500/20 shadow-lg">
+                <UsersIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <Typography variant="h6" color="blue-gray" className="mb-1">
+                  Sisa Kuota
+                </Typography>
+                <Typography variant="h4" className="font-bold">
+                  {availableInterns}/{totalInterns} Peserta
+                </Typography>
+                <Typography variant="h6" className="font-normal">
+                  {availableMhs}/{totalMhs} Mahasiswa
+                </Typography>
+                <Typography variant="h6" className="font-normal">
+                  {availableSiswa}/{totalSiswa} Siswa
+                </Typography>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="shadow-lg">
+            <CardBody className="flex items-center gap-4 p-4 md:p-6">
+              <div className="rounded-xl p-3 bg-purple-500 shadow-purple-500/20 shadow-lg">
+                <ArrowTrendingUpIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <Typography variant="h6" color="blue-gray" className="mb-1">
+                  Total Cabang
+                </Typography>
+                <Typography variant="h4" className="font-bold">
+                  {branchData.length} Cabang
+                </Typography>
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+
+        {isGridView ? (
+          <MappingGridView
+            searchResults={searchResults}
+            BRANCH_TYPES={BRANCH_TYPES}
+            handleOpen={handleOpen}
+          />
+        ) : (
+          <MappingListView
+            searchResults={searchResults}
+            BRANCH_TYPES={BRANCH_TYPES}
+            handleOpen={handleOpen}
+          />
+        )}
+
+        <Dialog open={open} handler={handleOpen}>
+          <DialogHeader>Edit Tipe Cabang - {selectedBranch?.name}</DialogHeader>
+          <DialogBody>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Typography variant="small" className="mb-2">
+                  Custom Kuota
+                </Typography>
+                <Switch
+                  checked={formData.isCustomQuota}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isCustomQuota: e.target.checked,
+                    }))
                   }
                 />
               </div>
-              <Button
-                color="blue"
-                size="sm"
-                className="flex items-center gap-2"
-                onClick={() => setIsGridView(!isGridView)}
-              >
-                {isGridView ? (
-                  <>
-                    <ListBulletIcon className="h-4 w-4" /> List View
-                  </>
-                ) : (
-                  <>
-                    <TableCellsIcon className="h-4 w-4" /> Grid View
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <Card className="shadow-lg">
-              <CardBody className="flex items-center gap-4 p-4 md:p-6">
-                <div className="rounded-xl p-3 bg-blue-500 shadow-blue-500/20 shadow-lg">
-                  <UsersIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-1">
-                    Sisa Kuota
-                  </Typography>
-                  <Typography variant="h4" className="font-bold">
-                    {availableInterns}/{totalInterns} Peserta
-                  </Typography>
-                  <Typography variant="h6" className="font-normal">
-                    {availableMhs}/{totalMhs} Mahasiswa
-                  </Typography>
-                  <Typography variant="h6" className="font-normal">
-                    {availableSiswa}/{totalSiswa} Siswa
-                  </Typography>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card className="shadow-lg">
-              <CardBody className="flex items-center gap-4 p-4 md:p-6">
-                <div className="rounded-xl p-3 bg-purple-500 shadow-purple-500/20 shadow-lg">
-                  <ArrowTrendingUpIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-1">
-                    Total Cabang
-                  </Typography>
-                  <Typography variant="h4" className="font-bold">
-                    {branchData.length} Cabang
-                  </Typography>
-                </div>
-              </CardBody>
-            </Card>
-          </div>
-
-          {isGridView ? (
-            <MappingGridView searchResults={searchResults} BRANCH_TYPES={BRANCH_TYPES} handleOpen={handleOpen} />
-          ) : (
-            <MappingListView searchResults={searchResults} BRANCH_TYPES={BRANCH_TYPES} handleOpen={handleOpen} />
-          )}
-
-          <Dialog open={open} handler={handleOpen}>
-            <DialogHeader>
-              Edit Tipe Cabang - {selectedBranch?.name}
-            </DialogHeader>
-            <DialogBody>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              {!formData.isCustomQuota ? (
+                <>
                   <Typography variant="small" className="mb-2">
-                    Custom Kuota
+                    Tipe Cabang
                   </Typography>
-                  <Switch
-                    checked={formData.isCustomQuota}
+                  <Select
+                    value={formData.tipe_cabang}
+                    onChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        tipe_cabang: value || "",
+                      }))
+                    }
+                    label="Pilih Tipe Cabang"
+                  >
+                    {Object.entries(BRANCH_TYPES).map(([value, { label }]) => (
+                      <Option key={value} value={value}>
+                        {label}
+                      </Option>
+                    ))}
+                  </Select>
+                  {formData.tipe_cabang && (
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                      <Typography
+                        variant="small"
+                        className="text-blue-900 font-medium"
+                      >
+                        Kuota Default untuk{" "}
+                        {BRANCH_TYPES[formData.tipe_cabang].label}:
+                      </Typography>
+                      <Typography variant="small" className="text-blue-800">
+                        Mahasiswa: {BRANCH_TYPES[formData.tipe_cabang].kuotaMhs}
+                      </Typography>
+                      <Typography variant="small" className="text-blue-800">
+                        Siswa: {BRANCH_TYPES[formData.tipe_cabang].kuotaSiswa}
+                      </Typography>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <Input
+                    type="number"
+                    label="Kuota Mahasiswa"
+                    value={formData.kuotaMhs}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        isCustomQuota: e.target.checked,
+                        kuotaMhs: e.target.value,
                       }))
                     }
+                    min="0"
+                  />
+                  <Input
+                    type="number"
+                    label="Kuota Siswa"
+                    value={formData.kuotaSiswa}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        kuotaSiswa: e.target.value,
+                      }))
+                    }
+                    min="0"
                   />
                 </div>
-
-                {!formData.isCustomQuota ? (
-                  <>
-                    <Typography variant="small" className="mb-2">
-                      Tipe Cabang
-                    </Typography>
-                    <Select
-                      value={formData.tipe_cabang}
-                      onChange={(value) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          tipe_cabang: value || "",
-                        }))
-                      }
-                      label="Pilih Tipe Cabang"
-                    >
-                      {Object.entries(BRANCH_TYPES).map(
-                        ([value, { label }]) => (
-                          <Option key={value} value={value}>
-                            {label}
-                          </Option>
-                        )
-                      )}
-                    </Select>
-                    {formData.tipe_cabang && (
-                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                        <Typography
-                          variant="small"
-                          className="text-blue-900 font-medium"
-                        >
-                          Kuota Default untuk{" "}
-                          {BRANCH_TYPES[formData.tipe_cabang].label}:
-                        </Typography>
-                        <Typography variant="small" className="text-blue-800">
-                          Mahasiswa:{" "}
-                          {BRANCH_TYPES[formData.tipe_cabang].kuotaMhs}
-                        </Typography>
-                        <Typography variant="small" className="text-blue-800">
-                          Siswa: {BRANCH_TYPES[formData.tipe_cabang].kuotaSiswa}
-                        </Typography>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="space-y-4">
-                    <Input
-                      type="number"
-                      label="Kuota Mahasiswa"
-                      value={formData.kuotaMhs}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          kuotaMhs: e.target.value,
-                        }))
-                      }
-                      min="0"
-                    />
-                    <Input
-                      type="number"
-                      label="Kuota Siswa"
-                      value={formData.kuotaSiswa}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          kuotaSiswa: e.target.value,
-                        }))
-                      }
-                      min="0"
-                    />
-                  </div>
-                )}
-              </div>
-            </DialogBody>
-            <DialogFooter>
-              <Button
-                variant="text"
-                color="red"
-                onClick={() => handleOpen(null)}
-                className="mr-1"
-              >
-                Batal
-              </Button>
-              <Button
-                variant="gradient"
-                color="green"
-                onClick={handleSubmit}
-                disabled={
-                  formData.isCustomQuota
-                    ? formData.kuotaMhs < 0 || formData.kuotaSiswa < 0
-                    : !formData.tipe_cabang
-                }
-              >
-                Simpan
-              </Button>
-            </DialogFooter>
-          </Dialog>
-        </div>
+              )}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button
+              variant="text"
+              color="red"
+              onClick={() => handleOpen(null)}
+              className="mr-1"
+            >
+              Batal
+            </Button>
+            <Button
+              variant="gradient"
+              color="green"
+              onClick={handleSubmit}
+              disabled={
+                formData.isCustomQuota
+                  ? formData.kuotaMhs < 0 || formData.kuotaSiswa < 0
+                  : !formData.tipe_cabang
+              }
+            >
+              Simpan
+            </Button>
+          </DialogFooter>
+        </Dialog>
       </div>
     </div>
   );

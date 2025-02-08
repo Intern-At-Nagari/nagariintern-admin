@@ -36,6 +36,7 @@ import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import ModalIframe from "../components/ModalIframe";
 import { toast } from "react-toastify";
 import axios from "axios";
+import CustomLoading from "../components/CustomLoading";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -106,10 +107,6 @@ const DiverifikasiDetailPage = () => {
       setPrintForm((prev) => ({
         ...prev,
         institusi: toTitleCase(participant.institusi || ""),
-        prodi:
-          type === "Perguruan Tinggi"
-            ? toTitleCase(participant.program_studi || "")
-            : toTitleCase(participant.jurusan || ""),
         prodi:
           type === "Perguruan Tinggi"
             ? toTitleCase(participant.program_studi || "")
@@ -266,9 +263,7 @@ const DiverifikasiDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="lg:ml-80 min-h-screen bg-blue-gray-50 flex items-center justify-center">
-        <Spinner className="h-12 w-12" />
-      </div>
+      <CustomLoading />
     );
   }
 
@@ -300,8 +295,7 @@ const DiverifikasiDetailPage = () => {
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-</Typography>gray-50">
       <Sidebar />
-      <div className="px-4 md:px-8 pb-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="flex-1 p-6">
           <BreadcrumbsComponent />
 
           <div className="flex justify-between items-center mb-4">
@@ -525,7 +519,7 @@ const DiverifikasiDetailPage = () => {
               </Card>
             ))
           )}
-        </div>
+        
       </div>
       <PrintModal
         open={printOpen}

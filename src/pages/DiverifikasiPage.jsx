@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card,
-  CardBody,
-  Typography,
-  IconButton,
   Input,
-  Tooltip,
 } from "@material-tailwind/react";
-import { EyeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {  MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
-import Pagination from "../components/Pagination"; // Ensure this is imported
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { useNavigate } from "react-router-dom";
 import TableComponent from "../components/TableComponent";
+import CustomLoading from "../components/CustomLoading";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
@@ -167,9 +162,7 @@ const DiverifikasiPage = () => {
       </div>
   
           {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
+            <CustomLoading />
           ) : (
             <TableComponent
               data={filteredData}

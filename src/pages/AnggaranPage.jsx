@@ -12,6 +12,7 @@ import { EyeIcon } from "@heroicons/react/24/outline";
 import Sidebar from '../components/Sidebar';
 import BreadcrumbsComponent from '../components/BreadcrumbsComponent';
 import Pagination from '../components/Pagination';
+import CustomLoading from '../components/CustomLoading';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -89,7 +90,7 @@ const AnggaranPage = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <CustomLoading />;
   }
 
   return (

@@ -16,6 +16,7 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Pagination from "../components/Pagination";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
+import CustomLoading from "../components/CustomLoading";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const HistoryPage = () => {
@@ -106,14 +107,11 @@ const HistoryPage = () => {
     return (
         <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
             <Sidebar />
-            <div className="px-4 md:px-8 pb-8">
-                <div className="max-w-7xl mx-auto">
+            <div className="flex-1 p-6">
                     <BreadcrumbsComponent />
 
                     {loading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-                        </div>
+                        <CustomLoading />
                     ) : error ? (
                         <div className="flex justify-center items-center h-64">
                             <Typography color="red" className="text-center">
@@ -292,7 +290,7 @@ const HistoryPage = () => {
                             </Card>
                         </>
                     )}
-                </div>
+                
             </div>
         </div>
     );

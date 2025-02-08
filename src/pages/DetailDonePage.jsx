@@ -18,7 +18,7 @@ import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import ModalIframe from "../components/ModalIframe";
 import axios from "axios";
-
+import CustomLoading from "../components/CustomLoading";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const DetailDonePage = () => {
@@ -97,9 +97,7 @@ const DetailDonePage = () => {
 
   if (loading) {
     return (
-      <div className="lg:ml-80 min-h-screen bg-blue-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+      <CustomLoading/>
     );
   }
 
@@ -122,8 +120,7 @@ const DetailDonePage = () => {
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
-      <div className="px-4 md:px-8 pb-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="flex-1 p-6">
           <BreadcrumbsComponent />
 
           <Card className="mb-6">
@@ -342,7 +339,7 @@ const DetailDonePage = () => {
               </div>
             </CardBody>
           </Card>
-        </div>
+        
       </div>
 
       <ModalIframe

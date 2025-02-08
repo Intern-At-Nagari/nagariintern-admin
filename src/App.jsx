@@ -1,4 +1,3 @@
-import { useState } from "react";
 import LoginPage from "./pages/LoginPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
@@ -135,7 +134,7 @@ function App() {
             </ProtectedRoute>
           }
           />
-
+ 
         <Route path="/intern/diterima/detail" element={<DiterimaDetailPage />} />
 
         {/* Rute Not Found */}

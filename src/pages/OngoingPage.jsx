@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
-import Pagination from "../components/Pagination";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import axios from "axios";
 import {
-  Typography,
   Input,
-  IconButton,
-  Tooltip,
 } from "@material-tailwind/react";
 import { format } from "date-fns";
-import { MagnifyingGlassIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import TableComponent from "../components/TableComponent";
+import CustomLoading from "../components/CustomLoading";
+
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -98,40 +96,21 @@ const OngoingPage = () => {
 
   if (loading) {
     return (
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1">
-          <BreadcrumbsComponent />
-          <div className="p-8">
-            <div className="text-center">Loading...</div>
-          </div>
-        </div>
-      </div>
+      <CustomLoading/>
     );
   }
 
   if (error) {
     return (
-      <div className="flex">
+      <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
         <Sidebar />
-        <div className="flex-1">
+        <div className="flex-1 p-6">
           <BreadcrumbsComponent />
-          <div className="p-8">
-            <div className="text-red-500">{error}</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
-      <Sidebar />
-      <div className="flex-1">
-        <BreadcrumbsComponent />
-        <div className="p-8">
-          <div className="flex justify-between items-center mb-6">
-            <div className="w-72">
+          <div className="mb-4">
+            
+  
+            {/* Maintain search input even in error state */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-4">
               <Input
                 type="text"
                 label="Search"
@@ -141,6 +120,44 @@ const OngoingPage = () => {
                 icon={<MagnifyingGlassIcon className="h-5 w-5" />}
               />
             </div>
+  
+            {/* Empty state table */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+              <div className="overflow-x-auto">
+                <TableComponent
+                  data={[]}
+                  columns={columns}
+                  currentPage={1}
+                  itemsPerPage={itemsPerPage}
+                  totalPages={1}
+                  onPageChange={() => {}}
+                  handleViewClick={() => {}}
+                  actionIcon="pencil"
+                  actionTooltip="Edit data"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
+      <Sidebar />
+      <div className="flex-1 p-6">
+        <BreadcrumbsComponent />
+        <div className="mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-4">
+            <Input
+              type="text"
+              label="Search"
+              value={searchTerm}
+              onChange={handleSearch}
+              className="focus:border-blue-500"
+              icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+            />
           </div>
 
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -157,8 +174,6 @@ const OngoingPage = () => {
                 actionTooltip="Edit data"
               />
             </div>
-
-   
 
             {filteredData.length === 0 && (
               <div className="text-center py-8 text-gray-500">

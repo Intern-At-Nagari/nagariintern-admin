@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
-  Card,
-  CardBody,
-  Typography,
-  IconButton,
   Input,
   Spinner,
-  Tooltip,
   Button,
   Dialog,
 } from "@material-tailwind/react";
@@ -19,9 +14,9 @@ import {
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { useNavigate } from "react-router-dom";
-import Pagination from "../components/Pagination";
 import { toast } from "react-toastify";
 import TableComponent from "../components/TableComponent";
+import CustomLoading from "../components/CustomLoading";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -194,11 +189,10 @@ const DiterimaPage = () => {
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
-      <div className="px-4 md:px-8 pb-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="flex-1 p-6">
           <BreadcrumbsComponent />
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex gap-2">
+          <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
               <Button
                 color="blue"
                 className="flex items-center gap-2"
@@ -228,9 +222,7 @@ const DiterimaPage = () => {
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
+            <CustomLoading/>
           ) : (
             <TableComponent
               data={filteredData}
@@ -260,7 +252,7 @@ const DiterimaPage = () => {
               }}
             />
           )}
-        </div>
+        
       </div>
 
       {/* Add Print Modal */}

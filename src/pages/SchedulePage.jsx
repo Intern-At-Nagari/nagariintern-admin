@@ -3,17 +3,18 @@ import { toast } from "react-toastify";
 import {
   Card,
   CardBody,
-  Typography,
   Button,
   Dialog,
   DialogHeader,
   DialogBody,
   Input,
+  Spinner
 } from "@material-tailwind/react";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import ScheduleTable from "../components/ScheduleTable";
 import ScheduleForm from "../components/ScheduleForm";
+import CustomLoading from "../components/CustomLoading";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const SchedulePage = () => {
@@ -21,6 +22,7 @@ const SchedulePage = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [schedules, setSchedules] = useState([]);
   const [remainingTimes, setRemainingTimes] = useState({});
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     nama: "",
     tanggalMulai: "",
@@ -49,8 +51,13 @@ const SchedulePage = () => {
   useEffect(() => {
     const newRemainingTimes = {};
     schedules.forEach((schedule) => {
-      if (getRegistrationStatus(schedule.tanggalMulai, schedule.tanggalTutup) === "SEDANG BERLANGSUNG") {
-        newRemainingTimes[schedule.id] = calculateTimeRemaining(schedule.tanggalTutup);
+      if (
+        getRegistrationStatus(schedule.tanggalMulai, schedule.tanggalTutup) ===
+        "SEDANG BERLANGSUNG"
+      ) {
+        newRemainingTimes[schedule.id] = calculateTimeRemaining(
+          schedule.tanggalTutup
+        );
       }
     });
     setRemainingTimes(newRemainingTimes);
@@ -64,7 +71,9 @@ const SchedulePage = () => {
     if (timeDiff <= 0) return null;
 
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const hours = Math.floor(
+      (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
 
@@ -108,6 +117,7 @@ const SchedulePage = () => {
   };
 
   const fetchSchedules = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/jadwal-pendaftaran`, {
@@ -126,14 +136,23 @@ const SchedulePage = () => {
 
       const initialTimes = {};
       sortedSchedules.forEach((schedule) => {
-        if (getRegistrationStatus(schedule.tanggalMulai, schedule.tanggalTutup) === "SEDANG BERLANGSUNG") {
-          initialTimes[schedule.id] = calculateTimeRemaining(schedule.tanggalTutup);
+        if (
+          getRegistrationStatus(
+            schedule.tanggalMulai,
+            schedule.tanggalTutup
+          ) === "SEDANG BERLANGSUNG"
+        ) {
+          initialTimes[schedule.id] = calculateTimeRemaining(
+            schedule.tanggalTutup
+          );
         }
       });
       setRemainingTimes(initialTimes);
     } catch (error) {
       console.error("Error fetching schedules:", error);
       toast.error("Failed to fetch schedules");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,20 +180,24 @@ const SchedulePage = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/admin/jadwal-pendaftaran/${editData.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          nama: editData.nama,
-          tanggalMulai: editData.tanggalMulai,
-          tanggalTutup: editData.tanggalTutup,
-        }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/admin/jadwal-pendaftaran/${editData.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            nama: editData.nama,
+            tanggalMulai: editData.tanggalMulai,
+            tanggalTutup: editData.tanggalTutup,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update schedule");
@@ -186,11 +209,14 @@ const SchedulePage = () => {
     } catch (error) {
       console.error("Failed to update schedule:", error);
       toast.error("Failed to update schedule");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/admin/jadwal-pendaftaran`, {
@@ -214,6 +240,7 @@ const SchedulePage = () => {
       console.error("Failed to create schedule:", error);
       toast.error(error.message || "Failed to create schedule");
     } finally {
+      setLoading(false);
       setFormData({ nama: "", tanggalMulai: "", tanggalTutup: "" });
       handleOpen();
     }
@@ -221,71 +248,83 @@ const SchedulePage = () => {
 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
+      {loading && <CustomLoading />}
       <Sidebar />
-      <div className="px-4 md:px-8 pb-8">
-        <div className="max-w-7xl mx-auto">
-          <BreadcrumbsComponent />
+      <div className="flex-1 p-6">
+        <BreadcrumbsComponent />
 
-          <div className="flex justify-between items-center mb-6">
-            <Button color="blue" onClick={handleOpen}>
-              Buat Jadwal
-            </Button>
-          </div>
-
-          <Card>
-            <CardBody className="p-0">
-              <ScheduleTable
-                schedules={schedules}
-                remainingTimes={remainingTimes}
-                getRegistrationStatus={getRegistrationStatus}
-                getStatusColor={getStatusColor}
-                formatTimeRemaining={formatTimeRemaining}
-                handleEditOpen={handleEditOpen}
-              />
-            </CardBody>
-          </Card>
-
-          <ScheduleForm
-            open={open}
-            handleOpen={handleOpen}
-            formData={formData}
-            setFormData={setFormData}
-            handleSubmit={handleSubmit}
-          />
-
-          <Dialog open={editOpen} handler={handleEditClose}>
-            <DialogHeader>Edit Jadwal</DialogHeader>
-            <DialogBody>
-              <form onSubmit={handleEditSubmit} className="space-y-4">
-                <Input
-                  label="Nama"
-                  value={editData.nama}
-                  onChange={(e) => setEditData({ ...editData, nama: e.target.value })}
-                />
-                <Input
-                  type="date"
-                  label="Tanggal Mulai"
-                  value={editData.tanggalMulai}
-                  onChange={(e) => setEditData({ ...editData, tanggalMulai: e.target.value })}
-                />
-                <Input
-                  type="date"
-                  label="Tanggal Selesai"
-                  value={editData.tanggalTutup}
-                  onChange={(e) => setEditData({ ...editData, tanggalTutup: e.target.value })}
-                />
-                <div className="flex justify-end gap-2">
-                  <Button variant="outlined" onClick={handleEditClose}>
-                    Batal
-                  </Button>
-                  <Button type="submit" color="blue">
-                    Simpan
-                  </Button>
-                </div>
-              </form>
-            </DialogBody>
-          </Dialog>
+        <div className="flex justify-between items-center mb-6">
+          <Button color="blue" onClick={handleOpen}>
+            Buat Jadwal
+          </Button>
         </div>
+
+        <Card>
+          <CardBody className="p-0">
+            <ScheduleTable
+              schedules={schedules}
+              remainingTimes={remainingTimes}
+              getRegistrationStatus={getRegistrationStatus}
+              getStatusColor={getStatusColor}
+              formatTimeRemaining={formatTimeRemaining}
+              handleEditOpen={handleEditOpen}
+            />
+          </CardBody>
+        </Card>
+
+        <ScheduleForm
+          open={open}
+          handleOpen={handleOpen}
+          formData={formData}
+          setFormData={setFormData}
+          handleSubmit={handleSubmit}
+        />
+
+        <Dialog open={editOpen} handler={handleEditClose}>
+          <DialogHeader>Edit Jadwal</DialogHeader>
+          <DialogBody>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <Input
+                label="Nama"
+                value={editData.nama}
+                onChange={(e) =>
+                  setEditData({ ...editData, nama: e.target.value })
+                }
+              />
+              <Input
+                type="date"
+                label="Tanggal Mulai"
+                value={editData.tanggalMulai}
+                onChange={(e) =>
+                  setEditData({ ...editData, tanggalMulai: e.target.value })
+                }
+              />
+              <Input
+                type="date"
+                label="Tanggal Selesai"
+                value={editData.tanggalTutup}
+                onChange={(e) =>
+                  setEditData({ ...editData, tanggalTutup: e.target.value })
+                }
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="text" onClick={handleEditClose} color="red">
+                  Cancel
+                </Button>
+                <Button type="submit" color="blue" disabled={loading}>
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <Spinner className="h-4 w-4" />
+                      <span>Loading...</span>
+                    </div>
+                  ) : (
+                    "Simpan"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </DialogBody>
+        </Dialog>
       </div>
     </div>
   );

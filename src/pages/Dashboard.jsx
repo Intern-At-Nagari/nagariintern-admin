@@ -28,6 +28,7 @@ import {
 } from "recharts";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
+import CustomLoading from "../components/CustomLoading";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const Dashboard = () => {
@@ -124,14 +125,13 @@ const Dashboard = () => {
           )}
         </div>
         <div className="mt-4">
-          <Typography variant="h4" color="blue-gray" className="font-bold">
-            {loading ? (
-              <div className="animate-pulse bg-gray-200 h-8 w-24 rounded" />
-            ) : value}
-          </Typography>
-          <Typography variant="small" className="text-gray-600 mt-1">
-            {title}
-          </Typography>
+          {loading ? (
+            <CustomLoading/>
+          ) : (
+            <div className="text-2xl font-medium text-blue-gray-900">
+              {value}
+            </div>
+          )}
         </div>
       </CardBody>
     </Card>
@@ -191,8 +191,7 @@ const Dashboard = () => {
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50/50">
       <Sidebar />
 
-      <div className="px-4 md:px-8 pb-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="flex-1 p-6">
           <BreadcrumbsComponent />
           
           <div className="flex items-center justify-between mb-8">
@@ -307,7 +306,7 @@ const Dashboard = () => {
 
             <TopUnitKerja data={dashboardData.topUnitKerja} />
           </div>
-        </div>
+        
       </div>
     </div>
   );

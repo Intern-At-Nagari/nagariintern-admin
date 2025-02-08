@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card,
   Typography,
   Button,
   Dialog,
   Input,
   Select,
   Option,
+  Spinner,
 } from "@material-tailwind/react";
 import { toast } from "react-toastify";
 import Sidebar from "../components/Sidebar";
@@ -15,11 +15,11 @@ import TableComponent from "../components/TableComponent";
 import { branches } from "../data/Unit";
 import axios from "axios";
 import {
-  PencilIcon,
   EyeIcon,
   EyeSlashIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
+import CustomLoading from "../components/CustomLoading";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -41,7 +41,6 @@ const CreateAccountPage = () => {
 
   const itemsPerPage = 10;
 
-  // Fetch existing accounts
   const fetchAccounts = async () => {
     try {
       const response = await axios.get(
@@ -60,7 +59,6 @@ const CreateAccountPage = () => {
           isVerified: account.User.isVerified ? "Ya" : "Tidak",
           createdAt: new Date(account.createdAt).toLocaleString(),
         }));
-        // Sort accounts by creation date (newest first)
         accountsData.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
@@ -76,7 +74,6 @@ const CreateAccountPage = () => {
     fetchAccounts();
   }, []);
 
-  // Handle search
   useEffect(() => {
     const filtered = accounts.filter(
       (account) =>
@@ -84,7 +81,7 @@ const CreateAccountPage = () => {
         account.unitKerja.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredAccounts(filtered);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   }, [searchQuery, accounts]);
 
   const TABLE_HEAD = [
@@ -231,10 +228,7 @@ const CreateAccountPage = () => {
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredAccounts.length / itemsPerPage);
-  const getCurrentPageData = () => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredAccounts.slice(startIndex, startIndex + itemsPerPage);
-  };
+
   const columns = [
     {
       label: "No",
@@ -287,9 +281,7 @@ const CreateAccountPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
+          <CustomLoading />
         ) : (
           <TableComponent
             data={filteredAccounts}
@@ -342,14 +334,22 @@ const CreateAccountPage = () => {
 
             <div className="flex justify-end gap-4 mt-8">
               <Button
-                variant="outlined"
+                variant="text"
                 onClick={handleCloseModal}
                 disabled={loading}
+                color="red"
               >
-                Batal
+                Cancel
               </Button>
               <Button type="submit" disabled={loading} color="blue">
-                {loading ? "Membuat..." : "Buat Akun"}
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Spinner className="h-4 w-4" />
+                    <span>Loading...</span>
+                  </div>
+                ) : (
+                  "Buat Akun"
+                )}
               </Button>
             </div>
           </form>
@@ -390,14 +390,22 @@ const CreateAccountPage = () => {
 
             <div className="flex justify-end gap-4 mt-8">
               <Button
-                variant="outlined"
+                variant="text"
+                color="red"
                 onClick={handleCloseModal}
                 disabled={loading}
               >
-                Batal
+                Cancel
               </Button>
               <Button type="submit" disabled={loading} color="blue">
-                {loading ? "Mengubah..." : "Ubah Kata Sandi"}
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Spinner className="h-4 w-4" />
+                    <span>Loading...</span>
+                  </div>
+                ) : (
+                  "Ubah Sandi"
+                )}
               </Button>
             </div>
           </form>

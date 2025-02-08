@@ -25,8 +25,8 @@ const ScheduleForm = ({ open, handleOpen, formData, setFormData, handleSubmit })
             onChange={(e) => setFormData({ ...formData, tanggalTutup: e.target.value })}
           />
           <div className="flex justify-end gap-2">
-            <Button variant="outlined" onClick={handleOpen}>
-              Batal
+            <Button variant="text" onClick={handleOpen} color="red">
+              Cancel
             </Button>
             <Button type="submit" color="blue">
               Simpan
