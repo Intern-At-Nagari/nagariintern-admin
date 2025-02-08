@@ -82,29 +82,46 @@ const Dashboard = () => {
     );
   };
 
-  const useTypingEffect = (text, speed = 50) => {
+  const useTypingEffect = (text, speed = 50, delayBeforeRestart = 2000) => {
     const [displayText, setDisplayText] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
-      let i = 0;
-      const timer = setInterval(() => {
-        if (i < text.length) {
-          setDisplayText((prev) => prev + text.charAt(i));
-          i++;
-        } else {
-          clearInterval(timer);
-        }
-      }, speed);
+      let timer;
 
-      return () => clearInterval(timer);
-    }, [text, speed]);
+      if (!isDeleting && displayText === text) {
+        // When finished typing, wait before starting to delete
+        timer = setTimeout(() => {
+          setIsDeleting(true);
+        }, delayBeforeRestart);
+      } else if (isDeleting && displayText === "") {
+        // When finished deleting, start typing again
+        setIsDeleting(false);
+      } else {
+        // Handle typing and deleting
+        timer = setTimeout(
+          () => {
+            if (!isDeleting) {
+              // Typing
+              setDisplayText(text.slice(0, displayText.length + 1));
+            } else {
+              // Deleting
+              setDisplayText(text.slice(0, displayText.length - 1));
+            }
+          },
+          isDeleting ? speed / 2 : speed
+        );
+      }
+
+      return () => clearTimeout(timer);
+    }, [text, displayText, isDeleting, speed, delayBeforeRestart]);
 
     return displayText;
   };
 
   // Use the hook with your welcome text
   const welcomeText = "Selamat Datang di Nagari Intern Dashboard";
-  const animatedText = useTypingEffect(welcomeText, 70);
+  const animatedText = useTypingEffect(welcomeText, 70, 2000);
 
   const getStatusData = () => {
     if (!dashboardData?.statusCounts) return [];
@@ -199,7 +216,6 @@ const Dashboard = () => {
           {animatedText}
           <span className="animate-blink">|</span>
         </Typography>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <StatCard
             title="Total Pendaftar"
@@ -360,7 +376,6 @@ const Dashboard = () => {
               </div>
             </CardBody>
           </Card>
-
         </div>
 
         <TopUnitKerja data={dashboardData.topUnitKerja} />
