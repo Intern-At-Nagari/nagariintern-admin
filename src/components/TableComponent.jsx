@@ -75,7 +75,7 @@ const TableComponent = ({
                     <Typography
                       variant="small"
                       color="blue-gray"
-                      className="font-normal leading-none"
+                      className="font-semibold leading-none"
                     >
                       {col.label}
                     </Typography>
@@ -85,7 +85,7 @@ const TableComponent = ({
                   <Typography
                     variant="small"
                     color="blue-gray"
-                    className="font-normal leading-none"
+                    className="font-semibold leading-none"
                   >
                     Aksi
                   </Typography>
@@ -103,7 +103,7 @@ const TableComponent = ({
                     </td>
                   ))}
                   <td className="p-4 text-center">
-                    <Tooltip content={actionTooltip}>
+                    <Tooltip content={actionTooltip} className = "bg-blue-500"> 
                       <IconButton
                         variant="text"
                         color="blue"

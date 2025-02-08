@@ -198,12 +198,6 @@ const MappingPage = () => {
         <BreadcrumbsComponent />
 
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-          <Typography
-            variant="h3"
-            className="font-bold text-gray-800 text-2xl md:text-3xl"
-          >
-            Pemetaan Peserta Magang
-          </Typography>
           <div className="flex gap-4 items-center">
             <div className="relative flex w-full md:w-72">
               <Input

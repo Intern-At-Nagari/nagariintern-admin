@@ -300,13 +300,6 @@ const DiverifikasiDetailPage = () => {
 
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
-              <Button
-                color="blue"
-                className="flex items-center gap-2"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeftIcon className="h-4 w-4" /> Back
-              </Button>
               <IconButton color="blue" onClick={toggleView}>
                 {isListView ? (
                   <ListBulletIcon className="h-4 w-4" />
