@@ -30,44 +30,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const useTypingEffect = (text, speed = 50, delayBeforeRestart = 2000) => {
-    const [displayText, setDisplayText] = useState("");
-    const [isDeleting, setIsDeleting] = useState(false);
-    
-    useEffect(() => {
-      let timer;
-      
-      if (!isDeleting && displayText === text) {
-        // When finished typing, wait before starting to delete
-        timer = setTimeout(() => {
-          setIsDeleting(true);
-        }, delayBeforeRestart);
-      } else if (isDeleting && displayText === "") {
-        // When finished deleting, start typing again
-        setIsDeleting(false);
-      } else {
-        // Handle typing and deleting
-        timer = setTimeout(() => {
-          if (!isDeleting) {
-            // Typing
-            setDisplayText(text.slice(0, displayText.length + 1));
-          } else {
-            // Deleting
-            setDisplayText(text.slice(0, displayText.length - 1));
-          }
-        }, isDeleting ? speed / 2 : speed);
-      }
-
-      return () => clearTimeout(timer);
-    }, [text, displayText, isDeleting, speed, delayBeforeRestart]);
-
-    return displayText;
-  };
-
-  // Use the hook with your welcome text
-  const welcomeText = "Selamat Datang di Nagari Intern Dashboard";
-  const animatedText = useTypingEffect(welcomeText, 70, 2000);
-
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -119,6 +81,30 @@ const Dashboard = () => {
       })
     );
   };
+
+  const useTypingEffect = (text, speed = 50) => {
+    const [displayText, setDisplayText] = useState("");
+
+    useEffect(() => {
+      let i = 0;
+      const timer = setInterval(() => {
+        if (i < text.length) {
+          setDisplayText((prev) => prev + text.charAt(i));
+          i++;
+        } else {
+          clearInterval(timer);
+        }
+      }, speed);
+
+      return () => clearInterval(timer);
+    }, [text, speed]);
+
+    return displayText;
+  };
+
+  // Use the hook with your welcome text
+  const welcomeText = "Selamat Datang di Nagari Intern Dashboard";
+  const animatedText = useTypingEffect(welcomeText, 70);
 
   const getStatusData = () => {
     if (!dashboardData?.statusCounts) return [];
@@ -363,12 +349,18 @@ const Dashboard = () => {
                         border: "none",
                       }}
                     />
-                    <Legend />
+                    <Legend
+                      formatter={(value, entry) => {
+                        const { payload } = entry;
+                        return `${value} (${payload.value})`;
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             </CardBody>
           </Card>
+
         </div>
 
         <TopUnitKerja data={dashboardData.topUnitKerja} />

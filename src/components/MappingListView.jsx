@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Typography, Button } from "@material-tailwind/react";
+import { Card, Typography, IconButton } from "@material-tailwind/react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 
 const MappingListView = ({ searchResults, BRANCH_TYPES, handleOpen }) => {
@@ -69,9 +69,9 @@ const MappingListView = ({ searchResults, BRANCH_TYPES, handleOpen }) => {
                 </Typography>
               </td>
               <td className="p-4 border-b border-blue-gray-100">
-                <Button size="sm" color="blue" onClick={() => handleOpen(branch)}>
+                <IconButton variant="text" color="blue" onClick={() => handleOpen(branch)}>
                   <PencilIcon className="h-4 w-4" />
-                </Button>
+                </IconButton>
               </td>
             </tr>
           ))}
