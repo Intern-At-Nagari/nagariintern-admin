@@ -151,7 +151,7 @@ const Dashboard = () => {
   };
 
   const StatCard = ({ title, value, icon: Icon, color, bgColor }) => (
-    <Card className="transition-all duration-300 hover:scale-105 hover:shadow-lg">
+    <Card className="transition-transform duration-300 hover:shadow-lg">
       <CardBody className="p-6">
         <div className="flex items-center justify-between">
           <div className={`rounded-xl p-4 ${bgColor}`}>
