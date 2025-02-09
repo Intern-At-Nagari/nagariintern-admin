@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import TableComponent from "../components/TableComponent";
-import { branches } from "../data/Unit";
+import { branches } from "../Data/Unit";
 import axios from "axios";
 import {
   EyeIcon,
