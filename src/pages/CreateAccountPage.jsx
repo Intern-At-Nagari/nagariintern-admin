@@ -38,6 +38,7 @@ const CreateAccountPage = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false); // New state for button loading
 
   const itemsPerPage = 10;
 
@@ -151,7 +152,7 @@ const CreateAccountPage = () => {
       return;
     }
 
-    setLoading(true);
+    setButtonLoading(true); // Change this from setLoading to setButtonLoading
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/admin/edit-password-pegawai-cabang/${selectedAccountId}`,
@@ -178,7 +179,7 @@ const CreateAccountPage = () => {
         toast.error("Gagal mengubah kata sandi");
       }
     } finally {
-      setLoading(false);
+      setButtonLoading(false); // Change this from setLoading to setButtonLoading
     }
   };
 
@@ -195,7 +196,7 @@ const CreateAccountPage = () => {
       return;
     }
 
-    setLoading(true);
+    setButtonLoading(true); // Change this from setLoading to setButtonLoading
     try {
       const response = await axios.post(
         `${API_BASE_URL}/admin/create-account-pegawai-cabang`,
@@ -216,7 +217,7 @@ const CreateAccountPage = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || "Gagal membuat akun");
     } finally {
-      setLoading(false);
+      setButtonLoading(false); // Change this from setLoading to setButtonLoading
     }
   };
 
@@ -280,21 +281,17 @@ const CreateAccountPage = () => {
           </div>
         </div>
 
-        {loading ? (
-          <CustomLoading />
-        ) : (
-          <TableComponent
-            data={filteredAccounts}
-            columns={columns}
-            currentPage={currentPage}
-            itemsPerPage={itemsPerPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            handleViewClick={handleOpenEditModal}
-            actionIcon="pencil"
-            actionTooltip="Edit"
-          />
-        )}
+        <TableComponent
+          data={filteredAccounts}
+          columns={columns}
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          handleViewClick={handleOpenEditModal}
+          actionIcon="pencil"
+          actionTooltip="Edit"
+        />
 
         <Dialog
           open={isCreateModalVisible}
@@ -336,13 +333,13 @@ const CreateAccountPage = () => {
               <Button
                 variant="text"
                 onClick={handleCloseModal}
-                disabled={loading}
+                disabled={buttonLoading}
                 color="red"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading} color="blue">
-                {loading ? (
+              <Button type="submit" disabled={buttonLoading} color="blue">
+                {buttonLoading ? (
                   <div className="flex items-center gap-2">
                     <Spinner className="h-4 w-4" />
                     <span>Loading...</span>
@@ -393,12 +390,12 @@ const CreateAccountPage = () => {
                 variant="text"
                 color="red"
                 onClick={handleCloseModal}
-                disabled={loading}
+                disabled={buttonLoading}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading} color="blue">
-                {loading ? (
+              <Button type="submit" disabled={buttonLoading} color="blue">
+                {buttonLoading ? (
                   <div className="flex items-center gap-2">
                     <Spinner className="h-4 w-4" />
                     <span>Loading...</span>

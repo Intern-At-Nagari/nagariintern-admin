@@ -23,6 +23,7 @@ const SchedulePage = () => {
   const [schedules, setSchedules] = useState([]);
   const [remainingTimes, setRemainingTimes] = useState({});
   const [loading, setLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false); // New state for button loading
   const [formData, setFormData] = useState({
     nama: "",
     tanggalMulai: "",
@@ -180,7 +181,7 @@ const SchedulePage = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setButtonLoading(true); // Change this from setLoading to setButtonLoading
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
@@ -210,13 +211,13 @@ const SchedulePage = () => {
       console.error("Failed to update schedule:", error);
       toast.error("Failed to update schedule");
     } finally {
-      setLoading(false);
+      setButtonLoading(false); // Change this from setLoading to setButtonLoading
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setButtonLoading(true); // Change this from setLoading to setButtonLoading
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/admin/jadwal-pendaftaran`, {
@@ -240,7 +241,7 @@ const SchedulePage = () => {
       console.error("Failed to create schedule:", error);
       toast.error(error.message || "Failed to create schedule");
     } finally {
-      setLoading(false);
+      setButtonLoading(false); // Change this from setLoading to setButtonLoading
       setFormData({ nama: "", tanggalMulai: "", tanggalTutup: "" });
       handleOpen();
     }
@@ -248,7 +249,6 @@ const SchedulePage = () => {
 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
-      {loading && <CustomLoading />}
       <Sidebar />
       <div className="flex-1 p-6">
         <BreadcrumbsComponent />
@@ -311,8 +311,8 @@ const SchedulePage = () => {
                 <Button variant="text" onClick={handleEditClose} color="red">
                   Cancel
                 </Button>
-                <Button type="submit" color="blue" disabled={loading}>
-                  {loading ? (
+                <Button type="submit" color="blue" disabled={buttonLoading}>
+                  {buttonLoading ? (
                     <div className="flex items-center gap-2">
                       <Spinner className="h-4 w-4" />
                       <span>Loading...</span>
