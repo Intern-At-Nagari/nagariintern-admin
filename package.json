@@ -4,10 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "vite preview",
     "dev": "vite",
     "build": "vite build",
+    "heroku-postbuild": "npm run build",
     "lint": "eslint .",
     "preview": "vite preview"
+  
   },
   "engines": {
     "node": "20.18.0"
