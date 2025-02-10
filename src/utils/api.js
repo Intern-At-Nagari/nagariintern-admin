@@ -7,6 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
@@ -14,15 +15,39 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Add headers that match backend corsOptions
+  config.headers['x-access-token'] = token;
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          break;
+        case 403:
+          console.error('Forbidden: You do not have permission');
+          break;
+        case 404:
+          console.error('Resource not found');
+          break;
+        case 500:
+          console.error('Internal server error');
+          break;
+        default:
+          console.error(`Error ${error.response.status}: ${error.response.data?.message || 'Unknown error'}`);
+      }
+    } else if (error.request) {
+      console.error('Network error: No response received');
+    } else {
+      console.error('Error setting up request:', error.message);
     }
     return Promise.reject(error);
   }
