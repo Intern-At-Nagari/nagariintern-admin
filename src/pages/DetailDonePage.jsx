@@ -17,9 +17,9 @@ import {
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import ModalIframe from "../components/ModalIframe";
-import axios from "axios";
 import CustomLoading from "../components/CustomLoading";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import endpoints from "../utils/api";
 
 const DetailDonePage = () => {
   const [data, setData] = useState(null);
@@ -63,17 +63,9 @@ const DetailDonePage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/admin/intern/done/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-
-        setData(response.data);
-        console.log(response.data);
+        const response = await endpoints.detail.getDetailDone(id);
+        setData(response);
+        console.log(response);
       } catch (err) {
         console.error("Error details:", err);
         setError(

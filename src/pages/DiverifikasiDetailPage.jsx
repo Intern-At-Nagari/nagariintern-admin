@@ -35,8 +35,8 @@ import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import ModalIframe from "../components/ModalIframe";
 import { toast } from "react-toastify";
-import axios from "axios";
 import CustomLoading from "../components/CustomLoading";
+import endpoints from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -123,26 +123,16 @@ const DiverifikasiDetailPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      let url;
+      const response = await endpoints.detail.getDetailDiverifikasiByInstitusi(
+        type,
+        idInstitusi, 
+        idProdi,
+        idUnitKerja
+      );
 
-      if (type === "Perguruan Tinggi") {
-        url = `${API_BASE_URL}/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
-      } else {
-        url = `${API_BASE_URL}/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
+      if (response && response.length > 0) {
+        setParticipants(response);
       }
-
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.data && response.data.length > 0) {
-        setParticipants(response.data);
-      }
-
       setError(null);
     } catch (err) {
       setError("Failed to fetch data. Please try again later.");
@@ -159,8 +149,6 @@ const DiverifikasiDetailPage = () => {
   const handlePrintSubmit = useCallback(async () => {
     setPrintLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
       const requestBody = {
         nomorSurat: printForm.nomorSurat,
         perihal: printForm.perihal,
@@ -171,22 +159,15 @@ const DiverifikasiDetailPage = () => {
         tmptMagang: printForm.tmptMagang,
       };
 
-      let apiUrl;
-      if (type === "Perguruan Tinggi") {
-        apiUrl = `${API_BASE_URL}/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
-      } else {
-        apiUrl = `${API_BASE_URL}/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
-      }
+      const response = await endpoints.generateDocument.suratPengantar(
+        type,
+        idInstitusi,
+        idProdi,
+        idUnitKerja,
+        requestBody
+      );
 
-      const response = await axios.post(apiUrl, requestBody, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        responseType: "arraybuffer",
-      });
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
+      const blob = new Blob([response], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -214,6 +195,8 @@ const DiverifikasiDetailPage = () => {
       setPrintLoading(false);
     }
   }, [printForm, type, idInstitusi, idProdi, idUnitKerja]);
+
+
   const InfoItem = ({ icon: Icon, label, value }) => (
     <div className="flex items-start gap-3">
       <Icon className="h-5 w-5 text-blue-gray-500 mt-1 flex-shrink-0" />
@@ -227,25 +210,13 @@ const DiverifikasiDetailPage = () => {
   const handleUpload = async (file) => {
     setUploadLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("SuratPengantar", file);
       formData.append("responseArray", JSON.stringify(participants));
 
-      const response = await axios.post(
-        `${API_BASE_URL}/intern/send-surat-pengantar`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.status === "success") {
-        toast.success("Surat balasan berhasil dikirim!");
-        setUploadOpen(false);
-      }
+      await endpoints.upload.suratPengantar(formData);
+      toast.success("Surat balasan berhasil dikirim!");
+      setUploadOpen(false);
     } catch (err) {
       toast.error(
         err.response?.data?.message || "Gagal mengirim surat balasan!"

@@ -7,9 +7,8 @@ import {
 import { Card, Input, Button, Typography, Spinner } from "@material-tailwind/react";
 import adminImage from "../assets/admin.png";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import endpoints from "../utils/api";
 
 const AdminLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -38,34 +37,29 @@ const AdminLoginPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
-      const { data } = response;
-      console.log(data);
-
+      const response = await endpoints.auth.login(formData);
+      
       // Check if the user is an admin or superadmin
-      if (data.user.role !== "admin" && data.user.role !== "SuperAdmin") {
+      if (response.user.role !== "admin" && response.user.role !== "SuperAdmin") {
         setError("Access denied. This login page is for administrators only.");
-        toast.error(
-          "Access denied. This login page is for administrators only."
-        );
+        toast.error("Access denied. This login page is for administrators only.");
         return;
       }
 
       // Save tokens to localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      localStorage.setItem("userRole", data.user.role);
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+      localStorage.setItem("userRole", response.user.role);
+      
       // Redirect to admin dashboard
       navigate("/dashboard");
       toast.success("Login successful!");
     } catch (err) {
       let errorMessage;
       if (err.response?.status === 403) {
-        errorMessage =
-          "Access denied. This login page is for administrators only.";
+        errorMessage = "Access denied. This login page is for administrators only.";
       } else {
-        errorMessage =
-          err.response?.data?.error || "Login gagal. Silakan coba lagi.";
+        errorMessage = err.response?.data?.error || "Login gagal. Silakan coba lagi.";
       }
       setError(errorMessage);
       toast.error(errorMessage);

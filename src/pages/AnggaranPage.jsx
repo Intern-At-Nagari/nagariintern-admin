@@ -13,6 +13,7 @@ import Pagination from "../components/Pagination";
 import CustomLoading from "../components/CustomLoading";
 import TableComponent from "../components/TableComponent";
 import ModalIframe from "../components/ModalIframe";
+import endpoints from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -31,25 +32,7 @@ const AnggaranPage = () => {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("No authentication token found. Please log in again.");
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/admin/absensi/rekap`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await endpoints.page.getRekap();
       if (result.status === "success") {
         console.log(
           "First record structure:",

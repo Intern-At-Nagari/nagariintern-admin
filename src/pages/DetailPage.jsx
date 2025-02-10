@@ -24,12 +24,12 @@ import {
   IdentificationIcon,
   EnvelopeIcon
 } from "@heroicons/react/24/outline";
-import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 import ModalIframe from "../components/ModalIframe";
 import CustomLoading from "../components/CustomLoading";
+import endpoints from "../utils/api";
 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -53,15 +53,8 @@ const DetailPage = () => {
 
   const fetchUnitKerja = async () => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/admin/unit-kerja`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      setUnitKerjaList(response.data.unitKerja);
+      const response = await endpoints.cabang.unitKerja();
+      setUnitKerjaList(response.unitKerja);
     } catch (err) {
       console.error("Error fetching unit kerja:", err);
     }
@@ -72,15 +65,11 @@ const DetailPage = () => {
       setLoading(true);
       try {
         const [internResponse] = await Promise.all([
-          axios.get(`${API_BASE_URL}/intern/${id}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }),
+          endpoints.detail.getDetailDiproses(id),
           fetchUnitKerja(),
         ]);
-        setData(internResponse.data);
-        setSelectedUnit(internResponse.data.UnitKerjaPengajuan.id);
+        setData(internResponse);
+        setSelectedUnit(internResponse.UnitKerjaPengajuan.id);
       } catch (err) {
         setError(
           err.response?.data?.message || "Failed to fetch intern details"
@@ -136,26 +125,12 @@ const DetailPage = () => {
   const handleSubmit = async () => {
     try {
       const action = modalType === "accept" ? "approve" : "reject";
-      const payload =
-        modalType === "accept" ? { penempatan: selectedUnit } : {};
-
-      await axios.patch(
-        `${API_BASE_URL}/intern/${id}/${action}`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const response = await axios.get(`${API_BASE_URL}/intern/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setData(response.data);
+      const payload = modalType === "accept" ? { penempatan: selectedUnit } : {};
+  
+      await endpoints.edit.approve(id, action, payload);
+      const response = await endpoints.detail.getDetailDiproses(id);
+      
+      setData(response);
       handleModalOpen();
       toast.success(
         `Request successfully ${action === "approve" ? "approved" : "rejected"}`

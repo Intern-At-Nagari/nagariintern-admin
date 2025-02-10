@@ -22,6 +22,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import CustomLoading from "../components/CustomLoading";
+import endpoints from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -33,36 +34,12 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Log the token being sent (remove in production)
-        console.log('Token being sent:', localStorage.getItem("token"));
-        
-        const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem("token")}`,
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include' // Important for cookies if you're using them
-        });
-    
-        if (!response.ok) {
-          // Get the error details first
-          const errorData = await response.json();
-          console.error('Response status:', response.status);
-          console.error('Error details:', errorData);
-          
-          // Only remove token if it's truly an authentication error
-          if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem("token");
-          }
-          
-          throw new Error(errorData.message || "Failed to fetch dashboard data");
-        }
-    
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error('Fetch error:', error);
-        throw error;
+        const data = await endpoints.page.getDashboard();
+        setDashboardData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 

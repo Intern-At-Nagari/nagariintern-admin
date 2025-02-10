@@ -13,15 +13,13 @@ import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import TableComponent from "../components/TableComponent";
 import { branches } from "../Data/Unit";
-import axios from "axios";
 import {
   EyeIcon,
   EyeSlashIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import CustomLoading from "../components/CustomLoading";
+import endpoints from "../utils/api";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const CreateAccountPage = () => {
   const [accounts, setAccounts] = useState([]);
@@ -41,19 +39,11 @@ const CreateAccountPage = () => {
   const [buttonLoading, setButtonLoading] = useState(false); // New state for button loading
 
   const itemsPerPage = 10;
-
   const fetchAccounts = async () => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/admin/account-pegawai-cabang`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      if (response.data.status === "success") {
-        const accountsData = response.data.data.map((account) => ({
+      const result = await endpoints.accounts.getAll();
+      if (result.status === "success") {
+        const accountsData = result.data.map((account) => ({
           id: account.User.id,
           email: account.User.email,
           unitKerja: account.UnitKerja.name,
@@ -152,19 +142,14 @@ const CreateAccountPage = () => {
       return;
     }
 
-    setButtonLoading(true); // Change this from setLoading to setButtonLoading
+    setButtonLoading(true);
     try {
-      const response = await axios.patch(
-        `${API_BASE_URL}/admin/edit-password-pegawai-cabang/${selectedAccountId}`,
-        { password: formData.password },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+      const result = await endpoints.edit.updatePassword(
+        selectedAccountId,
+        formData.password
       );
 
-      if (response.data.status === "success") {
+      if (result.status === "success") {
         toast.success("Kata sandi berhasil diubah");
         setIsEditModalVisible(false);
         resetForm();
@@ -179,9 +164,10 @@ const CreateAccountPage = () => {
         toast.error("Gagal mengubah kata sandi");
       }
     } finally {
-      setButtonLoading(false); // Change this from setLoading to setButtonLoading
+      setButtonLoading(false);
     }
   };
+
 
   const handleCreateAccount = async (e) => {
     e.preventDefault();
@@ -196,19 +182,11 @@ const CreateAccountPage = () => {
       return;
     }
 
-    setButtonLoading(true); // Change this from setLoading to setButtonLoading
+    setButtonLoading(true);
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/admin/create-account-pegawai-cabang`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const result = await endpoints.accounts.create(formData);
 
-      if (response.data.status === "success") {
+      if (result.status === "success") {
         toast.success("Akun berhasil dibuat. Email verifikasi telah dikirim!");
         setIsCreateModalVisible(false);
         resetForm();
@@ -217,7 +195,7 @@ const CreateAccountPage = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || "Gagal membuat akun");
     } finally {
-      setButtonLoading(false); // Change this from setLoading to setButtonLoading
+      setButtonLoading(false);
     }
   };
 

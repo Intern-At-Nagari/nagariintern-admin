@@ -3,13 +3,13 @@ import {
   Input,
 } from "@material-tailwind/react";
 import {  MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { useNavigate } from "react-router-dom";
 import TableComponent from "../components/TableComponent";
 import CustomLoading from "../components/CustomLoading";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import endpoints from "../utils/api";
+
 
 
 const DiverifikasiPage = () => {
@@ -30,20 +30,10 @@ const DiverifikasiPage = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
-
-      const response = await axios.get(
-        `${API_BASE_URL}/admin/diverifikasi`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const responseData = response.data;
+      const response = await endpoints.page.getDiverifikasi();
 
       // Grouping logic for mahasiswa
-      const mahasiswaGrouped = responseData.mahasiswa.dataMhs.reduce(
+      const mahasiswaGrouped = response.mahasiswa.dataMhs.reduce(
         (acc, item) => {
           const key = `${item.PerguruanTinggi.name}-${item.Prodi.name}-${item.UnitKerjaPenempatan.name}`;
           if (!acc[key]) {
@@ -65,7 +55,7 @@ const DiverifikasiPage = () => {
       );
 
       // Grouping logic for siswa
-      const siswaGrouped = responseData.siswa.dataSiswa.reduce((acc, item) => {
+      const siswaGrouped = response.siswa.dataSiswa.reduce((acc, item) => {
         const key = `${item.Smk.name}-${item.UnitKerjaPenempatan.name}`;
         if (!acc[key]) {
           acc[key] = {

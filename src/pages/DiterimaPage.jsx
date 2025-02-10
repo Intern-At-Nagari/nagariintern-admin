@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Input,
   Spinner,
@@ -8,7 +7,6 @@ import {
 } from "@material-tailwind/react";
 import {
   MagnifyingGlassIcon,
-  EyeIcon,
   PrinterIcon,
 } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar";
@@ -17,8 +15,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import TableComponent from "../components/TableComponent";
 import CustomLoading from "../components/CustomLoading";
+import endpoints from "../utils/api";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const DiterimaPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,15 +41,9 @@ const DiterimaPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_BASE_URL}/intern/diterima`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("Data fetched:", response.data);
-      setData(response.data);
+      const response = await endpoints.page.getDiterima();
+      console.log("Data fetched:", response);
+      setData(response);
       setError(null);
     } catch (err) {
       if (err.response?.status === 403) {
@@ -140,42 +132,27 @@ const DiterimaPage = () => {
 
   const handlePrint = async () => {
     setIsGenerating(true);
-    const token = localStorage.getItem("token");
-
     try {
-      for (const type of selectedTypes) {
-        const url =
-          type === "mahasiswa"
-            ? `${API_BASE_URL}/generate-lampiran-rekomen-mhs`
-            : `${API_BASE_URL}/generate-lampiran-rekomen-siswa`;
-
-        const response = await axios({
-          url,
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          responseType: "blob", // Important for file download
-        });
-
-        // Create download link
-        const downloadUrl = window.URL.createObjectURL(
-          new Blob([response.data])
-        );
+      const responses = await endpoints.generateDocument.lampiranRekomen(selectedTypes);
+      
+      // Process each response and create download links
+      responses.forEach((response, index) => {
+        const downloadUrl = window.URL.createObjectURL(new Blob([response]));
         const link = document.createElement("a");
         link.href = downloadUrl;
-        link.setAttribute("download", `lampiran_${type}.docx`);
+        link.setAttribute("download", `lampiran_${selectedTypes[index]}.docx`);
         document.body.appendChild(link);
         link.click();
         link.remove();
-      }
+      });
+
       handlePrintClose();
+      toast.success("Dokumen berhasil digenerate.");
     } catch (error) {
       console.error("Error generating document:", error);
-      alert("Gagal menghasilkan dokumen. Silakan coba lagi.");
+      toast.error("Gagal menghasilkan dokumen. Silakan coba lagi.");
     } finally {
       setIsGenerating(false);
-      toast.success("Dokumen berhasil digenerate.");
     }
   };
 
