@@ -40,6 +40,7 @@ import CustomLoading from "../components/CustomLoading";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+
 const DiverifikasiDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,6 +68,22 @@ const DiverifikasiDetailPage = () => {
     prodi: "",
     tmptMagang: "",
   });
+
+
+  const documentTypes = [
+    {
+      title: "Curriculum Vitae (CV)",
+      type: "CV",
+    },
+    {
+      title: "Surat Pengantar",
+      type: "Surat Pengantar",
+    },
+    { title: "Kartu Tanda Penduduk", type: "KTP" },
+    { title: "Transkip Nilai", type: "Transkip Nilai" },
+  ];
+
+
 
   const toggleView = () => setIsListView(!isListView);
 
@@ -127,9 +144,9 @@ const DiverifikasiDetailPage = () => {
       let url;
 
       if (type === "Perguruan Tinggi") {
-        url = `${API_BASE_URL}/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
+        url = `${API_BASE_URL}/superadmin/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
       } else {
-        url = `${API_BASE_URL}/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
+        url = `${API_BASE_URL}/superadmin/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
       }
 
       const response = await axios.get(url, {
@@ -173,9 +190,9 @@ const DiverifikasiDetailPage = () => {
 
       let apiUrl;
       if (type === "Perguruan Tinggi") {
-        apiUrl = `${API_BASE_URL}/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
+        apiUrl = `${API_BASE_URL}/superadmin/intern/diverifikasi/univ/${idInstitusi}/${idProdi}/${idUnitKerja}`;
       } else {
-        apiUrl = `${API_BASE_URL}/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
+        apiUrl = `${API_BASE_URL}/superadmin/intern/diverifikasi/smk/${idInstitusi}/${idUnitKerja}`;
       }
 
       const response = await axios.post(apiUrl, requestBody, {
@@ -233,7 +250,7 @@ const DiverifikasiDetailPage = () => {
       formData.append("responseArray", JSON.stringify(participants));
 
       const response = await axios.post(
-        `${API_BASE_URL}/intern/send-surat-pengantar`,
+        `${API_BASE_URL}/superadmin/intern/send-surat-pengantar`,
         formData,
         {
           headers: {

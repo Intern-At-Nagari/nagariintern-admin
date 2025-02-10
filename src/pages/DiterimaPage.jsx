@@ -44,7 +44,7 @@ const DiterimaPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_BASE_URL}/intern/diterima`, {
+      const response = await axios.get(`${API_BASE_URL}/superadmin/interns/diterima`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -146,8 +146,8 @@ const DiterimaPage = () => {
       for (const type of selectedTypes) {
         const url =
           type === "mahasiswa"
-            ? `${API_BASE_URL}/generate-lampiran-rekomen-mhs`
-            : `${API_BASE_URL}/generate-lampiran-rekomen-siswa`;
+            ? `${API_BASE_URL}/superadmin/generate-lampiran-rekomen-mhs`
+            : `${API_BASE_URL}/superadmin/generate-lampiran-rekomen-siswa`;
 
         const response = await axios({
           url,

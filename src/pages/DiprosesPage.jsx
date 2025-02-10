@@ -34,7 +34,7 @@ const DiprosesPage = () => {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No authentication token found");
 
-        const response = await axios.get(`${API_BASE_URL}/intern`, {
+        const response = await axios.get(`${API_BASE_URL}/superadmin/interns`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log(response.data);

@@ -38,7 +38,7 @@ const AdminLoginPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
+      const response = await axios.post(`http://localhost:3000/auth/login`, formData);
       const { data } = response;
       console.log(data);
 

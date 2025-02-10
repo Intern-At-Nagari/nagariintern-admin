@@ -121,7 +121,7 @@ const SchedulePage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/jadwal-pendaftaran`, {
+      const response = await fetch(`${API_BASE_URL}/superadmin/jadwal-pendaftaran`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -185,7 +185,7 @@ const SchedulePage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${API_BASE_URL}/admin/jadwal-pendaftaran/${editData.id}`,
+        `${API_BASE_URL}/superadmin/jadwal-pendaftaran/${editData.id}`,
         {
           method: "PATCH",
           headers: {
@@ -220,7 +220,7 @@ const SchedulePage = () => {
     setButtonLoading(true); // Change this from setLoading to setButtonLoading
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/admin/jadwal-pendaftaran`, {
+      const response = await fetch(`${API_BASE_URL}/superadmin/jadwal-pendaftaran`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

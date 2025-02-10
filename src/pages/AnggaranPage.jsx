@@ -38,7 +38,7 @@ const AnggaranPage = () => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/admin/absensi/rekap`, {
+      const response = await fetch(`${API_BASE_URL}/superadmin/absensi/rekap`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -230,7 +230,7 @@ const AnggaranPage = () => {
       return;
     }
 
-    const pdfUrl = `${API_BASE_URL}/uploads/${item.url_rekap}`;
+    const pdfUrl = `${API_BASE_URL}/superadmin/uploads/${item.url_rekap}`;
     console.log("Generated PDF URL:", pdfUrl);
     setSelectedPdf(pdfUrl);
     setIsModalOpen(true);

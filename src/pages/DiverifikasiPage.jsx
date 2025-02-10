@@ -34,7 +34,7 @@ const DiverifikasiPage = () => {
       if (!token) throw new Error("No authentication token found");
 
       const response = await axios.get(
-        `${API_BASE_URL}/admin/diverifikasi`,
+        `${API_BASE_URL}/superadmin/diverifikasi`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

@@ -45,7 +45,7 @@ const CreateAccountPage = () => {
   const fetchAccounts = async () => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/admin/account-pegawai-cabang`,
+        `${API_BASE_URL}/superadmin/account-pegawai-cabang`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -155,7 +155,7 @@ const CreateAccountPage = () => {
     setButtonLoading(true); // Change this from setLoading to setButtonLoading
     try {
       const response = await axios.patch(
-        `${API_BASE_URL}/admin/edit-password-pegawai-cabang/${selectedAccountId}`,
+        `${API_BASE_URL}/superadmin/edit-password-pegawai-cabang/${selectedAccountId}`,
         { password: formData.password },
         {
           headers: {
@@ -199,7 +199,7 @@ const CreateAccountPage = () => {
     setButtonLoading(true); // Change this from setLoading to setButtonLoading
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/admin/create-account-pegawai-cabang`,
+        `${API_BASE_URL}/superadmin/create-account-pegawai-cabang`,
         formData,
         {
           headers: {

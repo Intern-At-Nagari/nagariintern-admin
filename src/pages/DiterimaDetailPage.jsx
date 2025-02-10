@@ -100,9 +100,9 @@ const DiterimaDetailPage = () => {
       let url;
 
       if (type === "Perguruan Tinggi") {
-        url = `${API_BASE_URL}/intern/diterima/univ/${idInstitusi}/${idProdi}`;
+        url = `${API_BASE_URL}/superadmin/intern/diterima/univ/${idInstitusi}/${idProdi}`;
       } else {
-        url = `${API_BASE_URL}/intern/diterima/smk/${idInstitusi}`;
+        url = `${API_BASE_URL}/superadmin/intern/diterima/smk/${idInstitusi}`;
       }
 
       const response = await axios.get(url, {
@@ -138,9 +138,9 @@ const DiterimaDetailPage = () => {
       };
 
       if (type === "Perguruan Tinggi") {
-        apiUrl = `${API_BASE_URL}/intern/diterima/univ/${idInstitusi}/${idProdi}`;
+        apiUrl = `${API_BASE_URL}/superadmin/intern/diterima/univ/${idInstitusi}/${idProdi}`;
       } else {
-        apiUrl = `${API_BASE_URL}/intern/diterima/smk/${idInstitusi}`;
+        apiUrl = `${API_BASE_URL}/superadmin/intern/diterima/smk/${idInstitusi}`;
       }
 
       const response = await axios.post(apiUrl, requestBody, {
@@ -189,7 +189,7 @@ const DiterimaDetailPage = () => {
       formData.append("responseArray", JSON.stringify(participants));
 
       const response = await axios.post(
-        `${API_BASE_URL}/intern/send-surat-balasan`,
+        `${API_BASE_URL}/superadmin/intern/send-surat-balasan`,
         formData,
         {
           headers: {

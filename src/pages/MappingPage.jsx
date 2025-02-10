@@ -56,7 +56,7 @@ const MappingPage = () => {
 
   const fetchBranchData = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/admin/unit-kerja`, {
+      const response = await axios.get(`${API_BASE_URL}/superadmin/unit-kerja`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -105,7 +105,7 @@ const MappingPage = () => {
       };
 
       const response = await axios.patch(
-        `${API_BASE_URL}/admin/unit-kerja/${selectedBranch.id}`,
+        `${API_BASE_URL}/superadmin/unit-kerja/${selectedBranch.id}`,
         payload,
         {
           headers: {

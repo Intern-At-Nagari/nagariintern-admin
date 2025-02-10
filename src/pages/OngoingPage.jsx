@@ -37,7 +37,7 @@ const OngoingPage = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/admin/intern/start`, {
+      const response = await axios.get(`${API_BASE_URL}/superadmin/interns/start`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -92,7 +92,7 @@ const OngoingPage = () => {
       }
 
       const response = await axios.patch(
-        `${API_BASE_URL}/admin/intern/ongoing/${selectedIntern.id}`,
+        `${API_BASE_URL}/superadmin/interns/ongoing/${selectedIntern.id}`,
         {
           tanggalSelesai: newEndDate, // Match backend parameter name
         },

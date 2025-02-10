@@ -33,7 +33,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
+        const response = await fetch(`${API_BASE_URL}/superadmin/dashboard`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

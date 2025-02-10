@@ -37,7 +37,7 @@ const HistoryPage = () => {
                 const token = localStorage.getItem("token");
                 if (!token) throw new Error("No authentication token found");
 
-                const response = await axios.get(`${API_BASE_URL}/admin/intern/done`, {
+                const response = await axios.get(`${API_BASE_URL}/superadmin/interns/done`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 

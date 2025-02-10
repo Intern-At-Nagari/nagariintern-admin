@@ -32,7 +32,7 @@ const DetailDonePage = () => {
 
   const handleOpenModal = (doc, title) => {
     // Construct the full URL for the document
-    const fullUrl = `${API_BASE_URL}/uploads/${doc}`;
+    const fullUrl = `${API_BASE_URL}/superadmin/uploads/${doc}`;
     setSelectedDoc({ url: fullUrl, title });
     setIsModalOpen(true);
   };
@@ -64,7 +64,7 @@ const DetailDonePage = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/admin/intern/done/${id}`,
+          `${API_BASE_URL}/superadmin/intern/done/${id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
