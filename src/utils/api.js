@@ -6,27 +6,29 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
-  withCredentials: true,
+  withCredentials: true
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  
-  // Add headers that match backend corsOptions
-  config.headers['x-access-token'] = token;
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      config.headers['x-access-token'] = token;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    if (error.response) {
+    if (error.code === 'ERR_NETWORK') {
+      console.error('Network Error:', error.message);
+    } else if (error.response) {
       switch (error.response.status) {
         case 401:
           localStorage.removeItem('token');
@@ -44,15 +46,12 @@ api.interceptors.response.use(
         default:
           console.error(`Error ${error.response.status}: ${error.response.data?.message || 'Unknown error'}`);
       }
-    } else if (error.request) {
-      console.error('Network error: No response received');
-    } else {
-      console.error('Error setting up request:', error.message);
     }
     return Promise.reject(error);
   }
 );
 
+// ...rest of your endpoints configuration...
 const endpoints = {
   accounts: {
     getAll: () => api.get('/admin/account-pegawai-cabang'),
