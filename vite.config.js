@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5000,
-    cors: true // Enable CORS for development
+    cors: true,
+    https: true // Enable HTTPS for development
   }
 });
