@@ -102,7 +102,7 @@ const DiprosesPage = () => {
   const navigate = useNavigate();
   
   const handleViewClick = (id) => {
-    navigate(`/diterima/detail/${id}`);
+    navigate(`/diproses/detail/${id}`);
   };
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("id-ID", {
