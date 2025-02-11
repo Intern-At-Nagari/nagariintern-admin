@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  Input,
-  Spinner,
-  Button,
-  Dialog,
-} from "@material-tailwind/react";
-import {
-  MagnifyingGlassIcon,
-  PrinterIcon,
-} from "@heroicons/react/24/outline";
+import { Input, Spinner, Button, Dialog } from "@material-tailwind/react";
+import { MagnifyingGlassIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +8,6 @@ import { toast } from "react-toastify";
 import TableComponent from "../components/TableComponent";
 import CustomLoading from "../components/CustomLoading";
 import endpoints from "../utils/api";
-
 
 const DiterimaPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,7 +23,6 @@ const DiterimaPage = () => {
   const [openPrintModal, setOpenPrintModal] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
-
 
   useEffect(() => {
     fetchData();
@@ -65,31 +55,35 @@ const DiterimaPage = () => {
   const navigate = useNavigate();
 
   const filteredData = [
-    ...data.universities.flatMap((uni, index) =>
+    ...data.universities.flatMap((uni) =>
       uni.prodi.map((prodi) => ({
-        id: `uni-${uni.id_univ}-${prodi.id_prodi}`, // Add unique id
+        id: `uni-${uni.id_univ}-${prodi.id_prodi}`,
         type: "Perguruan Tinggi",
         name: uni.nama_institusi,
         prodi: prodi.nama_prodi,
         total: prodi.total_diterima,
         idInstitusi: uni.id_univ,
         idProdi: prodi.id_prodi,
+        createdAt: prodi.created_at || new Date().toISOString(), // Add creation time
       }))
     ),
-    ...data.schools.map((school, index) => ({
-      id: `school-${school.id_smk}`, // Add unique id
+    ...data.schools.map((school) => ({
+      id: `school-${school.id_smk}`,
       type: "Sekolah",
       name: school.nama_institusi,
       prodi: "-",
       total: school.total_diterima,
       idInstitusi: school.id_smk,
       idProdi: null,
+      createdAt: school.created_at || new Date().toISOString(), // Add creation time
     })),
-  ].filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.prodi.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort by newest first
+    .filter(
+      (item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.prodi.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -133,8 +127,10 @@ const DiterimaPage = () => {
   const handlePrint = async () => {
     setIsGenerating(true);
     try {
-      const responses = await endpoints.generateDocument.lampiranRekomen(selectedTypes);
-      
+      const responses = await endpoints.generateDocument.lampiranRekomen(
+        selectedTypes
+      );
+
       // Process each response and create download links
       responses.forEach((response, index) => {
         const downloadUrl = window.URL.createObjectURL(new Blob([response]));
@@ -167,69 +163,68 @@ const DiterimaPage = () => {
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
       <div className="flex-1 p-6">
-          <BreadcrumbsComponent />
-          <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-              <Button
-                color="blue"
-                className="flex items-center gap-2"
-                onClick={handlePrintOpen}
-              >
-                <PrinterIcon className="h-4 w-4" /> Cetak Lampiran Rekomendasi
-              </Button>
-            </div>
+        <BreadcrumbsComponent />
+        <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+            <Button
+              color="blue"
+              className="flex items-center gap-2"
+              onClick={handlePrintOpen}
+            >
+              <PrinterIcon className="h-4 w-4" /> Cetak Lampiran Rekomendasi
+            </Button>
           </div>
+        </div>
 
-          <div className="mb-4">
-            <div className="relative flex w-full max-w-[24rem]">
-              <Input
-                type="search"
-                label="Cari data..."
-                value={searchQuery}
-                onChange={handleSearch}
-                className="pr-20"
-                containerProps={{
-                  className: "min-w-0",
-                }}
-                icon={
-                  <MagnifyingGlassIcon className="h-5 w-5 text-blue-gray-500" />
-                }
-              />
-            </div>
-          </div>
-
-          {loading ? (
-            <CustomLoading/>
-          ) : (
-            <TableComponent
-              data={filteredData}
-              columns={columns}
-              currentPage={currentPage}
-              itemsPerPage={itemsPerPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-              actionIcon="eye"
-              actionTooltip="Lihat detail"
-              handleViewClick={(id) => {
-                const item = filteredData.find((item) => item.id === id);
-                if (item) {
-                  navigate(`/intern/diterima/detail`, {
-                    state: {
-                      type: item.type,
-                      name: item.name,
-                      prodi: item.prodi,
-                      idInstitusi: item.idInstitusi,
-                      idProdi: item.idProdi,
-                    },
-                  });
-                } else {
-                  console.error("Item not found for id:", id);
-                  toast.error("Error accessing data. Please try again.");
-                }
+        <div className="mb-4">
+          <div className="relative flex w-full max-w-[24rem]">
+            <Input
+              type="search"
+              label="Cari data..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="pr-20"
+              containerProps={{
+                className: "min-w-0",
               }}
+              icon={
+                <MagnifyingGlassIcon className="h-5 w-5 text-blue-gray-500" />
+              }
             />
-          )}
-        
+          </div>
+        </div>
+
+        {loading ? (
+          <CustomLoading />
+        ) : (
+          <TableComponent
+            data={filteredData}
+            columns={columns}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            actionIcon="eye"
+            actionTooltip="Lihat detail"
+            handleViewClick={(id) => {
+              const item = filteredData.find((item) => item.id === id);
+              if (item) {
+                navigate(`/intern/diterima/detail`, {
+                  state: {
+                    type: item.type,
+                    name: item.name,
+                    prodi: item.prodi,
+                    idInstitusi: item.idInstitusi,
+                    idProdi: item.idProdi,
+                  },
+                });
+              } else {
+                console.error("Item not found for id:", id);
+                toast.error("Error accessing data. Please try again.");
+              }
+            }}
+          />
+        )}
       </div>
 
       {/* Add Print Modal */}

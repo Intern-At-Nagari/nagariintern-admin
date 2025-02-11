@@ -28,10 +28,10 @@ const DiverifikasiPage = () => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-
+  
     try {
       const response = await endpoints.page.getDiverifikasi();
-
+  
       // Grouping logic for mahasiswa
       const mahasiswaGrouped = response.mahasiswa.dataMhs.reduce(
         (acc, item) => {
@@ -46,14 +46,21 @@ const DiverifikasiPage = () => {
               unitKerja: item.UnitKerjaPenempatan.name,
               idUnitKerja: item.UnitKerjaPenempatan.id,
               jml: 0,
+              createdAt: item.createdAt || new Date().toISOString(),
             };
+          }
+          // Update createdAt if newer entry found
+          const itemDate = new Date(item.createdAt);
+          const accDate = new Date(acc[key].createdAt);
+          if (itemDate > accDate) {
+            acc[key].createdAt = item.createdAt;
           }
           acc[key].jml += 1;
           return acc;
         },
         {}
       );
-
+  
       // Grouping logic for siswa
       const siswaGrouped = response.siswa.dataSiswa.reduce((acc, item) => {
         const key = `${item.Smk.name}-${item.UnitKerjaPenempatan.name}`;
@@ -66,17 +73,24 @@ const DiverifikasiPage = () => {
             prodi: "-",
             unitKerja: item.UnitKerjaPenempatan.name,
             jml: 0,
+            createdAt: item.createdAt || new Date().toISOString(),
           };
+        }
+        // Update createdAt if newer entry found
+        const itemDate = new Date(item.createdAt);
+        const accDate = new Date(acc[key].createdAt);
+        if (itemDate > accDate) {
+          acc[key].createdAt = item.createdAt;
         }
         acc[key].jml += 1;
         return acc;
       }, {});
-
+  
       const combinedData = [
         ...Object.values(mahasiswaGrouped),
         ...Object.values(siswaGrouped),
-      ];
-      console.log(combinedData);
+      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort by newest first
+  
       setData(combinedData);
     } catch (err) {
       setError(
