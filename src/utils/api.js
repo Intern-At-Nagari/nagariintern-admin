@@ -141,8 +141,19 @@ const endpoints = {
       return Promise.all(selectedTypes.map(type => 
         api.post(type === "mahasiswa" ? '/superadmin/generate-lampiran-rekomen-mhs' : '/superadmin/generate-lampiran-rekomen-siswa', {}, config)
       ));
+    },
+    suratPengambilanData: (formData) => {
+      const config = {
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+      return api.post('/superadmin/generate-surat-pengambilan-data', formData, config);
     }
+    
   },
+  
 };
 
 export default endpoints;

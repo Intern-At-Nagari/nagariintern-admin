@@ -17,6 +17,7 @@ const routeMap = {
   "/riwayat-pendaftar-magang": ["Home", "Riwayat Pendaftar"],
   "/riwayat-pendaftar-magang/detail": ["Home", "Riwayat Pendaftar", "Detail"],
   "/monitoring-peserta-magang": ["Home", "Pengaturan Sistem","Monitoring Peserta"],
+  "/pengambilan-data": ["Home", "Pengambilan Data"],
   
 };
 

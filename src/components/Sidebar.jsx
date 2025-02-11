@@ -13,6 +13,7 @@ import {
   BanknotesIcon,
   ClockIcon,
   ArrowRightEndOnRectangleIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 
 const Sidebar = () => {
@@ -57,6 +58,8 @@ const Sidebar = () => {
       setActiveItem("Anggaran");
     } else if (path === "riwayat-pendaftar-magang") {
       setActiveItem("Riwayat Pendaftar Magang");
+    } else if (path === "pengambilan-data") {
+      setActiveItem("Pengambilan Data");
     }
   }, [location]);
 
@@ -324,6 +327,28 @@ const Sidebar = () => {
                 <ClockIcon className="h-5 w-5" />
                 <span className="font-medium text-white">
                   Riwayat Pendaftar
+                </span>
+              </a>
+
+              {/* Pengambilan Data Link */}
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/pengambilan-data");
+                  setActiveItem("Pengambilan Data");
+                }}
+                onMouseEnter={() => setHoveredItem("Pengambilan Data")}
+                onMouseLeave={() => setHoveredItem(null)}
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
+                  activeItem === "Pengambilan Data" || hoveredItem === "Pengambilan Data"
+                    ? "bg-white/20 text-white translate-x-1"
+                    : "hover:bg-white/20 hover:text-white hover:translate-x-1"
+                }`}
+              >
+                <DocumentDuplicateIcon className="h-5 w-5" />
+                <span className="font-medium text-white">
+                  Pengambilan Data
                 </span>
               </a>
 

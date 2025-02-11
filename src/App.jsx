@@ -18,6 +18,7 @@ import CreateAccountPage from "./pages/CreateAccountPage";
 import HistoryPage from "./pages/HistoryPage";
 import DetailDonePage from "./pages/DetailDonePage";
 import OngoingPage from "./pages/OngoingPage";
+import PengambilanDataPage from "./pages/PengambilanDataPage";
 
 function App() {
   return (
@@ -37,7 +38,8 @@ function App() {
         <Route path="/riwayat-pendaftar-magang" element={ <ProtectedRoute> <HistoryPage/> </ProtectedRoute> } />
         <Route path="/riwayat-pendaftar-magang/detail/:id" element={ <ProtectedRoute> <DetailDonePage/> </ProtectedRoute> } />
         <Route path="/monitoring-peserta-magang" element={ <ProtectedRoute> <OngoingPage/> </ProtectedRoute> } /> 
-        <Route path="/intern/diterima/detail" element={<DiterimaDetailPage />} />
+        <Route path="/pengambilan-data" element={ <ProtectedRoute> <PengambilanDataPage/> </ProtectedRoute> } /> 
+        <Route path="/intern/diterima/detail" element={ <ProtectedRoute> <DiterimaDetailPage /> </ProtectedRoute> } />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <CustomAlert />
