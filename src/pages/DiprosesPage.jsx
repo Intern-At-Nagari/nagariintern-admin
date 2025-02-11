@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useNavigate } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Input,
   Select,
@@ -10,6 +10,7 @@ import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import TableComponent from "../components/TableComponent";
 import CustomLoading from "../components/CustomLoading";
 import endpoints from "../utils/api";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
