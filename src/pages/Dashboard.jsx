@@ -118,24 +118,29 @@ const Dashboard = () => {
 
     return [
       {
-        name: "Diproses",
-        value: dashboardData.statusCounts.diproses,
-        color: "#f59e0b",
+      name: "Diproses",
+      value: dashboardData.statusCounts.diproses,
+      color: "#fbbf24", // Warmer amber
       },
       {
-        name: "Diterima",
-        value: dashboardData.statusCounts.diterima,
-        color: "#10b981",
+      name: "Diterima",
+      value: dashboardData.statusCounts.diterima,
+      color: "#34d399", // Brighter emerald
       },
       {
-        name: "Magang Aktif",
-        value: dashboardData.statusCounts.pesertaMagangAktif,
-        color: "#3b82f6",
+      name: "Diverifikasi",
+      value: dashboardData.statusCounts.diverifikasi,
+      color: "#06b6d4", // Cyan
       },
       {
-        name: "Selesai",
-        value: dashboardData.statusCounts.pesertaSelesai,
-        color: "#8b5cf6",
+      name: "Magang Aktif",
+      value: dashboardData.statusCounts.pesertaMagangAktif,
+      color: "#60a5fa", // Lighter blue
+      },
+      {
+      name: "Selesai",
+      value: dashboardData.statusCounts.pesertaSelesai,
+      color: "#a78bfa", // Lighter purple
       },
     ];
   };
