@@ -19,6 +19,7 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import endpoints from "../utils/api";
+import CustomLoading from "../components/CustomLoading";
 
 
 const CreateAccountPage = () => {
@@ -26,6 +27,7 @@ const CreateAccountPage = () => {
   const [filteredAccounts, setFilteredAccounts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -40,6 +42,7 @@ const CreateAccountPage = () => {
 
   const itemsPerPage = 10;
   const fetchAccounts = async () => {
+    setLoading(true);
     try {
       const result = await endpoints.accounts.getAll();
       if (result.status === "success") {
@@ -58,6 +61,8 @@ const CreateAccountPage = () => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Gagal mengambil akun");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -258,7 +263,9 @@ const CreateAccountPage = () => {
             </Button>
           </div>
         </div>
-
+        {loading ? (
+        <CustomLoading/>
+      ) : (
         <TableComponent
           data={filteredAccounts}
           columns={columns}
@@ -269,7 +276,8 @@ const CreateAccountPage = () => {
           handleViewClick={handleOpenEditModal}
           actionIcon="pencil"
           actionTooltip="Edit"
-        />
+          />
+      )}
 
         <Dialog
           open={isCreateModalVisible}

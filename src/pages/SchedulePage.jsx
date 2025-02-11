@@ -8,14 +8,14 @@ import {
   DialogHeader,
   DialogBody,
   Input,
-  Spinner
+  Spinner,
 } from "@material-tailwind/react";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import ScheduleTable from "../components/ScheduleTable";
 import ScheduleForm from "../components/ScheduleForm";
 import endpoints from "../utils/api";
-
+import CustomLoading from "../components/CustomLoading";
 
 const SchedulePage = () => {
   const [open, setOpen] = useState(false);
@@ -123,7 +123,7 @@ const SchedulePage = () => {
       const result = await endpoints.page.getSchedules(); // Changed to use schedule.getAll
       const sortedSchedules = result.data.sort((a, b) => b.id - a.id);
       setSchedules(sortedSchedules);
-  
+
       const initialTimes = {};
       sortedSchedules.forEach((schedule) => {
         if (
@@ -177,7 +177,7 @@ const SchedulePage = () => {
         tanggalMulai: editData.tanggalMulai,
         tanggalTutup: editData.tanggalTutup,
       });
-  
+
       handleEditClose();
       await fetchSchedules();
       toast.success("Jadwal berhasil diperbarui");
@@ -220,14 +220,18 @@ const SchedulePage = () => {
 
         <Card>
           <CardBody className="p-0">
-            <ScheduleTable
-              schedules={schedules}
-              remainingTimes={remainingTimes}
-              getRegistrationStatus={getRegistrationStatus}
-              getStatusColor={getStatusColor}
-              formatTimeRemaining={formatTimeRemaining}
-              handleEditOpen={handleEditOpen}
-            />
+            {loading ? (
+              <CustomLoading />
+            ) : (
+              <ScheduleTable
+                schedules={schedules}
+                remainingTimes={remainingTimes}
+                getRegistrationStatus={getRegistrationStatus}
+                getStatusColor={getStatusColor}
+                formatTimeRemaining={formatTimeRemaining}
+                handleEditOpen={handleEditOpen}
+              />
+            )}
           </CardBody>
         </Card>
 
