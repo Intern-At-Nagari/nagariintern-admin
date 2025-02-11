@@ -23,128 +23,25 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Halaman login */}
-        <Route path="/" element={<LoginPage />} />
-
-        {/* Rute yang dilindungi */}
-        <Route
-          path="/dashboard/*"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/diproses"
-          element={
-            <ProtectedRoute>
-              <DiprosesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/detail/:id"
-          element={
-            <ProtectedRoute>
-              <DetailPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/mapping"
-          element={
-            <ProtectedRoute>
-              <MappingPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/diverifikasi"
-          element={
-            <ProtectedRoute>
-              <Diverifikasi />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/diterima"
-          element={
-            <ProtectedRoute>
-              <Diterima />
-            </ProtectedRoute>
-          }
-        />
-       
-  
-        <Route
-          path="/anggaran"
-          element={
-            <ProtectedRoute>
-              <AnggaranPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/diverifikasi/detail"
-          element={
-            <ProtectedRoute>
-              <DiverifikasiDetailPage />
-            </ProtectedRoute>
-          }
-          />
-        
-        <Route
-          path="/atur-jadwal-pendaftaran"
-          element={
-            <ProtectedRoute>
-              <SchedulePage />
-            </ProtectedRoute>
-          }
-          />
-        <Route
-          path="/tambah-akun-cabang"
-          element={
-            <ProtectedRoute>
-              <CreateAccountPage />
-            </ProtectedRoute>
-          }
-          />
-        <Route
-          path="/riwayat-pendaftar-magang"
-          element={
-            <ProtectedRoute>
-              <HistoryPage/>
-            </ProtectedRoute>
-          }
-          />
-        <Route
-          path="/riwayat-pendaftar-magang/detail/:id"
-          element={
-            <ProtectedRoute>
-              <DetailDonePage/>
-            </ProtectedRoute>
-          }
-          />
-        <Route
-          path="/monitoring-peserta-magang"
-          element={
-            <ProtectedRoute>
-              <OngoingPage/>
-            </ProtectedRoute>
-          }
-          />
- 
+        <Route path="/" element = {<LoginPage />} />
+        <Route path="/dashboard/*" element = { <ProtectedRoute> <Dashboard /> </ProtectedRoute> }/>
+        <Route path="/diproses" element = { <ProtectedRoute> <DiprosesPage /> </ProtectedRoute> } />
+        <Route path="/detail/:id" element={ <ProtectedRoute> <DetailPage /> </ProtectedRoute> } />
+        <Route path="/mapping" element={ <ProtectedRoute> <MappingPage /> </ProtectedRoute> } />
+        <Route path="/diverifikasi" element={ <ProtectedRoute> <Diverifikasi /> </ProtectedRoute> } />
+        <Route path="/diterima" element={ <ProtectedRoute> <Diterima /> </ProtectedRoute> } />
+        <Route path="/anggaran" element={ <ProtectedRoute> <AnggaranPage /> </ProtectedRoute> } />
+        <Route path="/diverifikasi/detail" element={ <ProtectedRoute> <DiverifikasiDetailPage /> </ProtectedRoute> } />
+        <Route path="/atur-jadwal-pendaftaran" element={ <ProtectedRoute> <SchedulePage /> </ProtectedRoute> } />
+        <Route path="/tambah-akun-cabang" element={ <ProtectedRoute> <CreateAccountPage /> </ProtectedRoute> } />
+        <Route path="/riwayat-pendaftar-magang" element={ <ProtectedRoute> <HistoryPage/> </ProtectedRoute> } />
+        <Route path="/riwayat-pendaftar-magang/detail/:id" element={ <ProtectedRoute> <DetailDonePage/> </ProtectedRoute> } />
+        <Route path="/monitoring-peserta-magang" element={ <ProtectedRoute> <OngoingPage/> </ProtectedRoute> } /> 
         <Route path="/intern/diterima/detail" element={<DiterimaDetailPage />} />
-
-        {/* Rute Not Found */}
         <Route path="*" element={<NotFound />} />
       </Routes>
       <CustomAlert />
-    </Router>
-    
-
+    </Router>    
   );
 }
-
 export default App;
