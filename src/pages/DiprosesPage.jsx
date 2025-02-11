@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useNavigate } from "react";
 import {
   Input,
   Select,
@@ -98,8 +98,10 @@ const DiprosesPage = () => {
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
+  const navigate = useNavigate();
+  
   const handleViewClick = (id) => {
-    window.location.href = `/detail/${id}`;
+    navigate(`/diterima/detail/${id}`);
   };
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("id-ID", {
