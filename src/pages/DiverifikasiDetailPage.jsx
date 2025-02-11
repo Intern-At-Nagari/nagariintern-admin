@@ -133,6 +133,7 @@ const DiverifikasiDetailPage = () => {
       if (response && response.length > 0) {
         setParticipants(response);
       }
+      console.log(response)
       setError(null);
     } catch (err) {
       setError("Failed to fetch data. Please try again later.");
