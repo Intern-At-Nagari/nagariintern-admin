@@ -155,9 +155,7 @@ const OngoingPage = () => {
     setCurrentPage(1);
   };
 
-  if (loading) {
-    return <CustomLoading />;
-  }
+  
 
   const renderContent = () => (
     <div className="flex-1 p-6">
@@ -176,6 +174,9 @@ const OngoingPage = () => {
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="overflow-x-auto">
+          {loading ? (
+        <CustomLoading/>
+      ) : (
             <TableComponent
               data={filteredData}
               columns={columns}
@@ -187,6 +188,7 @@ const OngoingPage = () => {
               actionIcon="pencil"
               actionTooltip="Edit tanggal selesai"
             />
+      )}
           </div>
 
           {filteredData.length === 0 && (
