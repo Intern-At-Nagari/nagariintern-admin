@@ -92,10 +92,10 @@ const PengambilanDataPage = () => {
             setIsLoading(false);
         }
     };
-    if (isLoading) return <CustomLoading />;
 
     return (
         <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
+            {isLoading && <CustomLoading />}
             <Sidebar />
             <div className="flex-1 p-6 ">
                 <BreadcrumbsComponent />
