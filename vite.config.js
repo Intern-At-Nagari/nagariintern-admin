@@ -8,6 +8,14 @@ export default defineConfig({
     host: '0.0.0.0',
     cors: true,
     https: false,
+    proxy: {
+      [process.env.VITE_API_BASE_URL]: {
+        target: process.env.VITE_API_BASE_URL,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(process.env.VITE_API_BASE_URL, '')
+      }
+    }
   },
   build: {
     outDir: 'dist',
