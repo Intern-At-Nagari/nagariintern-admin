@@ -92,7 +92,7 @@ const PengambilanDataPage = () => {
             setIsLoading(false);
         }
     };
-    if (loading) return <CustomLoading />;
+    if (isLoading) return <CustomLoading />;
 
     return (
         <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
