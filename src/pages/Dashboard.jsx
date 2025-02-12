@@ -200,6 +200,22 @@ const Dashboard = () => {
   );
 
   if (loading) return <CustomLoading />;
+  
+  if (error) {
+    return (
+      <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
+        <Sidebar />
+        <div className="flex-1 p-6">
+          <BreadcrumbsComponent />
+          <div className="text-center mt-8">
+            <Typography variant="h4" color="red" className="font-medium">
+              Cannot get data from server
+            </Typography>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
