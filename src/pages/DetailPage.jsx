@@ -135,8 +135,9 @@ const DetailPage = () => {
         `Request successfully ${action === "approve" ? "approved" : "rejected"}`
       );
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update status");
-      toast.error("Error updating status");
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || "Failed to update status";
+      setError(errorMessage);
+      toast.error(errorMessage);
       console.error("Error updating status:", err);
     }
   };
@@ -488,6 +489,7 @@ const DetailPage = () => {
               onClick={async () => {
                 await handleSubmit();
                 navigate("/diproses");
+                
               }}
               disabled={
                 modalType === "accept" &&
