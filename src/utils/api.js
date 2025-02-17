@@ -13,7 +13,13 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    };
+    
+    const token = getCookie('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
       config.headers['x-access-token'] = token;

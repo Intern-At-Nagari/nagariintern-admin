@@ -46,10 +46,10 @@ const AdminLoginPage = () => {
         return;
       }
 
-      // Save tokens to localStorage
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
-      localStorage.setItem("userRole", response.user.role);
+      
+      document.cookie = `token=${response.token}; path=/; secure; samesite=strict`;
+      document.cookie = `user=${JSON.stringify(response.user)}; path=/; secure; samesite=strict`;
+      document.cookie = `userRole=${response.user.role}; path=/; secure; samesite=strict`;
       
       // Redirect to admin dashboard
       navigate("/dashboard");
