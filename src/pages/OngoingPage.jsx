@@ -16,6 +16,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import TableComponent from "../components/TableComponent";
 import CustomLoading from "../components/CustomLoading";
 import { toast } from "react-toastify";
+import endpoints from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -37,13 +38,9 @@ const OngoingPage = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/superadmin/interns/start`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setInternData(response.data);
-      console.log("Data fetched:", response.data);
+      const data = await endpoints.page.getOngoing();
+      setInternData(data);
+      console.log("Data fetched:", data);
       setLoading(false);
     } catch (err) {
       setError("Failed to fetch data");
@@ -83,41 +80,25 @@ const OngoingPage = () => {
       toast.error("Data tidak lengkap");
       return;
     }
-
+  
     setUpdateLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      const response = await axios.patch(
-        `${API_BASE_URL}/superadmin/interns/ongoing/${selectedIntern.id}`,
-        {
-          tanggalSelesai: newEndDate, // Match backend parameter name
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.status === "success") {
+      const response = await endpoints.edit.updateEndDate(selectedIntern.id, newEndDate);
+  
+      // Check if the response was successful
+      if (response.status === "success") {
         await fetchData();
         setIsModalOpen(false);
-        toast.success(
-          response.data.message || "Tanggal selesai berhasil diperbarui"
-        );
+        toast.success(response.message || "Tanggal selesai berhasil diperbarui");
       } else {
-        throw new Error(response.data.message || "Failed to update end date");
+        throw new Error(response.message || "Failed to update end date");
       }
     } catch (error) {
       console.error("Failed to update end date:", error);
       toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Gagal memperbarui tanggal selesai"
+        error.response?.data?.message || 
+        error.message || 
+        "Gagal memperbarui tanggal selesai"
       );
     } finally {
       setUpdateLoading(false);
@@ -174,9 +155,7 @@ const OngoingPage = () => {
     setCurrentPage(1);
   };
 
-  if (loading) {
-    return <CustomLoading />;
-  }
+  
 
   const renderContent = () => (
     <div className="flex-1 p-6">
@@ -195,6 +174,9 @@ const OngoingPage = () => {
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="overflow-x-auto">
+          {loading ? (
+        <CustomLoading/>
+      ) : (
             <TableComponent
               data={filteredData}
               columns={columns}
@@ -206,6 +188,7 @@ const OngoingPage = () => {
               actionIcon="pencil"
               actionTooltip="Edit tanggal selesai"
             />
+      )}
           </div>
 
           {filteredData.length === 0 && (

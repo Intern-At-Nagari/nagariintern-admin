@@ -1,0 +1,13 @@
+{
+  "root": "dist/",
+  "clean_urls": true,
+  "routes": {
+    "/**": "index.html"
+  },
+  "headers": {
+    "/**": {
+      "Cache-Control": "no-store, no-cache",
+      "Strict-Transport-Security": "max-age=7776000"
+    }
+  }
+}

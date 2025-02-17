@@ -12,12 +12,11 @@ import {
     EyeIcon,
     MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Pagination from "../components/Pagination";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import CustomLoading from "../components/CustomLoading";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import endpoints from "../utils/api";
 
 const HistoryPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -34,23 +33,16 @@ const HistoryPage = () => {
             setError(null);
 
             try {
-                const token = localStorage.getItem("token");
-                if (!token) throw new Error("No authentication token found");
-
-                const response = await axios.get(`${API_BASE_URL}/superadmin/interns/done`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                const responseData = response.data || [];
-                const dataArray = Array.isArray(responseData) ? responseData : [];
-                setData(dataArray);
+            const responseData = await endpoints.page.getDone();
+            const dataArray = Array.isArray(responseData) ? responseData : [];
+            setData(dataArray);
             } catch (err) {
-                setError(
-                    err.response?.data?.message || err.message || "Failed to fetch data"
-                );
-                console.error("Error details:", err);
+            setError(
+                err.response?.data?.message || err.message || "Failed to fetch data"
+            );
+            console.error("Error details:", err);
             } finally {
-                setLoading(false);
+            setLoading(false);
             }
         };
 

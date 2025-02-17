@@ -22,6 +22,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import CustomLoading from "../components/CustomLoading";
+import endpoints from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -33,18 +34,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/superadmin/dashboard`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
 
-        if (!response.ok) {
-          localStorage.removeItem("token");
-          throw new Error("Failed to fetch dashboard data");
-        }
+        const data = await endpoints.page.getDashboard();
 
-        const data = await response.json();
         setDashboardData(data);
       } catch (err) {
         setError(err.message);
@@ -128,24 +120,29 @@ const Dashboard = () => {
 
     return [
       {
-        name: "Diproses",
-        value: dashboardData.statusCounts.diproses,
-        color: "#f59e0b",
+      name: "Diproses",
+      value: dashboardData.statusCounts.diproses,
+      color: "#fbbf24", // Warmer amber
       },
       {
-        name: "Diterima",
-        value: dashboardData.statusCounts.diterima,
-        color: "#10b981",
+      name: "Diterima",
+      value: dashboardData.statusCounts.diterima,
+      color: "#34d399", // Brighter emerald
       },
       {
-        name: "Magang Aktif",
-        value: dashboardData.statusCounts.pesertaMagangAktif,
-        color: "#3b82f6",
+      name: "Diverifikasi",
+      value: dashboardData.statusCounts.diverifikasi,
+      color: "#06b6d4", // Cyan
       },
       {
-        name: "Selesai",
-        value: dashboardData.statusCounts.pesertaSelesai,
-        color: "#8b5cf6",
+      name: "Magang Aktif",
+      value: dashboardData.statusCounts.pesertaMagangAktif,
+      color: "#60a5fa", // Lighter blue
+      },
+      {
+      name: "Selesai",
+      value: dashboardData.statusCounts.pesertaSelesai,
+      color: "#a78bfa", // Lighter purple
       },
     ];
   };
@@ -205,6 +202,22 @@ const Dashboard = () => {
   );
 
   if (loading) return <CustomLoading />;
+  
+  if (error) {
+    return (
+      <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
+        <Sidebar />
+        <div className="flex-1 p-6">
+          <BreadcrumbsComponent />
+          <div className="text-center mt-8">
+            <Typography variant="h4" color="red" className="font-medium">
+              Cannot get data from server
+            </Typography>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">

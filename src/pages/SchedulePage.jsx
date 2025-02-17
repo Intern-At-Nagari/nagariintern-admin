@@ -8,14 +8,14 @@ import {
   DialogHeader,
   DialogBody,
   Input,
-  Spinner
+  Spinner,
 } from "@material-tailwind/react";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import ScheduleTable from "../components/ScheduleTable";
 import ScheduleForm from "../components/ScheduleForm";
+import endpoints from "../utils/api";
 import CustomLoading from "../components/CustomLoading";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const SchedulePage = () => {
   const [open, setOpen] = useState(false);
@@ -120,18 +120,7 @@ const SchedulePage = () => {
   const fetchSchedules = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/superadmin/jadwal-pendaftaran`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const result = await response.json();
+      const result = await endpoints.page.getSchedules(); // Changed to use schedule.getAll
       const sortedSchedules = result.data.sort((a, b) => b.id - a.id);
       setSchedules(sortedSchedules);
 
@@ -151,7 +140,7 @@ const SchedulePage = () => {
       setRemainingTimes(initialTimes);
     } catch (error) {
       console.error("Error fetching schedules:", error);
-      toast.error("Failed to fetch schedules");
+      toast.error("Gagal mengambil data jadwal");
     } finally {
       setLoading(false);
     }
@@ -181,69 +170,39 @@ const SchedulePage = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    setButtonLoading(true); // Change this from setLoading to setButtonLoading
+    setButtonLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${API_BASE_URL}/superadmin/jadwal-pendaftaran/${editData.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            nama: editData.nama,
-            tanggalMulai: editData.tanggalMulai,
-            tanggalTutup: editData.tanggalTutup,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update schedule");
-      }
+      await endpoints.schedule.update(editData.id, {
+        nama: editData.nama,
+        tanggalMulai: editData.tanggalMulai,
+        tanggalTutup: editData.tanggalTutup,
+      });
 
       handleEditClose();
       await fetchSchedules();
-      toast.success("Schedule updated successfully");
+      toast.success("Jadwal berhasil diperbarui");
     } catch (error) {
       console.error("Failed to update schedule:", error);
-      toast.error("Failed to update schedule");
+      toast.error(error.response?.data?.message || "Gagal memperbarui jadwal");
     } finally {
-      setButtonLoading(false); // Change this from setLoading to setButtonLoading
+      setButtonLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setButtonLoading(true); // Change this from setLoading to setButtonLoading
+    setButtonLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/superadmin/jadwal-pendaftaran`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create schedule");
-      }
-
+      await endpoints.schedule.create(formData);
       await fetchSchedules();
-      toast.success("Schedule created successfully");
-    } catch (error) {
-      console.error("Failed to create schedule:", error);
-      toast.error(error.message || "Failed to create schedule");
-    } finally {
-      setButtonLoading(false); // Change this from setLoading to setButtonLoading
       setFormData({ nama: "", tanggalMulai: "", tanggalTutup: "" });
       handleOpen();
+      toast.success("Jadwal berhasil dibuat");
+    } catch (error) {
+      console.error("Failed to create schedule:", error);
+      toast.error(error.response?.data?.message || "Gagal membuat jadwal");
+    } finally {
+      setButtonLoading(false);
     }
   };
 
@@ -261,14 +220,18 @@ const SchedulePage = () => {
 
         <Card>
           <CardBody className="p-0">
-            <ScheduleTable
-              schedules={schedules}
-              remainingTimes={remainingTimes}
-              getRegistrationStatus={getRegistrationStatus}
-              getStatusColor={getStatusColor}
-              formatTimeRemaining={formatTimeRemaining}
-              handleEditOpen={handleEditOpen}
-            />
+            {loading ? (
+              <CustomLoading />
+            ) : (
+              <ScheduleTable
+                schedules={schedules}
+                remainingTimes={remainingTimes}
+                getRegistrationStatus={getRegistrationStatus}
+                getStatusColor={getStatusColor}
+                formatTimeRemaining={formatTimeRemaining}
+                handleEditOpen={handleEditOpen}
+              />
+            )}
           </CardBody>
         </Card>
 

@@ -5,11 +5,13 @@ import {
   Option,
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import TableComponent from "../components/TableComponent";
 import CustomLoading from "../components/CustomLoading";
+import endpoints from "../utils/api";
+import { useNavigate } from "react-router-dom";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const DiprosesPage = () => {
@@ -31,35 +33,27 @@ const DiprosesPage = () => {
       setError(null);
 
       try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No authentication token found");
+      const responseData = await endpoints.page.getDiproses();
+      const dataArray = Array.isArray(responseData.data) ? responseData.data : [];
+      setData(dataArray);
 
-        const response = await axios.get(`${API_BASE_URL}/superadmin/interns`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log(response.data);
+      // Extract unique institutions and types from the data
+      const uniqueInstitutions = [
+        ...new Set(dataArray.map((item) => item.institusi).filter(Boolean)),
+      ];
+      const uniqueTypes = [
+        ...new Set(dataArray.map((item) => item.type).filter(Boolean)),
+      ];
 
-        const responseData = response.data.data || response.data;
-        const dataArray = Array.isArray(responseData) ? responseData : [];
-        setData(dataArray);
-
-        // Extract unique institutions and types from the data
-        const uniqueInstitutions = [
-          ...new Set(dataArray.map((item) => item.institusi).filter(Boolean)),
-        ];
-        const uniqueTypes = [
-          ...new Set(dataArray.map((item) => item.type).filter(Boolean)),
-        ];
-
-        setInstitutions(uniqueInstitutions);
-        setTypes(uniqueTypes);
+      setInstitutions(uniqueInstitutions);
+      setTypes(uniqueTypes);
       } catch (err) {
-        setError(
-          err.response?.data?.message || err.message || "Failed to fetch data"
-        );
-        console.error("Error details:", err);
+      setError(
+        err.response?.data?.message || err.message || "Failed to fetch data"
+      );
+      console.error("Error details:", err);
       } finally {
-        setLoading(false);
+      setLoading(false);
       }
     };
 
@@ -105,8 +99,10 @@ const DiprosesPage = () => {
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
+  const navigate = useNavigate();
+  
   const handleViewClick = (id) => {
-    window.location.href = `/detail/${id}`;
+    navigate(`/diproses/detail/${id}`);
   };
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("id-ID", {

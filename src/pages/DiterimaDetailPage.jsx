@@ -31,9 +31,9 @@ import UploadModal from "../components/DiterimaDetail/UploadModal";
 import TableView from "../components/DiterimaDetail/TableView";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
-import axios from "axios";
 import { toast } from "react-toastify";
 import CustomLoading from "../components/CustomLoading";
+import endpoints from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -63,12 +63,7 @@ const DiterimaDetailPage = () => {
     return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  const handlePrintFormChange = useCallback((field, value) => {
-    setPrintForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  }, []);
+  
 
   useEffect(() => {
     fetchData();
@@ -96,23 +91,9 @@ const DiterimaDetailPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      let url;
-
-      if (type === "Perguruan Tinggi") {
-        url = `${API_BASE_URL}/superadmin/intern/diterima/univ/${idInstitusi}/${idProdi}`;
-      } else {
-        url = `${API_BASE_URL}/superadmin/intern/diterima/smk/${idInstitusi}`;
-      }
-
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("response:", response.data);
-      setParticipants(response.data || []);
+      const response = await endpoints.detail.getDetailTerimaByInstitusi(type, idInstitusi, idProdi);
+      console.log("response:", response);
+      setParticipants(response || []);
       setError(null);
     } catch (err) {
       setError("Failed to fetch data. Please try again later.");
@@ -122,13 +103,21 @@ const DiterimaDetailPage = () => {
     }
   };
 
+  const handlePrintOpen = useCallback(() => {
+    setPrintOpen((prev) => !prev);
+  }, []);
+
+  const handlePrintFormChange = useCallback((field, value) => {
+    setPrintForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }, []);
+
   const handlePrintSubmit = useCallback(async () => {
     setPrintLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
-      let apiUrl;
-      let requestBody = {
+      const requestBody = {
         nomorSurat: printForm.nomorSurat,
         perihal: printForm.perihal,
         pejabat: printForm.pejabat,
@@ -137,22 +126,15 @@ const DiterimaDetailPage = () => {
         perihal_detail: printForm.perihal_detail,
       };
 
-      if (type === "Perguruan Tinggi") {
-        apiUrl = `${API_BASE_URL}/superadmin/intern/diterima/univ/${idInstitusi}/${idProdi}`;
-      } else {
-        apiUrl = `${API_BASE_URL}/superadmin/intern/diterima/smk/${idInstitusi}`;
-      }
-
-      const response = await axios.post(apiUrl, requestBody, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        responseType: "arraybuffer",
-      });
+      const response = await endpoints.generateDocument.suratBalasan(
+        type,
+        idInstitusi,
+        idProdi,
+        requestBody
+      );
 
       // Create blob and download
-      const blob = new Blob([response.data], { type: "application/pdf" });
+      const blob = new Blob([response], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -178,44 +160,27 @@ const DiterimaDetailPage = () => {
     } finally {
       setPrintLoading(false);
     }
-  }, [printForm, type, idInstitusi, idProdi]);
+  }, [printForm, type, idInstitusi, idProdi, handlePrintOpen]);
 
   const handleUpload = async (file) => {
     setUploadLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("fileSuratBalasan", file);
       formData.append("responseArray", JSON.stringify(participants));
 
-      const response = await axios.post(
-        `${API_BASE_URL}/superadmin/intern/send-surat-balasan`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.status === "success") {
-        toast.success("Surat balasan berhasil dikirim!");
-        setUploadOpen(false);
-      }
+      await endpoints.upload.suratBalasan(formData);
+      toast.success("Surat balasan berhasil dikirim!");
+      setUploadOpen(false);
+      navigate("/diterima");
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Gagal mengirim surat balasan!"
-      );
+      toast.error(err.response?.data?.message || "Gagal mengirim surat balasan!");
       console.error("Error sending letter:", err);
     } finally {
       setUploadLoading(false);
-      navigate("/diterima");
     }
   };
 
-  const handlePrintOpen = useCallback(() => {
-    setPrintOpen((prev) => !prev);
-  }, []);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("id-ID", {

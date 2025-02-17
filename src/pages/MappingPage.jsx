@@ -5,14 +5,8 @@ import {
   CardBody,
   Typography,
   Button,
-  Dialog,
-  DialogHeader,
-  DialogBody,
-  DialogFooter,
-  Select,
-  Option,
   Input,
-  Switch,
+  Spinner,
 } from "@material-tailwind/react";
 import {
   UsersIcon,
@@ -23,12 +17,11 @@ import {
 } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
-import axios from "axios";
 import MappingGridView from "../components/MappingGridView";
 import MappingListView from "../components/MappingListView";
 import CustomLoading from "../components/CustomLoading";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import endpoints from "../utils/api";
+import ModalUnitKerja from "../components/ModalUnitKerja"; // Import the new component
 
 const MappingPage = () => {
   const [branchData, setBranchData] = useState([]);
@@ -45,6 +38,7 @@ const MappingPage = () => {
     kuotaMhs: 0,
     kuotaSiswa: 0,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add this state
 
   const BRANCH_TYPES = {
     pusat: { label: "Pusat", kuotaMhs: 0, kuotaSiswa: 16 },
@@ -56,15 +50,11 @@ const MappingPage = () => {
 
   const fetchBranchData = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/superadmin/unit-kerja`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      const data = response.data.unitKerja || [];
+      const response = await endpoints.cabang.unitKerja();
+      const data = response.unitKerja || [];
       setBranchData(Array.isArray(data) ? data : []);
       setSearchResults(Array.isArray(data) ? data : []);
-      console.log(response.data);
+      console.log(response);
     } catch (err) {
       setError("Failed to fetch branch data");
       console.error(err);
@@ -92,7 +82,7 @@ const MappingPage = () => {
 
   const handleSubmit = async () => {
     try {
-      setLoading(true);
+      setIsSubmitting(true); // Start loading
       setError(null);
 
       const payload = {
@@ -104,17 +94,7 @@ const MappingPage = () => {
         }),
       };
 
-      const response = await axios.patch(
-        `${API_BASE_URL}/superadmin/unit-kerja/${selectedBranch.id}`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
+      await endpoints.edit.updateUnitKerja(selectedBranch.id, payload);
       await fetchBranchData();
       setOpen(false);
       setFormData({
@@ -125,12 +105,11 @@ const MappingPage = () => {
       });
       toast.success("Kuota berhasil diperbarui!");
     } catch (err) {
-      const errorMsg =
-        err.response?.data?.error || "Failed to update branch type";
+      const errorMsg = err.response?.data?.error || "Failed to update branch type";
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false); // Stop loading
     }
   };
 
@@ -287,117 +266,16 @@ const MappingPage = () => {
           />
         )}
 
-        <Dialog open={open} handler={handleOpen}>
-          <DialogHeader>Edit Tipe Cabang - {selectedBranch?.name}</DialogHeader>
-          <DialogBody>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Typography variant="small" className="mb-2">
-                  Custom Kuota
-                </Typography>
-                <Switch
-                  checked={formData.isCustomQuota}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      isCustomQuota: e.target.checked,
-                    }))
-                  }
-                />
-              </div>
-
-              {!formData.isCustomQuota ? (
-                <>
-                  <Typography variant="small" className="mb-2">
-                    Tipe Cabang
-                  </Typography>
-                  <Select
-                    value={formData.tipe_cabang}
-                    onChange={(value) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        tipe_cabang: value || "",
-                      }))
-                    }
-                    label="Pilih Tipe Cabang"
-                  >
-                    {Object.entries(BRANCH_TYPES).map(([value, { label }]) => (
-                      <Option key={value} value={value}>
-                        {label}
-                      </Option>
-                    ))}
-                  </Select>
-                  {formData.tipe_cabang && (
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                      <Typography
-                        variant="small"
-                        className="text-blue-900 font-medium"
-                      >
-                        Kuota Default untuk{" "}
-                        {BRANCH_TYPES[formData.tipe_cabang].label}:
-                      </Typography>
-                      <Typography variant="small" className="text-blue-800">
-                        Mahasiswa: {BRANCH_TYPES[formData.tipe_cabang].kuotaMhs}
-                      </Typography>
-                      <Typography variant="small" className="text-blue-800">
-                        Siswa: {BRANCH_TYPES[formData.tipe_cabang].kuotaSiswa}
-                      </Typography>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="space-y-4">
-                  <Input
-                    type="number"
-                    label="Kuota Mahasiswa"
-                    value={formData.kuotaMhs}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        kuotaMhs: e.target.value,
-                      }))
-                    }
-                    min="0"
-                  />
-                  <Input
-                    type="number"
-                    label="Kuota Siswa"
-                    value={formData.kuotaSiswa}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        kuotaSiswa: e.target.value,
-                      }))
-                    }
-                    min="0"
-                  />
-                </div>
-              )}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <Button
-              variant="text"
-              color="red"
-              onClick={() => handleOpen(null)}
-              className="mr-1"
-            >
-              Batal
-            </Button>
-            <Button
-              variant="gradient"
-              color="green"
-              onClick={handleSubmit}
-              disabled={
-                formData.isCustomQuota
-                  ? formData.kuotaMhs < 0 || formData.kuotaSiswa < 0
-                  : !formData.tipe_cabang
-              }
-            >
-              Simpan
-            </Button>
-          </DialogFooter>
-        </Dialog>
+        <ModalUnitKerja
+          open={open}
+          handleOpen={handleOpen}
+          selectedBranch={selectedBranch}
+          formData={formData}
+          setFormData={setFormData}
+          BRANCH_TYPES={BRANCH_TYPES}
+          handleSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
       </div>
     </div>
   );

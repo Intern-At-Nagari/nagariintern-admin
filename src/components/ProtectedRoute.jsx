@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
+  const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
 
   // Jika token tidak ada, redirect ke halaman login
   if (!token) {

@@ -17,6 +17,7 @@ const routeMap = {
   "/riwayat-pendaftar-magang": ["Home", "Riwayat Pendaftar"],
   "/riwayat-pendaftar-magang/detail": ["Home", "Riwayat Pendaftar", "Detail"],
   "/monitoring-peserta-magang": ["Home", "Pengaturan Sistem","Monitoring Peserta"],
+  "/pengambilan-data": ["Home", "Pengambilan Data"],
   
 };
 
@@ -35,7 +36,7 @@ const BreadcrumbsComponent = () => {
     if (path.match(/^\/riwayat-pendaftar-magang\/detail\/\d+$/)) {
       return ["Home", "Riwayat Pendaftar", "Detail"];
     }
-    if (path.match(/^\/detail\/\d+$/)) {
+    if (path.match(/^\/diproses\/detail\/\d+$/)) {
       return ["Home", "Permintaan", "Diproses", "Detail"];
     }
     return routeMap[path] || ["Home"];
