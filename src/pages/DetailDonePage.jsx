@@ -27,7 +27,7 @@ const DetailDonePage = () => {
 
   const handleOpenModal = (doc, title) => {
     // Construct the full URL for the document
-    const fullUrl = `${API_BASE_URL}/uploads/${doc}`;
+    const fullUrl = `${API_BASE_URL}/superadmin/uploads/${doc}`;
     setSelectedDoc({ url: fullUrl, title });
     setIsModalOpen(true);
   };
@@ -58,9 +58,11 @@ const DetailDonePage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
+
         const response = await endpoints.detail.getDetailDone(id);
         setData(response);
         console.log(response);
+
       } catch (err) {
         console.error("Error details:", err);
         setError(

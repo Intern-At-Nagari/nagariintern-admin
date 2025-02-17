@@ -34,7 +34,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+
         const data = await endpoints.page.getDashboard();
+
         setDashboardData(data);
       } catch (err) {
         setError(err.message);

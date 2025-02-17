@@ -46,6 +46,7 @@ const AnggaranPage = () => {
   const fetchData = async () => {
     try {
       const result = await endpoints.page.getRekap();
+
       if (result.status === "success") {
         console.log(
           "First record structure:",
@@ -227,7 +228,7 @@ const AnggaranPage = () => {
       return;
     }
 
-    const pdfUrl = `${API_BASE_URL}/uploads/${item.url_rekap}`;
+    const pdfUrl = `${API_BASE_URL}/superadmin/uploads/${item.url_rekap}`;
     console.log("Generated PDF URL:", pdfUrl);
     setSelectedPdf(pdfUrl);
     setIsModalOpen(true);

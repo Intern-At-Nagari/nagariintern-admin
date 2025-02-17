@@ -44,6 +44,7 @@ const CreateAccountPage = () => {
   const fetchAccounts = async () => {
     setLoading(true);
     try {
+
       const result = await endpoints.accounts.getAll();
       if (result.status === "success") {
         const accountsData = result.data.map((account) => ({
@@ -149,9 +150,11 @@ const CreateAccountPage = () => {
 
     setButtonLoading(true);
     try {
+
       const result = await endpoints.edit.updatePassword(
         selectedAccountId,
         formData.password
+
       );
 
       if (result.status === "success") {
@@ -189,7 +192,9 @@ const CreateAccountPage = () => {
 
     setButtonLoading(true);
     try {
+
       const result = await endpoints.accounts.create(formData);
+
 
       if (result.status === "success") {
         toast.success("Akun berhasil dibuat. Email verifikasi telah dikirim!");
