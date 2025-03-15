@@ -50,6 +50,36 @@ const DetailPage = () => {
     title: "",
   });
 
+  const documentTypes = [
+    {
+      title: "Curriculum Vitae (CV)",
+      type: "CV",
+    },
+    {
+      title: "Surat Pengantar",
+      type: "Surat Pengantar",
+    },
+    { title: "Kartu Tanda Penduduk", type: "KTP" },
+    { title: "Transkip Nilai", type: "Transkip Nilai" },
+  ];
+
+  const documents = data
+  ? documentTypes
+      .map(({ title, type }) => {
+        const foundDoc = data.dokumen?.find(
+          (doc) => doc.tipe === type
+        );
+        return foundDoc
+          ? {
+              title,
+              fileName: foundDoc.url,
+            }
+          : null;
+      })
+      .filter(Boolean)
+  : [];
+
+
   const fetchUnitKerja = async () => {
     try {
       const response = await endpoints.cabang.unitKerja();
@@ -67,9 +97,11 @@ const DetailPage = () => {
           endpoints.detail.getDetailDiproses(id),
           fetchUnitKerja(),
         ]);
-        setData(internResponse);
-        console.log(internResponse);
-        setSelectedUnit(internResponse.UnitKerjaPengajuan.id);
+        console.log(internResponse.data);
+        setData(internResponse.data);
+        setSelectedUnit(internResponse.data.UnitKerjaPengajuan.id);
+
+
       } catch (err) {
         setError(
           err.response?.data?.message || "Failed to fetch intern details"

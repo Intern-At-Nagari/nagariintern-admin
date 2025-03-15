@@ -30,8 +30,19 @@ const DiverifikasiPage = () => {
     setError(null);
   
     try {
-      const response = await endpoints.page.getDiverifikasi();
-  
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await axios.get(
+        `${API_BASE_URL}/superadmin/interns/diverifikasi`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const responseData = response.data;
+
+
       // Grouping logic for mahasiswa
       const mahasiswaGrouped = response.mahasiswa.dataMhs.reduce(
         (acc, item) => {
