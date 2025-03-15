@@ -3,13 +3,13 @@ import {
   Input,
 } from "@material-tailwind/react";
 import {  MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { useNavigate } from "react-router-dom";
 import TableComponent from "../components/TableComponent";
 import CustomLoading from "../components/CustomLoading";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import endpoints from "../utils/api";
+
 
 
 const DiverifikasiPage = () => {
@@ -28,7 +28,7 @@ const DiverifikasiPage = () => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-
+  
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found");
@@ -42,8 +42,9 @@ const DiverifikasiPage = () => {
 
       const responseData = response.data;
 
+
       // Grouping logic for mahasiswa
-      const mahasiswaGrouped = responseData.mahasiswa.dataMhs.reduce(
+      const mahasiswaGrouped = response.mahasiswa.dataMhs.reduce(
         (acc, item) => {
           const key = `${item.PerguruanTinggi.name}-${item.Prodi.name}-${item.UnitKerjaPenempatan.name}`;
           if (!acc[key]) {
@@ -56,16 +57,23 @@ const DiverifikasiPage = () => {
               unitKerja: item.UnitKerjaPenempatan.name,
               idUnitKerja: item.UnitKerjaPenempatan.id,
               jml: 0,
+              createdAt: item.createdAt || new Date().toISOString(),
             };
+          }
+          // Update createdAt if newer entry found
+          const itemDate = new Date(item.createdAt);
+          const accDate = new Date(acc[key].createdAt);
+          if (itemDate > accDate) {
+            acc[key].createdAt = item.createdAt;
           }
           acc[key].jml += 1;
           return acc;
         },
         {}
       );
-
+  
       // Grouping logic for siswa
-      const siswaGrouped = responseData.siswa.dataSiswa.reduce((acc, item) => {
+      const siswaGrouped = response.siswa.dataSiswa.reduce((acc, item) => {
         const key = `${item.Smk.name}-${item.UnitKerjaPenempatan.name}`;
         if (!acc[key]) {
           acc[key] = {
@@ -76,17 +84,24 @@ const DiverifikasiPage = () => {
             prodi: "-",
             unitKerja: item.UnitKerjaPenempatan.name,
             jml: 0,
+            createdAt: item.createdAt || new Date().toISOString(),
           };
+        }
+        // Update createdAt if newer entry found
+        const itemDate = new Date(item.createdAt);
+        const accDate = new Date(acc[key].createdAt);
+        if (itemDate > accDate) {
+          acc[key].createdAt = item.createdAt;
         }
         acc[key].jml += 1;
         return acc;
       }, {});
-
+  
       const combinedData = [
         ...Object.values(mahasiswaGrouped),
         ...Object.values(siswaGrouped),
-      ];
-      console.log(combinedData);
+      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort by newest first
+  
       setData(combinedData);
     } catch (err) {
       setError(

@@ -15,13 +15,13 @@ import {
     MagnifyingGlassIcon,
     ArrowDownTrayIcon
 } from "@heroicons/react/24/outline";
-import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Pagination from "../components/Pagination";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import CustomLoading from "../components/CustomLoading";
 import * as XLSX from 'xlsx';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import endpoints from "../utils/api";
 
 const HistoryPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -67,13 +67,14 @@ const HistoryPage = () => {
                 }
                 
                 setData(dataArray);
+
             } catch (err) {
-                setError(
-                    err.response?.data?.message || err.message || "Failed to fetch data"
-                );
-                console.error("Error details:", err);
+            setError(
+                err.response?.data?.message || err.message || "Failed to fetch data"
+            );
+            console.error("Error details:", err);
             } finally {
-                setLoading(false);
+            setLoading(false);
             }
         };
     

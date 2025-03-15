@@ -24,12 +24,12 @@ import {
   IdentificationIcon,
   EnvelopeIcon,
 } from "@heroicons/react/24/outline";
-import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import { toast } from "react-toastify";
 import ModalIframe from "../components/ModalIframe";
 import CustomLoading from "../components/CustomLoading";
+import endpoints from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -79,14 +79,11 @@ const DetailPage = () => {
       .filter(Boolean)
   : [];
 
+
   const fetchUnitKerja = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/superadmin/unit-kerja`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setUnitKerjaList(response.data.unitKerja);
+      const response = await endpoints.cabang.unitKerja();
+      setUnitKerjaList(response.unitKerja);
     } catch (err) {
       console.error("Error fetching unit kerja:", err);
     }
@@ -97,16 +94,14 @@ const DetailPage = () => {
       setLoading(true);
       try {
         const [internResponse] = await Promise.all([
-          axios.get(`${API_BASE_URL}/superadmin/intern/${id}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }),
+          endpoints.detail.getDetailDiproses(id),
           fetchUnitKerja(),
         ]);
         console.log(internResponse.data);
         setData(internResponse.data);
         setSelectedUnit(internResponse.data.UnitKerjaPengajuan.id);
+
+
       } catch (err) {
         setError(
           err.response?.data?.message || "Failed to fetch intern details"
@@ -160,33 +155,21 @@ const DetailPage = () => {
   const handleSubmit = async () => {
     try {
       const action = modalType === "accept" ? "approve" : "reject";
-      const keterangan = notes;
-
       const payload =
-        modalType === "accept"  ? { penempatan: selectedUnit } : { keterangan };
+        modalType === "accept" ? { penempatan: selectedUnit } : {};
 
-        
+      await endpoints.edit.approve(id, action, payload);
+      const response = await endpoints.detail.getDetailDiproses(id);
 
-      await axios.patch(`${API_BASE_URL}/superadmin/intern/${id}/${action}`, payload, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      const response = await axios.get(`${API_BASE_URL}/superadmin/intern/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setData(response.data);
+      setData(response);
       handleModalOpen();
       toast.success(
         `Request successfully ${action === "approve" ? "approved" : "rejected"}`
       );
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update status");
-      toast.error("Error updating status");
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || "Failed to update status";
+      setError(errorMessage);
+      toast.error(errorMessage);
       console.error("Error updating status:", err);
     }
   };
@@ -252,6 +235,23 @@ const DetailPage = () => {
                   </div>
                 </div>
 
+                <div className="flex items-start gap-3">
+                  <UserIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                    >
+                      Nama
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {data.type === "siswa"
+                        ? data.User?.Siswas[0]?.name
+                        : data.User?.Mahasiswas[0]?.name}
+                    </Typography>
+                  </div>
+                </div>
                 <div className="flex items-start gap-3">
                   <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
                   <div className="flex-1">
@@ -407,41 +407,25 @@ const DetailPage = () => {
             >
               Dokumen Pendukung
             </Typography>
-            <div className="grid grid-cols-1 gap-4 mb-6">
-              {documents.map((doc, index) => (
-                <div
-                  key={index}
-                  className="border rounded-lg p-4 flex justify-between items-center"
-                >
-                  <div>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-medium"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {data.dokumen &&
+                Object.entries(data.dokumen).map(([key, value]) => (
+                  <div key={key} className="flex gap-2">
+                    <Button
+                      variant="outlined"
+                      className="flex items-center gap-2 normal-case flex-1"
+                      onClick={() => {
+                        handleDocumentModal(
+                          `${API_BASE_URL}/uploads/${value}`,
+                          key.replace("_", " ").toUpperCase()
+                        );
+                      }}
                     >
-                      {doc.title}
-                    </Typography>
-                    <Typography variant="small" color="gray">
-                      {doc.fileName}
-                    </Typography>
+                      <ArrowDownTrayIcon className="w-4 h-4" />
+                      {key.replace("_", " ").toUpperCase()}
+                    </Button>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outlined"
-                    color="blue"
-                    className="flex items-center gap-2"
-                    onClick={() =>
-                      handleDocumentModal(
-                        `${API_BASE_URL}/uploads/${doc.fileName}`,
-                        doc.title
-                      )
-                    }
-                  >
-                    <ArrowDownTrayIcon className="w-4 h-4" />
-                    Download
-                  </Button>
-                </div>
-              ))}
+                ))}
             </div>
 
             {/* Action Buttons */}
@@ -537,6 +521,7 @@ const DetailPage = () => {
               onClick={async () => {
                 await handleSubmit();
                 navigate("/diproses");
+                
               }}
               disabled={
                 modalType === "accept" &&

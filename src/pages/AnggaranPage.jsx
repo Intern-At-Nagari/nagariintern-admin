@@ -13,8 +13,22 @@ import Pagination from "../components/Pagination";
 import CustomLoading from "../components/CustomLoading";
 import TableComponent from "../components/TableComponent";
 import ModalIframe from "../components/ModalIframe";
+import endpoints from "../utils/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const SearchInput = React.memo(({ value, onChange }) => (
+  <div className="relative">
+    <input
+      type="text"
+      placeholder="Cari data anggaran..."
+      value={value}
+      onChange={onChange}
+      className="w-full px-4 py-2 pr-12 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+    />
+    <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+  </div>
+));
 
 const AnggaranPage = () => {
   const [anggaranData, setAnggaranData] = useState([]);
@@ -31,25 +45,8 @@ const AnggaranPage = () => {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("No authentication token found. Please log in again.");
-        setLoading(false);
-        return;
-      }
+      const result = await endpoints.page.getRekap();
 
-      const response = await fetch(`${API_BASE_URL}/superadmin/absensi/rekap`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
       if (result.status === "success") {
         console.log(
           "First record structure:",
@@ -167,7 +164,8 @@ const AnggaranPage = () => {
     return filteredData.reduce(
       (acc, curr) => {
         return {
-          totalBiaya: acc.totalBiaya + parseInt(curr.total_biaya.replace(/\./g, "")),
+          totalBiaya:
+            acc.totalBiaya + parseInt(curr.total_biaya.replace(/\./g, "")),
           totalPeserta: acc.totalPeserta + curr.total_peserta,
           totalKehadiran: acc.totalKehadiran + curr.total_kehadiran,
         };
@@ -241,19 +239,6 @@ const AnggaranPage = () => {
     setSelectedPdf(null);
   };
 
-  const SearchInput = () => (
-    <div className="relative">
-      <input
-        type="text"
-        placeholder="Cari data anggaran..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full px-4 py-2 pr-12 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
-      />
-      <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-    </div>
-  );
-
   const MonthSelector = () => (
     <div className="relative">
       <select
@@ -313,8 +298,13 @@ const AnggaranPage = () => {
                 <div className="space-y-6">
                   {/* Header */}
                   <div className="flex items-center justify-between border-b border-blue-gray-50 pb-4">
-                    <Typography variant="h6" color="blue-gray" className="font-medium">
-                      Ringkasan {getMonthName(currentMonth)} {new Date().getFullYear()}
+                    <Typography
+                      variant="h6"
+                      color="blue-gray"
+                      className="font-medium"
+                    >
+                      Ringkasan {getMonthName(currentMonth)}{" "}
+                      {new Date().getFullYear()}
                     </Typography>
                     <div className="p-3 bg-green-100 rounded-full">
                       <CurrencyDollarIcon className="h-6 w-6 text-green-600" />
@@ -326,12 +316,20 @@ const AnggaranPage = () => {
                     {/* Total Biaya */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Typography variant="small" color="blue-gray" className="font-medium opacity-75">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-medium opacity-75"
+                        >
                           Total Biaya
                         </Typography>
                         <CurrencyDollarIcon className="h-5 w-5 text-green-500" />
                       </div>
-                      <Typography variant="h3" color="green" className="font-bold">
+                      <Typography
+                        variant="h3"
+                        color="green"
+                        className="font-bold"
+                      >
                         Rp {getTotalStats().totalBiaya.toLocaleString("id-ID")}
                       </Typography>
                     </div>
@@ -342,11 +340,17 @@ const AnggaranPage = () => {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <UsersIcon className="h-4 w-4 text-blue-600" />
-                          <Typography variant="small" className="font-medium text-blue-gray-600">
+                          <Typography
+                            variant="small"
+                            className="font-medium text-blue-gray-600"
+                          >
                             Total Peserta
                           </Typography>
                         </div>
-                        <Typography variant="h6" className="font-bold text-blue-gray-800">
+                        <Typography
+                          variant="h6"
+                          className="font-bold text-blue-gray-800"
+                        >
                           {getTotalStats().totalPeserta.toLocaleString("id-ID")}
                         </Typography>
                       </div>
@@ -355,12 +359,20 @@ const AnggaranPage = () => {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <ClockIcon className="h-4 w-4 text-blue-600" />
-                          <Typography variant="small" className="font-medium text-blue-gray-600">
+                          <Typography
+                            variant="small"
+                            className="font-medium text-blue-gray-600"
+                          >
                             Total Kehadiran
                           </Typography>
                         </div>
-                        <Typography variant="h6" className="font-bold text-blue-gray-800">
-                          {getTotalStats().totalKehadiran.toLocaleString("id-ID")}
+                        <Typography
+                          variant="h6"
+                          className="font-bold text-blue-gray-800"
+                        >
+                          {getTotalStats().totalKehadiran.toLocaleString(
+                            "id-ID"
+                          )}
                         </Typography>
                       </div>
                     </div>
@@ -375,19 +387,34 @@ const AnggaranPage = () => {
             <CardBody className="p-6">
               <div className="flex flex-col gap-4">
                 <div className="space-y-2">
-                  <Typography variant="small" color="blue-gray" className="font-medium">
+                  <Typography
+                    variant="small"
+                    color="blue-gray"
+                    className="font-medium"
+                  >
                     Pencarian
                   </Typography>
-                  <SearchInput />
+                  <SearchInput
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Typography variant="small" color="blue-gray" className="font-medium">
+                  <Typography
+                    variant="small"
+                    color="blue-gray"
+                    className="font-medium"
+                  >
                     Pilih Bulan
                   </Typography>
                   <MonthSelector />
                 </div>
                 <div className="space-y-2">
-                  <Typography variant="small" color="blue-gray" className="font-medium">
+                  <Typography
+                    variant="small"
+                    color="blue-gray"
+                    className="font-medium"
+                  >
                     Pilih Periode
                   </Typography>
                   <PeriodSelector />

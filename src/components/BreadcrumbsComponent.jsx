@@ -37,6 +37,7 @@ const BreadcrumbsComponent = () => {
     }
     if (path.match(/^\/detail\/\d+$/)) {
       return ["Dashboard", "Permintaan", "Diproses", "Detail"];
+
     }
     return routeMap[path] || ["Dashboard"];
   };

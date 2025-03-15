@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import {
-  Card,
-  CardBody,
-  Typography,
-  Alert,
-} from "@material-tailwind/react";
+import { Card, CardBody, Typography, Alert } from "@material-tailwind/react";
 import {
   BuildingOfficeIcon,
   UserIcon,
@@ -17,9 +12,9 @@ import {
 import Sidebar from "../components/Sidebar";
 import BreadcrumbsComponent from "../components/BreadcrumbsComponent";
 import ModalIframe from "../components/ModalIframe";
-import axios from "axios";
 import CustomLoading from "../components/CustomLoading";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import endpoints from "../utils/api";
 
 const DetailDonePage = () => {
   const [data, setData] = useState(null);
@@ -63,17 +58,11 @@ const DetailDonePage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/superadmin/intern/done/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
 
-        setData(response.data);
-        console.log(response.data);
+        const response = await endpoints.detail.getDetailDone(id);
+        setData(response);
+        console.log(response);
+
       } catch (err) {
         console.error("Error details:", err);
         setError(
@@ -96,9 +85,7 @@ const DetailDonePage = () => {
   };
 
   if (loading) {
-    return (
-      <CustomLoading/>
-    );
+    return <CustomLoading />;
   }
 
   if (error) {
@@ -121,225 +108,220 @@ const DetailDonePage = () => {
     <div className="lg:ml-80 min-h-screen bg-blue-gray-50">
       <Sidebar />
       <div className="flex-1 p-6">
-          <BreadcrumbsComponent />
+        <BreadcrumbsComponent />
 
-          <Card className="mb-6">
-            <CardBody className="p-6">
-              <Typography
-                variant="h6"
-                color="blue-gray"
-                className="mb-6 pb-2 border-b"
-              >
-                Informasi Pendaftar
-              </Typography>
+        <Card className="mb-6">
+          <CardBody className="p-6">
+            <Typography
+              variant="h6"
+              color="blue-gray"
+              className="mb-6 pb-2 border-b"
+            >
+              Informasi Pendaftar
+            </Typography>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                {/* Personal Details */}
-                <div className="space-y-5">
-                  <div className="flex items-start gap-3">
-                    <UserIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
-                    <div className="flex-1">
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
-                        Tipe Pemohon
-                      </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {data.type?.charAt(0).toUpperCase() +
-                          data.type?.slice(1)}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
-                    <div className="flex-1">
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
-                        {data.type === "siswa"
-                          ? "SMK & Jurusan"
-                          : "Institusi & Program Studi"}
-                      </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {data.type === "siswa"
-                          ? `${data.Smk?.name} - ${data.Jurusan?.name}`
-                          : `${data.PerguruanTinggi?.name} - ${data.Prodi?.name}`}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <EnvelopeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
-                    <div className="flex-1">
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
-                        Email
-                      </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {data.User?.email}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  {data.type === "mahasiswa" && (
-                    <div className="flex items-start gap-3">
-                      <IdentificationIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
-                      <div className="flex-1">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-medium"
-                        >
-                          NIM
-                        </Typography>
-                        <Typography
-                          variant="small"
-                          className="text-blue-gray-500"
-                        >
-                          {data.User?.Mahasiswas[0]?.nim || "-"}
-                        </Typography>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Contact Details */}
-                <div className="space-y-5">
-                  <div className="flex items-start gap-3">
-                    <PhoneIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
-                    <div className="flex-1">
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
-                        No. Telepon
-                      </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {(data.type === "siswa"
-                          ? data.User?.Siswas[0]?.no_hp
-                          : data.User?.Mahasiswas[0]?.no_hp) || "-"}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
-                    <div className="flex-1">
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
-                        Alamat
-                      </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {(data.type === "siswa"
-                          ? data.User?.Siswas[0]?.alamat
-                          : data.User?.Mahasiswas[0]?.alamat) || "-"}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <CalendarIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
-                    <div className="flex-1">
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
-                        Periode Magang
-                      </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {formatDate(data.tanggalMulai)} -{" "}
-                        {formatDate(data.tanggalSelesai)}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
-                    <div className="flex-1">
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-medium"
-                      >
-                        Unit Kerja Penempatan
-                      </Typography>
-                      <Typography
-                        variant="small"
-                        className="text-blue-gray-500"
-                      >
-                        {data.UnitKerjaPenempatan?.name}
-                      </Typography>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Documents Section */}
-              <Typography
-                variant="h6"
-                color="blue-gray"
-                className="mb-4 pb-2 border-b"
-              >
-                Dokumen
-              </Typography>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {data.Dokumens?.map((doc, index) => {
-                  const documentTitle = getDocumentType(doc.url);
-                  return (
-                    <div
-                      key={doc.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Personal Details */}
+              <div className="space-y-5">
+                <div className="flex items-start gap-3">
+                  <UserIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
                     >
+                      Tipe Pemohon
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {data.type?.charAt(0).toUpperCase() + data.type?.slice(1)}
+                    </Typography>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <UserIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                    >
+                      Nama
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {data.type === "siswa"
+                        ? data.User?.Siswas[0]?.name
+                        : data.User?.Mahasiswas[0]?.name}
+                    </Typography>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                    >
+                      {data.type === "siswa"
+                        ? "SMK & Jurusan"
+                        : "Institusi & Program Studi"}
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {data.type === "siswa"
+                        ? `${data.Smk?.name} - ${data.Jurusan?.name}`
+                        : `${data.PerguruanTinggi?.name} - ${data.Prodi?.name}`}
+                    </Typography>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <EnvelopeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                    >
+                      Email
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {data.User?.email}
+                    </Typography>
+                  </div>
+                </div>
+
+                {data.type === "mahasiswa" && (
+                  <div className="flex items-start gap-3">
+                    <IdentificationIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                    <div className="flex-1">
                       <Typography
                         variant="small"
-                        className="text-blue-gray-700 font-medium"
+                        color="blue-gray"
+                        className="font-medium"
                       >
-                        {documentTitle}
+                        NIM
                       </Typography>
-                      <button
-                        onClick={() => handleOpenModal(doc.url, documentTitle)}
-                        className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+                      <Typography
+                        variant="small"
+                        className="text-blue-gray-500"
                       >
-                        Lihat Dokumen
-                      </button>
+                        {data.User?.Mahasiswas[0]?.nim || "-"}
+                      </Typography>
                     </div>
-                  );
-                })}
+                  </div>
+                )}
               </div>
-            </CardBody>
-          </Card>
-        
+
+              {/* Contact Details */}
+              <div className="space-y-5">
+                <div className="flex items-start gap-3">
+                  <PhoneIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                    >
+                      No. Telepon
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {(data.type === "siswa"
+                        ? data.User?.Siswas[0]?.no_hp
+                        : data.User?.Mahasiswas[0]?.no_hp) || "-"}
+                    </Typography>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                    >
+                      Alamat
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {(data.type === "siswa"
+                        ? data.User?.Siswas[0]?.alamat
+                        : data.User?.Mahasiswas[0]?.alamat) || "-"}
+                    </Typography>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <CalendarIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                    >
+                      Periode Magang
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {formatDate(data.tanggalMulai)} -{" "}
+                      {formatDate(data.tanggalSelesai)}
+                    </Typography>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-1" />
+                  <div className="flex-1">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-medium"
+                    >
+                      Unit Kerja Penempatan
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {data.UnitKerjaPenempatan?.name}
+                    </Typography>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Documents Section */}
+            <Typography
+              variant="h6"
+              color="blue-gray"
+              className="mb-4 pb-2 border-b"
+            >
+              Dokumen
+            </Typography>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {data.Dokumens?.map((doc, index) => {
+                const documentTitle = getDocumentType(doc.url);
+                return (
+                  <div
+                    key={doc.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                  >
+                    <Typography
+                      variant="small"
+                      className="text-blue-gray-700 font-medium"
+                    >
+                      {documentTitle}
+                    </Typography>
+                    <button
+                      onClick={() => handleOpenModal(doc.url, documentTitle)}
+                      className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+                    >
+                      Lihat Dokumen
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </CardBody>
+        </Card>
       </div>
 
       <ModalIframe
