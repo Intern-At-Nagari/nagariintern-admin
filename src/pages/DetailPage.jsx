@@ -64,20 +64,20 @@ const DetailPage = () => {
   ];
 
   const documents = data
-    ? documentTypes
-        .map(({ title, type }) => {
-          const foundDoc = data.Dokumens?.find(
-            (doc) => doc.tipeDokumen.name === type
-          );
-          return foundDoc
-            ? {
-                title,
-                fileName: foundDoc.url,
-              }
-            : null;
-        })
-        .filter(Boolean)
-    : [];
+  ? documentTypes
+      .map(({ title, type }) => {
+        const foundDoc = data.dokumen?.find(
+          (doc) => doc.tipe === type
+        );
+        return foundDoc
+          ? {
+              title,
+              fileName: foundDoc.url,
+            }
+          : null;
+      })
+      .filter(Boolean)
+  : [];
 
   const fetchUnitKerja = async () => {
     try {
@@ -104,6 +104,7 @@ const DetailPage = () => {
           }),
           fetchUnitKerja(),
         ]);
+        console.log(internResponse.data);
         setData(internResponse.data);
         setSelectedUnit(internResponse.data.UnitKerjaPengajuan.id);
       } catch (err) {

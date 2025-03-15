@@ -3,20 +3,20 @@ import { Breadcrumbs as MTBreadcrumbs } from "@material-tailwind/react";
 import { HomeIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 const routeMap = {
-  "/": ["Home"],
-  "/dashboard": ["Home", "Dashboard"],
-  "/diproses": ["Home", "Permintaan", "Diproses"],
-  "/diverifikasi": ["Home", "Permintaan", "Diverifikasi"],
-  "/diterima": ["Home", "Permintaan", "Diterima"],
-  "/mapping": ["Home", "Pemetaan"],
-  "/anggaran": ["Home", "Anggaran"],
-  "/intern/diterima/detail": ["Home", "Permintaan", "Diterima", "Detail"],
-  "/diverifikasi/detail": ["Home", "Permintaan", "Diverifikasi", "Detail"],
-  "/atur-jadwal-pendaftaran": ["Home", "Pengaturan Sistem", "Jadwal"],
-  "/tambah-akun-cabang": ["Home", "Pengaturan Sistem", "Buat Akun Cabang"],
-  "/riwayat-pendaftar-magang": ["Home", "Riwayat Pendaftar"],
-  "/riwayat-pendaftar-magang/detail": ["Home", "Riwayat Pendaftar", "Detail"],
-  "/monitoring-peserta-magang": ["Home", "Pengaturan Sistem","Monitoring Peserta"],
+  "/": ["Dashboard"],
+  "/dashboard": [ "Dashboard"],
+  "/diproses": ["Dashboard", "Permintaan", "Diproses"],
+  "/diverifikasi": ["Dashboard", "Permintaan", "Diverifikasi"],
+  "/diterima": ["Dashboard", "Permintaan", "Diterima"],
+  "/mapping": ["Dashboard", "Pemetaan"],
+  "/anggaran": ["Dashboard", "Anggaran"],
+  "/intern/diterima/detail": ["Dashboard", "Permintaan", "Diterima", "Detail"],
+  "/diverifikasi/detail": ["Dashboard", "Permintaan", "Diverifikasi", "Detail"],
+  "/atur-jadwal-pendaftaran": ["Dashboard", "Pengaturan Sistem", "Jadwal"],
+  "/tambah-akun-cabang": ["Dashboard", "Pengaturan Sistem", "Buat Akun Cabang"],
+  "/riwayat-pendaftar-magang": ["Dashboard", "Riwayat Pendaftar"],
+  "/riwayat-pendaftar-magang/detail": ["Dashboard", "Riwayat Pendaftar", "Detail"],
+  "/monitoring-peserta-magang": ["Dashboard", "Pengaturan Sistem","Monitoring Peserta"],
   
 };
 
@@ -33,12 +33,12 @@ const BreadcrumbsComponent = () => {
   const getPathsForRoute = (path) => {
     // Handle the detail route with ID
     if (path.match(/^\/riwayat-pendaftar-magang\/detail\/\d+$/)) {
-      return ["Home", "Riwayat Pendaftar", "Detail"];
+      return ["Dashboard", "Riwayat Pendaftar", "Detail"];
     }
     if (path.match(/^\/detail\/\d+$/)) {
-      return ["Home", "Permintaan", "Diproses", "Detail"];
+      return ["Dashboard", "Permintaan", "Diproses", "Detail"];
     }
-    return routeMap[path] || ["Home"];
+    return routeMap[path] || ["Dashboard"];
   };
   
 

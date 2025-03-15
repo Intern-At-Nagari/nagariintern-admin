@@ -219,28 +219,28 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <StatCard
             title="Total Pendaftar"
-            value={dashboardData.totalRegistrants}
+            value={dashboardData?.totalRegistrants || 0}
             icon={UsersIcon}
             color="text-blue-500"
             bgColor="bg-blue-50"
           />
           <StatCard
             title="Peserta Aktif"
-            value={dashboardData.statusCounts.pesertaMagangAktif}
+            value={dashboardData?.statusCounts?.pesertaMagangAktif || 0}
             icon={UserPlusIcon}
             color="text-green-500"
             bgColor="bg-green-50"
           />
           <StatCard
             title="Mahasiswa"
-            value={dashboardData.typeCounts.mahasiswa}
+            value={dashboardData?.typeCounts?.mahasiswa || 0}
             icon={ClipboardDocumentCheckIcon}
             color="text-purple-500"
             bgColor="bg-purple-50"
           />
           <StatCard
             title="Siswa"
-            value={dashboardData.typeCounts.siswa}
+            value={dashboardData?.typeCounts?.siswa || 0}
             icon={CheckCircleIcon}
             color="text-indigo-500"
             bgColor="bg-indigo-50"
@@ -378,7 +378,7 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        <TopUnitKerja data={dashboardData.topUnitKerja} />
+        <TopUnitKerja data={dashboardData?.topUnitKerja} />
       </div>
     </div>
   );
